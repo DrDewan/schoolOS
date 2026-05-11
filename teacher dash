@@ -1,0 +1,1182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Acolyte Teacher Dashboard — Grade 5 Science</title>
+  <style>
+    :root {
+      --bg: #070816;
+      --panel: #101225;
+      --panel-2: #161a33;
+      --panel-3: #1d2242;
+      --text: #f7f7ff;
+      --muted: #a9afcf;
+      --soft: #73799d;
+      --line: rgba(255,255,255,0.1);
+      --accent: #ff4d6d;
+      --accent-2: #7c5cff;
+      --cyan: #35d0ff;
+      --green: #33d17a;
+      --yellow: #ffcc4d;
+      --orange: #ff965c;
+      --red: #ff5c7a;
+      --shadow: 0 18px 45px rgba(0,0,0,0.35);
+      --radius: 22px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 8% 8%, rgba(124,92,255,0.35), transparent 28%),
+        radial-gradient(circle at 88% 12%, rgba(255,77,109,0.22), transparent 30%),
+        radial-gradient(circle at 62% 85%, rgba(53,208,255,0.13), transparent 32%),
+        var(--bg);
+    }
+
+    button, input, select, textarea {
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    .app-shell {
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      min-height: 100vh;
+    }
+
+    .sidebar {
+      border-right: 1px solid var(--line);
+      background: rgba(8, 10, 25, 0.76);
+      backdrop-filter: blur(18px);
+      padding: 24px 18px;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+    }
+
+    .brand {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 28px;
+      padding: 4px 6px;
+    }
+
+    .brand-mark {
+      width: 44px;
+      height: 44px;
+      border-radius: 15px;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      display: grid;
+      place-items: center;
+      box-shadow: 0 12px 30px rgba(124,92,255,0.35);
+      font-size: 22px;
+      font-weight: 900;
+    }
+
+    .brand h1 {
+      margin: 0;
+      font-size: 20px;
+      line-height: 1;
+    }
+
+    .brand p {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .nav-section-title {
+      color: var(--soft);
+      font-size: 11px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin: 24px 12px 10px;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: var(--muted);
+      padding: 12px 13px;
+      border-radius: 15px;
+      margin-bottom: 6px;
+      transition: 180ms ease;
+      border: 1px solid transparent;
+    }
+
+    .nav-item.active,
+    .nav-item:hover {
+      color: var(--text);
+      background: rgba(255,255,255,0.07);
+      border-color: var(--line);
+    }
+
+    .nav-icon {
+      width: 28px;
+      height: 28px;
+      border-radius: 10px;
+      display: grid;
+      place-items: center;
+      background: rgba(255,255,255,0.07);
+      font-size: 15px;
+    }
+
+    .sidebar-footer {
+      position: absolute;
+      left: 18px;
+      right: 18px;
+      bottom: 20px;
+      padding: 16px;
+      border-radius: 18px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid var(--line);
+    }
+
+    .sidebar-footer strong {
+      display: block;
+      font-size: 14px;
+      margin-bottom: 5px;
+    }
+
+    .sidebar-footer span {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.4;
+    }
+
+    .main {
+      padding: 26px 32px 48px;
+      overflow: hidden;
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 18px;
+      margin-bottom: 22px;
+    }
+
+    .page-title h2 {
+      font-size: 30px;
+      margin: 0 0 8px;
+      letter-spacing: -0.04em;
+    }
+
+    .page-title p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.45;
+    }
+
+    .school-pill {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(255,255,255,0.07);
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 10px 14px;
+      white-space: nowrap;
+      color: var(--muted);
+      box-shadow: var(--shadow);
+    }
+
+    .school-pill strong {
+      color: var(--text);
+    }
+
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.35fr) minmax(340px, 0.65fr);
+      gap: 20px;
+      align-items: start;
+    }
+
+    .stack {
+      display: grid;
+      gap: 20px;
+    }
+
+    .card {
+      background: rgba(16, 18, 37, 0.78);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .card.pad {
+      padding: 22px;
+    }
+
+    .card-header {
+      padding: 20px 22px 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 16px;
+    }
+
+    .card-title {
+      margin: 0;
+      font-size: 18px;
+      letter-spacing: -0.02em;
+    }
+
+    .card-subtitle {
+      margin: 6px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .hero-mission {
+      position: relative;
+      background:
+        linear-gradient(135deg, rgba(124,92,255,0.18), rgba(255,77,109,0.12)),
+        rgba(16,18,37,0.86);
+    }
+
+    .hero-mission::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at 78% 18%, rgba(53,208,255,0.17), transparent 30%);
+      pointer-events: none;
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 2;
+      padding: 24px;
+    }
+
+    .mission-meta-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      border-radius: 999px;
+      padding: 7px 11px;
+      color: var(--muted);
+      background: rgba(255,255,255,0.07);
+      border: 1px solid var(--line);
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    .pill.green { color: #bfffd9; background: rgba(51,209,122,0.12); border-color: rgba(51,209,122,0.25); }
+    .pill.yellow { color: #ffe6a3; background: rgba(255,204,77,0.12); border-color: rgba(255,204,77,0.25); }
+    .pill.red { color: #ffd1da; background: rgba(255,92,122,0.12); border-color: rgba(255,92,122,0.25); }
+    .pill.cyan { color: #c9f4ff; background: rgba(53,208,255,0.12); border-color: rgba(53,208,255,0.25); }
+
+    .hero-title {
+      margin: 0;
+      font-size: 34px;
+      max-width: 760px;
+      letter-spacing: -0.05em;
+      line-height: 1.05;
+    }
+
+    .hero-desc {
+      color: var(--muted);
+      max-width: 760px;
+      margin: 14px 0 22px;
+      font-size: 15px;
+      line-height: 1.6;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 11px;
+      align-items: center;
+    }
+
+    .btn {
+      border: 0;
+      border-radius: 14px;
+      padding: 11px 15px;
+      color: var(--text);
+      background: rgba(255,255,255,0.08);
+      border: 1px solid var(--line);
+      transition: 180ms ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      text-decoration: none;
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+      background: rgba(255,255,255,0.12);
+    }
+
+    .btn.primary {
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      border-color: transparent;
+      box-shadow: 0 14px 30px rgba(124,92,255,0.28);
+      font-weight: 800;
+    }
+
+    .btn.success {
+      background: rgba(51,209,122,0.15);
+      border-color: rgba(51,209,122,0.34);
+      color: #d4ffe5;
+    }
+
+    .btn.warning {
+      background: rgba(255,204,77,0.12);
+      border-color: rgba(255,204,77,0.25);
+      color: #ffebb5;
+    }
+
+    .btn.small {
+      padding: 8px 10px;
+      border-radius: 12px;
+      font-size: 12px;
+    }
+
+    .progress-strip {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-top: 24px;
+    }
+
+    .metric {
+      padding: 15px;
+      border-radius: 18px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid var(--line);
+    }
+
+    .metric span {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      margin-bottom: 7px;
+    }
+
+    .metric strong {
+      font-size: 24px;
+      letter-spacing: -0.04em;
+    }
+
+    .metric em {
+      display: block;
+      font-style: normal;
+      margin-top: 6px;
+      color: var(--soft);
+      font-size: 12px;
+    }
+
+    .section-body {
+      padding: 18px 22px 22px;
+    }
+
+    .printables-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+    }
+
+    .printable {
+      background: rgba(255,255,255,0.055);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 16px;
+      min-height: 172px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .printable-icon {
+      width: 42px;
+      height: 42px;
+      border-radius: 14px;
+      display: grid;
+      place-items: center;
+      background: rgba(255,255,255,0.08);
+      margin-bottom: 12px;
+      font-size: 20px;
+    }
+
+    .printable h4 {
+      margin: 0 0 7px;
+      font-size: 15px;
+    }
+
+    .printable p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.4;
+      font-size: 12px;
+    }
+
+    .timeline {
+      display: grid;
+      gap: 12px;
+    }
+
+    .timeline-item {
+      display: grid;
+      grid-template-columns: 42px 1fr auto;
+      gap: 14px;
+      align-items: center;
+      padding: 14px;
+      border-radius: 18px;
+      background: rgba(255,255,255,0.045);
+      border: 1px solid var(--line);
+    }
+
+    .timeline-item.today {
+      background: rgba(124,92,255,0.14);
+      border-color: rgba(124,92,255,0.38);
+    }
+
+    .timeline-number {
+      width: 42px;
+      height: 42px;
+      border-radius: 15px;
+      display: grid;
+      place-items: center;
+      background: rgba(255,255,255,0.07);
+      color: var(--muted);
+      font-weight: 900;
+    }
+
+    .timeline-item.completed .timeline-number {
+      background: rgba(51,209,122,0.16);
+      color: #c8ffdf;
+    }
+
+    .timeline-info h4 {
+      margin: 0 0 6px;
+      font-size: 14px;
+    }
+
+    .timeline-info p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .timeline-actions {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .status-select {
+      color: var(--text);
+      background: rgba(255,255,255,0.08);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 8px 10px;
+      outline: none;
+      min-width: 130px;
+    }
+
+    .status-select option {
+      color: #111;
+    }
+
+    .upload-zone {
+      border: 1px dashed rgba(255,255,255,0.24);
+      border-radius: 20px;
+      background: rgba(255,255,255,0.04);
+      padding: 18px;
+      display: grid;
+      gap: 14px;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .field label {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      margin-bottom: 7px;
+    }
+
+    .field input,
+    .field select,
+    .field textarea {
+      width: 100%;
+      color: var(--text);
+      background: rgba(255,255,255,0.07);
+      border: 1px solid var(--line);
+      border-radius: 13px;
+      padding: 11px 12px;
+      outline: none;
+    }
+
+    .field select option {
+      color: #111;
+    }
+
+    .field textarea {
+      min-height: 98px;
+      resize: vertical;
+    }
+
+    .review-panel {
+      margin-top: 14px;
+      border-radius: 18px;
+      border: 1px solid rgba(255,204,77,0.24);
+      background: rgba(255,204,77,0.08);
+      padding: 15px;
+      display: none;
+    }
+
+    .review-panel.show {
+      display: block;
+    }
+
+    .review-panel h4 {
+      margin: 0 0 10px;
+    }
+
+    .review-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .review-cell {
+      background: rgba(0,0,0,0.18);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 12px;
+    }
+
+    .review-cell span {
+      display: block;
+      color: var(--muted);
+      font-size: 11px;
+      margin-bottom: 5px;
+    }
+
+    .review-cell strong {
+      font-size: 18px;
+    }
+
+    .student-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .student-row {
+      display: grid;
+      grid-template-columns: 42px 1fr auto;
+      gap: 12px;
+      align-items: center;
+      padding: 12px;
+      background: rgba(255,255,255,0.045);
+      border: 1px solid var(--line);
+      border-radius: 17px;
+    }
+
+    .avatar {
+      width: 42px;
+      height: 42px;
+      border-radius: 15px;
+      display: grid;
+      place-items: center;
+      font-weight: 900;
+      background: linear-gradient(135deg, rgba(124,92,255,0.75), rgba(255,77,109,0.75));
+    }
+
+    .student-row h4 {
+      margin: 0 0 5px;
+      font-size: 14px;
+    }
+
+    .student-row p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.35;
+    }
+
+    .score-badge {
+      min-width: 58px;
+      text-align: center;
+      border-radius: 999px;
+      padding: 8px 10px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.07);
+      font-weight: 800;
+      font-size: 13px;
+    }
+
+    .score-badge.good { color: #c8ffdf; background: rgba(51,209,122,0.12); border-color: rgba(51,209,122,0.22); }
+    .score-badge.mid { color: #ffebb5; background: rgba(255,204,77,0.12); border-color: rgba(255,204,77,0.22); }
+    .score-badge.low { color: #ffd1da; background: rgba(255,92,122,0.12); border-color: rgba(255,92,122,0.22); }
+
+    .insight-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .insight {
+      display: flex;
+      gap: 12px;
+      padding: 13px;
+      border-radius: 17px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.045);
+    }
+
+    .insight-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 999px;
+      margin-top: 5px;
+      flex: 0 0 auto;
+    }
+
+    .insight-dot.green { background: var(--green); }
+    .insight-dot.yellow { background: var(--yellow); }
+    .insight-dot.red { background: var(--red); }
+    .insight strong {
+      display: block;
+      font-size: 13px;
+      margin-bottom: 4px;
+    }
+    .insight span {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .mini-calendar {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 8px;
+    }
+
+    .day-card {
+      min-height: 78px;
+      border-radius: 16px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.045);
+      padding: 10px;
+    }
+
+    .day-card.today {
+      border-color: rgba(124,92,255,0.45);
+      background: rgba(124,92,255,0.14);
+    }
+
+    .day-card strong {
+      display: block;
+      font-size: 12px;
+      margin-bottom: 8px;
+    }
+
+    .day-card span {
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.35;
+      display: block;
+    }
+
+    .toast {
+      position: fixed;
+      right: 26px;
+      bottom: 26px;
+      background: rgba(15, 18, 36, 0.96);
+      color: var(--text);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 13px 16px;
+      box-shadow: var(--shadow);
+      transform: translateY(20px);
+      opacity: 0;
+      pointer-events: none;
+      transition: 220ms ease;
+      z-index: 20;
+    }
+
+    .toast.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    @media (max-width: 1180px) {
+      .app-shell { grid-template-columns: 1fr; }
+      .sidebar { position: relative; height: auto; display: none; }
+      .dashboard-grid { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 760px) {
+      .main { padding: 18px; }
+      .topbar { align-items: flex-start; flex-direction: column; }
+      .hero-title { font-size: 28px; }
+      .progress-strip, .printables-grid, .form-row, .review-grid, .mini-calendar { grid-template-columns: 1fr; }
+      .timeline-item { grid-template-columns: 38px 1fr; }
+      .timeline-actions { grid-column: 1 / -1; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-mark">A</div>
+        <div>
+          <h1>Acolyte</h1>
+          <p>Mission-based classroom OS</p>
+        </div>
+      </div>
+
+      <div class="nav-section-title">Teacher</div>
+      <div class="nav-item active"><span class="nav-icon">🚀</span> Today’s Mission</div>
+      <div class="nav-item"><span class="nav-icon">🗺️</span> Curriculum Map</div>
+      <div class="nav-item"><span class="nav-icon">📄</span> Printables</div>
+      <div class="nav-item"><span class="nav-icon">📷</span> Worksheet Upload</div>
+      <div class="nav-item"><span class="nav-icon">📊</span> Class Results</div>
+
+      <div class="nav-section-title">Current Class</div>
+      <div class="nav-item"><span class="nav-icon">👧</span> Grade 5 Science</div>
+      <div class="nav-item"><span class="nav-icon">➗</span> Grade 5 Math</div>
+      <div class="nav-item"><span class="nav-icon">⚙️</span> Settings</div>
+
+      <div class="sidebar-footer">
+        <strong>Usage status</strong>
+        <span>7 missions opened this month. Next school subscription cycle: 18 June 2026.</span>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div class="page-title">
+          <h2>Teacher Dashboard</h2>
+          <p>Grade 5 Combined Science · Forces and Motion Block · Week 6 of academic calendar</p>
+        </div>
+        <div class="school-pill">🏫 <span><strong>Greenfield Cambridge School</strong> · Section A</span></div>
+      </header>
+
+      <section class="dashboard-grid">
+        <div class="stack">
+          <article class="card hero-mission">
+            <div class="hero-content">
+              <div class="mission-meta-row">
+                <span class="pill cyan">📅 Today · Monday, 11 May 2026</span>
+                <span class="pill green">On track</span>
+                <span class="pill">⏱️ 40 minutes</span>
+                <span class="pill">Cambridge Primary Science · Stage 5/6 bridge</span>
+              </div>
+
+              <h1 class="hero-title">Mission 04: How Forces Change Motion</h1>
+              <p class="hero-desc">Students investigate how pushes and pulls can start, stop, speed up, slow down, or change the direction of an object. The mission links today’s classroom activity to the current Cambridge learning objective and prepares students for the end-of-block assessment.</p>
+
+              <div class="actions">
+                <button class="btn primary" onclick="startMission()">🚀 Start Mission</button>
+                <button class="btn" onclick="showToast('Teacher guide downloaded')">📘 Teacher Guide</button>
+                <button class="btn" onclick="showToast('Student notes downloaded')">📗 Student Notes</button>
+                <button class="btn" onclick="showToast('Worksheet downloaded')">📝 Worksheet</button>
+                <button class="btn success" onclick="markTodayCompleted()">✅ Mark Completed</button>
+              </div>
+
+              <div class="progress-strip">
+                <div class="metric">
+                  <span>Block progress</span>
+                  <strong id="blockProgress">44%</strong>
+                  <em>4 of 9 planned sessions</em>
+                </div>
+                <div class="metric">
+                  <span>Curriculum pacing</span>
+                  <strong>On track</strong>
+                  <em>0.5 day ahead</em>
+                </div>
+                <div class="metric">
+                  <span>Last worksheet avg.</span>
+                  <strong>74%</strong>
+                  <em>3 students flagged</em>
+                </div>
+                <div class="metric">
+                  <span>Evidence status</span>
+                  <strong id="evidenceStatus">Pending</strong>
+                  <em>Upload after class</em>
+                </div>
+              </div>
+            </div>
+          </article>
+
+          <article class="card">
+            <div class="card-header">
+              <div>
+                <h3 class="card-title">Mission Printables</h3>
+                <p class="card-subtitle">Standard mission package. Extra assessment sheet appears at the end of the block.</p>
+              </div>
+              <button class="btn small" onclick="showToast('All mission files prepared for print')">🖨️ Print all</button>
+            </div>
+            <div class="section-body">
+              <div class="printables-grid">
+                <div class="printable">
+                  <div>
+                    <div class="printable-icon">📘</div>
+                    <h4>Teacher Material</h4>
+                    <p>Timing guide, discussion prompts, misconceptions, answers, and optional extension questions.</p>
+                  </div>
+                  <button class="btn small" onclick="showToast('Opening teacher material PDF')">Open PDF</button>
+                </div>
+                <div class="printable">
+                  <div>
+                    <div class="printable-icon">📗</div>
+                    <h4>Student Notes</h4>
+                    <p>Clean reading handout aligned with the mission, written in original wording for student revision.</p>
+                  </div>
+                  <button class="btn small" onclick="showToast('Opening student notes PDF')">Open PDF</button>
+                </div>
+                <div class="printable">
+                  <div>
+                    <div class="printable-icon">📝</div>
+                    <h4>Worksheet</h4>
+                    <p>Pre-filled QR, student ID, name, class, mission ID, MCQ section, and short written prompts.</p>
+                  </div>
+                  <button class="btn small" onclick="showToast('Opening worksheet PDF')">Open PDF</button>
+                </div>
+              </div>
+            </div>
+          </article>
+
+          <article class="card">
+            <div class="card-header">
+              <div>
+                <h3 class="card-title">Current Block Timeline</h3>
+                <p class="card-subtitle">Flexible weekly plan with tentative exact dates. Teachers may move missions if a class is missed.</p>
+              </div>
+              <span class="pill yellow">Assessment due: 20 May</span>
+            </div>
+            <div class="section-body">
+              <div class="timeline" id="timeline"></div>
+            </div>
+          </article>
+
+          <article class="card">
+            <div class="card-header">
+              <div>
+                <h3 class="card-title">Upload Worksheet for AI Checking</h3>
+                <p class="card-subtitle">One student at a time for the prototype. AI suggests marks and comments; teacher verification is compulsory before saving.</p>
+              </div>
+              <span class="pill red">Verification required</span>
+            </div>
+            <div class="section-body">
+              <div class="upload-zone">
+                <div class="form-row">
+                  <div class="field">
+                    <label>Detected student / manual selection</label>
+                    <select id="studentSelect">
+                      <option>Ayaan Rahman · G5-SCI-014</option>
+                      <option>Sarah Zaheen · G5-SCI-021</option>
+                      <option>Rafi Chowdhury · G5-SCI-008</option>
+                      <option>Zarin Tasnim · G5-SCI-032</option>
+                    </select>
+                  </div>
+                  <div class="field">
+                    <label>Worksheet type</label>
+                    <select id="worksheetType">
+                      <option>Mission 04 Worksheet · Mixed MCQ + short answer</option>
+                      <option>Mission 04 MCQ only</option>
+                      <option>Block Assessment Sheet</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="form-row">
+                  <div class="field">
+                    <label>Worksheet photo/PDF</label>
+                    <input id="worksheetFile" type="file" accept="image/*,.pdf" />
+                  </div>
+                  <div class="field">
+                    <label>QR status</label>
+                    <input value="QR expected: student ID + mission ID + worksheet ID" readonly />
+                  </div>
+                </div>
+
+                <div class="actions">
+                  <button class="btn primary" onclick="simulateAiCheck()">🤖 Run AI Check</button>
+                  <button class="btn" onclick="showToast('Saved as draft for later checking')">💾 Save Draft</button>
+                </div>
+              </div>
+
+              <div class="review-panel" id="reviewPanel">
+                <h4>Teacher Verification Needed</h4>
+                <div class="review-grid">
+                  <div class="review-cell">
+                    <span>AI suggested score</span>
+                    <strong id="aiScore">8/10</strong>
+                  </div>
+                  <div class="review-cell">
+                    <span>Confidence</span>
+                    <strong id="aiConfidence">Medium</strong>
+                  </div>
+                  <div class="review-cell">
+                    <span>Possible weakness</span>
+                    <strong id="weaknessTag">Force vs speed</strong>
+                  </div>
+                </div>
+                <div class="field">
+                  <label>AI feedback draft</label>
+                  <textarea id="feedbackText">Good understanding of push and pull. Needs correction on the idea that a force is always needed to keep an object moving.</textarea>
+                </div>
+                <div class="actions" style="margin-top: 12px;">
+                  <button class="btn success" onclick="verifyAndSave()">✅ Verify & Save Result</button>
+                  <button class="btn warning" onclick="showToast('Opened manual correction mode')">✏️ Edit Marks</button>
+                  <button class="btn" onclick="showToast('Flagged for manual review')">🚩 Flag</button>
+                </div>
+              </div>
+            </div>
+          </article>
+        </div>
+
+        <aside class="stack">
+          <article class="card pad">
+            <h3 class="card-title">This Week</h3>
+            <p class="card-subtitle">Planned lessons based on the school academic calendar.</p>
+            <div class="mini-calendar" style="margin-top: 16px;">
+              <div class="day-card"><strong>Sun</strong><span>M03 completed</span></div>
+              <div class="day-card today"><strong>Mon</strong><span>M04 forces & motion</span></div>
+              <div class="day-card"><strong>Tue</strong><span>M05 friction</span></div>
+              <div class="day-card"><strong>Wed</strong><span>M06 fair test</span></div>
+              <div class="day-card"><strong>Thu</strong><span>Practice / catch-up</span></div>
+            </div>
+          </article>
+
+          <article class="card pad">
+            <h3 class="card-title">Class Understanding Snapshot</h3>
+            <p class="card-subtitle">High-level view only. Detailed marks stay inside student records.</p>
+            <div class="insight-list" style="margin-top: 16px;">
+              <div class="insight"><div class="insight-dot green"></div><div><strong>Majority ready for today’s mission</strong><span>18 of 24 students scored above 70% in the previous worksheet.</span></div></div>
+              <div class="insight"><div class="insight-dot yellow"></div><div><strong>Misconception detected</strong><span>Several students think heavier objects always need larger force to move.</span></div></div>
+              <div class="insight"><div class="insight-dot red"></div><div><strong>3 students need attention</strong><span>Recommended: 10-minute foundation task on speed and direction before assessment.</span></div></div>
+            </div>
+          </article>
+
+          <article class="card pad">
+            <div style="display:flex; justify-content:space-between; gap:12px; align-items:flex-start;">
+              <div>
+                <h3 class="card-title">Flagged Students</h3>
+                <p class="card-subtitle">Visible to principal if needed.</p>
+              </div>
+              <button class="btn small" onclick="showToast('Opening full class list')">View all</button>
+            </div>
+            <div class="student-list" style="margin-top: 16px;">
+              <div class="student-row">
+                <div class="avatar">S</div>
+                <div><h4>Sarah Zaheen</h4><p>Possible foundation gap: speed, direction, motion vocabulary.</p></div>
+                <div class="score-badge low">48%</div>
+              </div>
+              <div class="student-row">
+                <div class="avatar">R</div>
+                <div><h4>Rafi Chowdhury</h4><p>Missed two worksheets. Needs evidence before block assessment.</p></div>
+                <div class="score-badge mid">61%</div>
+              </div>
+              <div class="student-row">
+                <div class="avatar">Z</div>
+                <div><h4>Zarin Tasnim</h4><p>Understands MCQs but weak written explanation quality.</p></div>
+                <div class="score-badge mid">64%</div>
+              </div>
+            </div>
+          </article>
+
+          <article class="card pad">
+            <h3 class="card-title">Teacher Notes</h3>
+            <p class="card-subtitle">Private note for class record. Principal can request details later.</p>
+            <div class="field" style="margin-top: 16px;">
+              <textarea id="teacherNote">Class responded well to the previous activity. Need to ask more oral questions before the worksheet.</textarea>
+            </div>
+            <div class="actions" style="margin-top: 12px;">
+              <button class="btn success" onclick="saveTeacherNote()">Save Note</button>
+              <button class="btn" onclick="showToast('Note marked as visible to principal')">Share with Principal</button>
+            </div>
+          </article>
+        </aside>
+      </section>
+    </main>
+  </div>
+
+  <div class="toast" id="toast">Saved</div>
+
+  <script>
+    const defaultMissions = [
+      { id: 1, title: 'M01: What is a Force?', date: '05 May', status: 'Completed' },
+      { id: 2, title: 'M02: Push, Pull, and Direction', date: '06 May', status: 'Completed' },
+      { id: 3, title: 'M03: Starting and Stopping Motion', date: '10 May', status: 'Completed' },
+      { id: 4, title: 'M04: How Forces Change Motion', date: '11 May', status: 'Today' },
+      { id: 5, title: 'M05: Friction in Everyday Life', date: '12 May', status: 'Scheduled' },
+      { id: 6, title: 'M06: Planning a Fair Test', date: '13 May', status: 'Scheduled' },
+      { id: 7, title: 'M07: Measuring Force', date: '17 May', status: 'Scheduled' },
+      { id: 8, title: 'M08: Forces Investigation Lab', date: '18 May', status: 'Scheduled' },
+      { id: 9, title: 'Block Assessment + Discussion', date: '20 May', status: 'Scheduled' }
+    ];
+
+    const statusOptions = ['Completed', 'Today', 'Scheduled', 'In Progress', 'Needs Review', 'Skipped'];
+    let missions = JSON.parse(localStorage.getItem('teacherDashboardMissions') || 'null') || defaultMissions;
+
+    function renderTimeline() {
+      const timeline = document.getElementById('timeline');
+      timeline.innerHTML = '';
+      missions.forEach((mission, index) => {
+        const item = document.createElement('div');
+        item.className = 'timeline-item' + (mission.status === 'Today' ? ' today' : '') + (mission.status === 'Completed' ? ' completed' : '');
+        item.innerHTML = `
+          <div class="timeline-number">${mission.status === 'Completed' ? '✓' : mission.id}</div>
+          <div class="timeline-info">
+            <h4>${mission.title}</h4>
+            <p>${mission.date} · ${mission.status}</p>
+          </div>
+          <div class="timeline-actions">
+            <button class="btn small" onclick="moveMission(${index}, -1)">←</button>
+            <button class="btn small" onclick="moveMission(${index}, 1)">→</button>
+            <select class="status-select" onchange="updateStatus(${index}, this.value)">
+              ${statusOptions.map(option => `<option ${mission.status === option ? 'selected' : ''}>${option}</option>`).join('')}
+            </select>
+          </div>
+        `;
+        timeline.appendChild(item);
+      });
+    }
+
+    function persistMissions() {
+      localStorage.setItem('teacherDashboardMissions', JSON.stringify(missions));
+    }
+
+    function updateStatus(index, status) {
+      missions[index].status = status;
+      persistMissions();
+      renderTimeline();
+      showToast(`Mission status changed to ${status}`);
+    }
+
+    function moveMission(index, direction) {
+      const newIndex = index + direction;
+      if (newIndex < 0 || newIndex >= missions.length) return;
+      const temp = missions[index];
+      missions[index] = missions[newIndex];
+      missions[newIndex] = temp;
+      persistMissions();
+      renderTimeline();
+      showToast('Mission order updated');
+    }
+
+    function startMission() {
+      const missionWindow = window.open('', '_blank');
+      if (!missionWindow) {
+        showToast('Popup blocked. Allow new tabs to open missions.');
+        return;
+      }
+      missionWindow.document.write(`
+        <html>
+          <head>
+            <title>Mission 04</title>
+            <style>
+              body { margin:0; background:#08091a; color:white; font-family:system-ui; display:grid; place-items:center; min-height:100vh; }
+              .box { max-width:760px; padding:40px; border-radius:28px; background:linear-gradient(135deg, rgba(124,92,255,.28), rgba(255,77,109,.18)); border:1px solid rgba(255,255,255,.16); box-shadow:0 25px 80px rgba(0,0,0,.4); }
+              h1 { font-size:44px; line-height:1; margin:0 0 16px; }
+              p { color:#c6c9e6; font-size:18px; line-height:1.6; }
+            </style>
+          </head>
+          <body>
+            <div class="box">
+              <h1>Mission 04: How Forces Change Motion</h1>
+              <p>This is where the Lovable-generated mission page/app would open. The teacher dashboard only launches and tracks it; the mission itself remains a separate classroom experience.</p>
+            </div>
+          </body>
+        </html>
+      `);
+      missionWindow.document.close();
+      showToast('Mission opened in a new tab');
+    }
+
+    function markTodayCompleted() {
+      const todayIndex = missions.findIndex(m => m.status === 'Today');
+      if (todayIndex >= 0) {
+        missions[todayIndex].status = 'Completed';
+        if (missions[todayIndex + 1] && missions[todayIndex + 1].status === 'Scheduled') {
+          missions[todayIndex + 1].status = 'Today';
+        }
+        persistMissions();
+        renderTimeline();
+      }
+      document.getElementById('blockProgress').textContent = '56%';
+      document.getElementById('evidenceStatus').textContent = 'Awaiting upload';
+      showToast('Today’s mission marked completed. Next mission moved to Today.');
+    }
+
+    function simulateAiCheck() {
+      const selectedStudent = document.getElementById('studentSelect').value;
+      const scores = {
+        'Ayaan Rahman · G5-SCI-014': ['8/10', 'High', 'Force changes motion'],
+        'Sarah Zaheen · G5-SCI-021': ['5/10', 'Medium', 'Speed vs force'],
+        'Rafi Chowdhury · G5-SCI-008': ['6/10', 'Low', 'Incomplete answers'],
+        'Zarin Tasnim · G5-SCI-032': ['7/10', 'Medium', 'Written explanation']
+      };
+      const result = scores[selectedStudent] || ['7/10', 'Medium', 'General review'];
+      document.getElementById('aiScore').textContent = result[0];
+      document.getElementById('aiConfidence').textContent = result[1];
+      document.getElementById('weaknessTag').textContent = result[2];
+      document.getElementById('reviewPanel').classList.add('show');
+      showToast('AI check completed. Teacher verification required.');
+    }
+
+    function verifyAndSave() {
+      document.getElementById('evidenceStatus').textContent = 'Saved';
+      document.getElementById('reviewPanel').classList.remove('show');
+      showToast('Verified result saved to student record');
+    }
+
+    function saveTeacherNote() {
+      const note = document.getElementById('teacherNote').value;
+      localStorage.setItem('teacherDashboardNote', note);
+      showToast('Teacher note saved');
+    }
+
+    function showToast(message) {
+      const toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.classList.add('show');
+      clearTimeout(window.toastTimer);
+      window.toastTimer = setTimeout(() => toast.classList.remove('show'), 2400);
+    }
+
+    function loadSavedNote() {
+      const note = localStorage.getItem('teacherDashboardNote');
+      if (note) document.getElementById('teacherNote').value = note;
+    }
+
+    renderTimeline();
+    loadSavedNote();
+  </script>
+</body>
+</html>
