@@ -1,0 +1,1023 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Acolyte Principal Dashboard — First Look</title>
+  <style>
+    :root {
+      --bg: #070816;
+      --panel: #101225;
+      --panel-2: #161a33;
+      --panel-3: #1d2242;
+      --text: #f7f7ff;
+      --muted: #a9afcf;
+      --soft: #73799d;
+      --line: rgba(255,255,255,0.1);
+      --accent: #ff4d6d;
+      --accent-2: #7c5cff;
+      --cyan: #35d0ff;
+      --green: #33d17a;
+      --yellow: #ffcc4d;
+      --orange: #ff965c;
+      --red: #ff5c7a;
+      --shadow: 0 18px 45px rgba(0,0,0,0.35);
+      --radius: 22px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 8% 8%, rgba(124,92,255,0.35), transparent 28%),
+        radial-gradient(circle at 92% 14%, rgba(255,77,109,0.2), transparent 30%),
+        radial-gradient(circle at 65% 88%, rgba(53,208,255,0.12), transparent 32%),
+        var(--bg);
+    }
+
+    button, input, select, textarea { font: inherit; }
+    button { cursor: pointer; }
+
+    .app-shell {
+      display: grid;
+      grid-template-columns: 285px 1fr;
+      min-height: 100vh;
+    }
+
+    .sidebar {
+      border-right: 1px solid var(--line);
+      background: rgba(8, 10, 25, 0.76);
+      backdrop-filter: blur(18px);
+      padding: 24px 18px;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+    }
+
+    .brand {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 28px;
+      padding: 4px 6px;
+    }
+
+    .brand-mark {
+      width: 44px;
+      height: 44px;
+      border-radius: 15px;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      display: grid;
+      place-items: center;
+      box-shadow: 0 12px 30px rgba(124,92,255,0.35);
+      font-size: 22px;
+      font-weight: 900;
+    }
+
+    .brand h1 { margin: 0; font-size: 20px; line-height: 1; }
+    .brand p { margin: 4px 0 0; color: var(--muted); font-size: 12px; }
+
+    .nav-section-title {
+      color: var(--soft);
+      font-size: 11px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin: 24px 12px 10px;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: var(--muted);
+      padding: 12px 13px;
+      border-radius: 15px;
+      margin-bottom: 6px;
+      transition: 180ms ease;
+      border: 1px solid transparent;
+    }
+
+    .nav-item.active, .nav-item:hover {
+      color: var(--text);
+      background: rgba(255,255,255,0.07);
+      border-color: var(--line);
+    }
+
+    .nav-icon {
+      width: 28px;
+      height: 28px;
+      border-radius: 10px;
+      display: grid;
+      place-items: center;
+      background: rgba(255,255,255,0.07);
+      font-size: 15px;
+    }
+
+    .sidebar-footer {
+      position: absolute;
+      left: 18px;
+      right: 18px;
+      bottom: 20px;
+      padding: 16px;
+      border-radius: 18px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid var(--line);
+    }
+
+    .sidebar-footer strong { display: block; font-size: 14px; margin-bottom: 5px; }
+    .sidebar-footer span { color: var(--muted); font-size: 12px; line-height: 1.4; }
+
+    .main {
+      padding: 26px 32px 48px;
+      overflow: hidden;
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 18px;
+      margin-bottom: 22px;
+    }
+
+    .page-title h2 {
+      font-size: 30px;
+      margin: 0 0 8px;
+      letter-spacing: -0.04em;
+    }
+
+    .page-title p { margin: 0; color: var(--muted); line-height: 1.45; }
+
+    .top-actions {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .filter-pill, .school-pill {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(255,255,255,0.07);
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 10px 14px;
+      white-space: nowrap;
+      color: var(--muted);
+      box-shadow: var(--shadow);
+    }
+
+    .filter-pill select {
+      color: var(--text);
+      background: transparent;
+      border: 0;
+      outline: none;
+    }
+
+    .filter-pill option { color: #111; }
+    .school-pill strong { color: var(--text); }
+
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.42fr) minmax(350px, 0.58fr);
+      gap: 20px;
+      align-items: start;
+    }
+
+    .stack { display: grid; gap: 20px; }
+
+    .card {
+      background: rgba(16, 18, 37, 0.78);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .card.pad { padding: 22px; }
+
+    .card-header {
+      padding: 20px 22px 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 16px;
+    }
+
+    .card-title { margin: 0; font-size: 18px; letter-spacing: -0.02em; }
+    .card-subtitle { margin: 6px 0 0; color: var(--muted); font-size: 13px; line-height: 1.45; }
+    .section-body { padding: 18px 22px 22px; }
+
+    .hero {
+      position: relative;
+      background:
+        linear-gradient(135deg, rgba(124,92,255,0.2), rgba(255,77,109,0.1)),
+        rgba(16,18,37,0.86);
+    }
+
+    .hero::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at 82% 12%, rgba(53,208,255,0.16), transparent 31%);
+      pointer-events: none;
+    }
+
+    .hero-content { position: relative; z-index: 2; padding: 24px; }
+
+    .mission-meta-row, .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .mission-meta-row { margin-bottom: 18px; }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      border-radius: 999px;
+      padding: 7px 11px;
+      color: var(--muted);
+      background: rgba(255,255,255,0.07);
+      border: 1px solid var(--line);
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    .pill.green { color: #bfffd9; background: rgba(51,209,122,0.12); border-color: rgba(51,209,122,0.25); }
+    .pill.yellow { color: #ffe6a3; background: rgba(255,204,77,0.12); border-color: rgba(255,204,77,0.25); }
+    .pill.orange { color: #ffd9c2; background: rgba(255,150,92,0.12); border-color: rgba(255,150,92,0.25); }
+    .pill.red { color: #ffd1da; background: rgba(255,92,122,0.12); border-color: rgba(255,92,122,0.25); }
+    .pill.cyan { color: #c9f4ff; background: rgba(53,208,255,0.12); border-color: rgba(53,208,255,0.25); }
+
+    .hero-title {
+      margin: 0;
+      font-size: 35px;
+      max-width: 850px;
+      letter-spacing: -0.05em;
+      line-height: 1.05;
+    }
+
+    .hero-desc {
+      color: var(--muted);
+      max-width: 860px;
+      margin: 14px 0 22px;
+      font-size: 15px;
+      line-height: 1.6;
+    }
+
+    .btn {
+      border: 0;
+      border-radius: 14px;
+      padding: 11px 15px;
+      color: var(--text);
+      background: rgba(255,255,255,0.08);
+      border: 1px solid var(--line);
+      transition: 180ms ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      text-decoration: none;
+    }
+
+    .btn:hover { transform: translateY(-1px); background: rgba(255,255,255,0.12); }
+    .btn.primary { background: linear-gradient(135deg, var(--accent), var(--accent-2)); border-color: transparent; box-shadow: 0 14px 30px rgba(124,92,255,0.28); font-weight: 800; }
+    .btn.success { background: rgba(51,209,122,0.15); border-color: rgba(51,209,122,0.34); color: #d4ffe5; }
+    .btn.warning { background: rgba(255,204,77,0.12); border-color: rgba(255,204,77,0.25); color: #ffebb5; }
+    .btn.danger { background: rgba(255,92,122,0.13); border-color: rgba(255,92,122,0.28); color: #ffd1da; }
+    .btn.small { padding: 8px 10px; border-radius: 12px; font-size: 12px; }
+
+    .health-grid {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 12px;
+      margin-top: 24px;
+    }
+
+    .metric {
+      padding: 15px;
+      border-radius: 18px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid var(--line);
+      min-height: 118px;
+    }
+
+    .metric span { display: block; color: var(--muted); font-size: 12px; margin-bottom: 7px; }
+    .metric strong { font-size: 27px; letter-spacing: -0.05em; }
+    .metric em { display: block; font-style: normal; margin-top: 6px; color: var(--soft); font-size: 12px; line-height: 1.35; }
+
+    .split-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    .table-wrap { overflow-x: auto; }
+
+    table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0 10px;
+      min-width: 760px;
+    }
+
+    th {
+      color: var(--soft);
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      font-weight: 800;
+      padding: 0 12px 2px;
+      text-align: left;
+    }
+
+    td {
+      background: rgba(255,255,255,0.045);
+      border-top: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+      padding: 13px 12px;
+      color: var(--muted);
+      font-size: 13px;
+      vertical-align: middle;
+    }
+
+    td:first-child { border-left: 1px solid var(--line); border-radius: 16px 0 0 16px; color: var(--text); font-weight: 800; }
+    td:last-child { border-right: 1px solid var(--line); border-radius: 0 16px 16px 0; }
+
+    .progress-bar {
+      height: 9px;
+      width: 145px;
+      background: rgba(255,255,255,0.08);
+      border-radius: 999px;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      margin-bottom: 6px;
+    }
+
+    .progress-fill {
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, var(--cyan), var(--accent-2));
+    }
+
+    .progress-fill.green { background: linear-gradient(90deg, var(--green), var(--cyan)); }
+    .progress-fill.yellow { background: linear-gradient(90deg, var(--yellow), var(--orange)); }
+    .progress-fill.red { background: linear-gradient(90deg, var(--red), var(--accent)); }
+
+    .teacher-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+    }
+
+    .teacher-card {
+      background: rgba(255,255,255,0.045);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 15px;
+      min-height: 160px;
+    }
+
+    .teacher-card h4 { margin: 0 0 6px; font-size: 15px; }
+    .teacher-card p { margin: 0; color: var(--muted); font-size: 12px; line-height: 1.45; }
+
+    .teacher-stat-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .teacher-stat-row strong { color: var(--text); }
+
+    .alert-list, .student-list, .note-list { display: grid; gap: 10px; }
+
+    .alert, .student-row, .note-item {
+      background: rgba(255,255,255,0.045);
+      border: 1px solid var(--line);
+      border-radius: 17px;
+      padding: 13px;
+    }
+
+    .alert {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+    }
+
+    .alert-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 999px;
+      margin-top: 5px;
+      flex: 0 0 auto;
+    }
+
+    .alert-dot.green { background: var(--green); }
+    .alert-dot.yellow { background: var(--yellow); }
+    .alert-dot.orange { background: var(--orange); }
+    .alert-dot.red { background: var(--red); }
+
+    .alert strong, .note-item strong { display: block; font-size: 13px; margin-bottom: 4px; }
+    .alert span, .note-item span { color: var(--muted); font-size: 12px; line-height: 1.45; }
+
+    .student-row {
+      display: grid;
+      grid-template-columns: 42px 1fr auto;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .avatar {
+      width: 42px;
+      height: 42px;
+      border-radius: 15px;
+      display: grid;
+      place-items: center;
+      font-weight: 900;
+      background: linear-gradient(135deg, rgba(124,92,255,0.75), rgba(255,77,109,0.75));
+    }
+
+    .student-row h4 { margin: 0 0 5px; font-size: 14px; }
+    .student-row p { margin: 0; color: var(--muted); font-size: 12px; line-height: 1.35; }
+
+    .risk-badge, .score-badge {
+      min-width: 60px;
+      text-align: center;
+      border-radius: 999px;
+      padding: 8px 10px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.07);
+      font-weight: 800;
+      font-size: 12px;
+    }
+
+    .risk-badge.high, .score-badge.low { color: #ffd1da; background: rgba(255,92,122,0.12); border-color: rgba(255,92,122,0.22); }
+    .risk-badge.mid, .score-badge.mid { color: #ffebb5; background: rgba(255,204,77,0.12); border-color: rgba(255,204,77,0.22); }
+    .risk-badge.good, .score-badge.good { color: #c8ffdf; background: rgba(51,209,122,0.12); border-color: rgba(51,209,122,0.22); }
+
+    .field label {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      margin-bottom: 7px;
+    }
+
+    .field input, .field select, .field textarea {
+      width: 100%;
+      color: var(--text);
+      background: rgba(255,255,255,0.07);
+      border: 1px solid var(--line);
+      border-radius: 13px;
+      padding: 11px 12px;
+      outline: none;
+    }
+
+    .field select option { color: #111; }
+    .field textarea { min-height: 96px; resize: vertical; }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .calendar-strip {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 8px;
+    }
+
+    .cycle-card {
+      min-height: 76px;
+      border-radius: 16px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.045);
+      padding: 10px;
+    }
+
+    .cycle-card.active {
+      border-color: rgba(124,92,255,0.45);
+      background: rgba(124,92,255,0.14);
+    }
+
+    .cycle-card strong { display: block; font-size: 12px; margin-bottom: 8px; }
+    .cycle-card span { color: var(--muted); font-size: 11px; line-height: 1.35; display: block; }
+
+    .modal-backdrop {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.58);
+      z-index: 40;
+      padding: 24px;
+      place-items: center;
+    }
+
+    .modal-backdrop.show { display: grid; }
+
+    .modal {
+      width: min(760px, 100%);
+      background: rgba(16,18,37,0.98);
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      box-shadow: 0 30px 90px rgba(0,0,0,0.55);
+      padding: 22px;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: flex-start;
+      margin-bottom: 16px;
+    }
+
+    .modal h3 { margin: 0 0 6px; }
+    .modal p { margin: 0; color: var(--muted); line-height: 1.5; }
+
+    .toast {
+      position: fixed;
+      right: 26px;
+      bottom: 26px;
+      background: rgba(15, 18, 36, 0.96);
+      color: var(--text);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 13px 16px;
+      box-shadow: var(--shadow);
+      transform: translateY(20px);
+      opacity: 0;
+      pointer-events: none;
+      transition: 220ms ease;
+      z-index: 60;
+    }
+
+    .toast.show { transform: translateY(0); opacity: 1; }
+
+    @media (max-width: 1320px) {
+      .health-grid { grid-template-columns: repeat(3, 1fr); }
+      .teacher-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    @media (max-width: 1160px) {
+      .app-shell { grid-template-columns: 1fr; }
+      .sidebar { display: none; }
+      .dashboard-grid { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 760px) {
+      .main { padding: 18px; }
+      .topbar { align-items: flex-start; flex-direction: column; }
+      .top-actions { justify-content: flex-start; }
+      .hero-title { font-size: 28px; }
+      .health-grid, .split-row, .teacher-grid, .form-row, .calendar-strip { grid-template-columns: 1fr; }
+      .student-row { grid-template-columns: 42px 1fr; }
+      .risk-badge, .score-badge { grid-column: 1 / -1; width: max-content; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-mark">A</div>
+        <div>
+          <h1>Acolyte</h1>
+          <p>School academic command center</p>
+        </div>
+      </div>
+
+      <div class="nav-section-title">Principal</div>
+      <div class="nav-item active"><span class="nav-icon">🏫</span> School Overview</div>
+      <div class="nav-item"><span class="nav-icon">🗺️</span> Curriculum Progress</div>
+      <div class="nav-item"><span class="nav-icon">👩‍🏫</span> Teacher Usage</div>
+      <div class="nav-item"><span class="nav-icon">🚩</span> Flagged Students</div>
+      <div class="nav-item"><span class="nav-icon">📝</span> Principal Notes</div>
+
+      <div class="nav-section-title">Views</div>
+      <div class="nav-item"><span class="nav-icon">🔬</span> Sciences</div>
+      <div class="nav-item"><span class="nav-icon">➗</span> Mathematics</div>
+      <div class="nav-item"><span class="nav-icon">📅</span> Academic Calendar</div>
+      <div class="nav-item"><span class="nav-icon">⚙️</span> Settings</div>
+
+      <div class="sidebar-footer">
+        <strong>Subscription cycle</strong>
+        <span>Current cycle active. Next renewal window starts 18 June 2026. Usage data available for admin review.</span>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div class="page-title">
+          <h2>Principal Dashboard</h2>
+          <p>School-wide academic progress, teacher usage, curriculum pacing, and student risk signals.</p>
+        </div>
+        <div class="top-actions">
+          <div class="filter-pill">📘
+            <select id="viewFilter" onchange="filterView()">
+              <option>All grades & subjects</option>
+              <option>Grade 4–6 Combined Science</option>
+              <option>Grade 6–8 Physics</option>
+              <option>Grade 6–8 Chemistry</option>
+              <option>Grade 6–8 Biology</option>
+              <option>Grade 4–8 Mathematics</option>
+            </select>
+          </div>
+          <div class="school-pill">🏫 <span><strong>Greenfield Cambridge School</strong></span></div>
+        </div>
+      </header>
+
+      <section class="dashboard-grid">
+        <div class="stack">
+          <article class="card hero">
+            <div class="hero-content">
+              <div class="mission-meta-row">
+                <span class="pill cyan">📅 Monday, 11 May 2026</span>
+                <span class="pill green">Overall school status: stable</span>
+                <span class="pill yellow">4 areas need attention</span>
+                <span class="pill">Academic week 6</span>
+              </div>
+
+              <h1 class="hero-title">Your school is mostly on track, but Grade 6 Science and Grade 5 Math need attention this week.</h1>
+              <p class="hero-desc">This dashboard hides unnecessary detail at first. It highlights curriculum delays, low worksheet evidence, teacher usage gaps, and students who may need intervention. Click any row to move from school-level summary to teacher, class, or student-level detail.</p>
+
+              <div class="actions">
+                <button class="btn primary" onclick="showToast('Opening weekly academic report')">📊 Weekly Report</button>
+                <button class="btn" onclick="showToast('Opening curriculum tracker')">🗺️ Curriculum Tracker</button>
+                <button class="btn warning" onclick="openActionModal('Grade 6 Science')">📌 Create Follow-up</button>
+                <button class="btn" onclick="showToast('Export prepared for school leadership')">⬇️ Export Summary</button>
+              </div>
+
+              <div class="health-grid">
+                <div class="metric">
+                  <span>Classes on track</span>
+                  <strong>14/18</strong>
+                  <em>4 need schedule review</em>
+                </div>
+                <div class="metric">
+                  <span>Missions completed</span>
+                  <strong>126</strong>
+                  <em>This academic term</em>
+                </div>
+                <div class="metric">
+                  <span>Teacher usage</span>
+                  <strong>82%</strong>
+                  <em>Based on opened/completed missions</em>
+                </div>
+                <div class="metric">
+                  <span>Worksheets verified</span>
+                  <strong>71%</strong>
+                  <em>AI checks confirmed by teachers</em>
+                </div>
+                <div class="metric">
+                  <span>Students flagged</span>
+                  <strong>23</strong>
+                  <em>Across grades 4–8</em>
+                </div>
+                <div class="metric">
+                  <span>Renewal cycle</span>
+                  <strong>38d</strong>
+                  <em>Until next usage cycle window</em>
+                </div>
+              </div>
+            </div>
+          </article>
+
+          <article class="card">
+            <div class="card-header">
+              <div>
+                <h3 class="card-title">Curriculum Progress by Grade and Subject</h3>
+                <p class="card-subtitle">Planned vs actual progress based on the school-provided academic calendar.</p>
+              </div>
+              <span class="pill yellow">Exception-based view</span>
+            </div>
+            <div class="section-body table-wrap">
+              <table id="progressTable">
+                <thead>
+                  <tr>
+                    <th>Class</th>
+                    <th>Teacher</th>
+                    <th>Planned</th>
+                    <th>Actual</th>
+                    <th>Pacing</th>
+                    <th>Evidence</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Grade 5 Combined Science</td>
+                    <td>Ms. Farhana</td>
+                    <td>42%</td>
+                    <td><div class="progress-bar"><div class="progress-fill green" style="width:44%"></div></div>44%</td>
+                    <td><span class="pill green">On track</span></td>
+                    <td>83% verified</td>
+                    <td><button class="btn small" onclick="openActionModal('Grade 5 Combined Science')">View</button></td>
+                  </tr>
+                  <tr>
+                    <td>Grade 5 Mathematics</td>
+                    <td>Mr. Rashed</td>
+                    <td>40%</td>
+                    <td><div class="progress-bar"><div class="progress-fill yellow" style="width:34%"></div></div>34%</td>
+                    <td><span class="pill yellow">1 week behind</span></td>
+                    <td>61% verified</td>
+                    <td><button class="btn small warning" onclick="openActionModal('Grade 5 Mathematics')">Follow up</button></td>
+                  </tr>
+                  <tr>
+                    <td>Grade 6 Combined Science</td>
+                    <td>Ms. Jannat</td>
+                    <td>39%</td>
+                    <td><div class="progress-bar"><div class="progress-fill red" style="width:27%"></div></div>27%</td>
+                    <td><span class="pill red">2 weeks behind</span></td>
+                    <td>48% verified</td>
+                    <td><button class="btn small danger" onclick="openActionModal('Grade 6 Combined Science')">Urgent</button></td>
+                  </tr>
+                  <tr>
+                    <td>Grade 7 Physics</td>
+                    <td>Mr. Nayeem</td>
+                    <td>36%</td>
+                    <td><div class="progress-bar"><div class="progress-fill green" style="width:37%"></div></div>37%</td>
+                    <td><span class="pill green">On track</span></td>
+                    <td>78% verified</td>
+                    <td><button class="btn small" onclick="openActionModal('Grade 7 Physics')">View</button></td>
+                  </tr>
+                  <tr>
+                    <td>Grade 8 Biology</td>
+                    <td>Ms. Samia</td>
+                    <td>35%</td>
+                    <td><div class="progress-bar"><div class="progress-fill yellow" style="width:32%"></div></div>32%</td>
+                    <td><span class="pill orange">Low assessment score</span></td>
+                    <td>88% verified</td>
+                    <td><button class="btn small warning" onclick="openActionModal('Grade 8 Biology')">Review</button></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </article>
+
+          <div class="split-row">
+            <article class="card">
+              <div class="card-header">
+                <div>
+                  <h3 class="card-title">Immediate Attention</h3>
+                  <p class="card-subtitle">System-generated operational and academic alerts.</p>
+                </div>
+              </div>
+              <div class="section-body alert-list">
+                <div class="alert"><div class="alert-dot red"></div><div><strong>Grade 6 Combined Science is 2 weeks behind</strong><span>Recommendation: add one catch-up class or convert the next discussion day into a mission completion day.</span></div></div>
+                <div class="alert"><div class="alert-dot yellow"></div><div><strong>Grade 5 Math worksheet evidence is weak</strong><span>Only 61% of submitted worksheets are teacher-verified. Follow-up with Mr. Rashed.</span></div></div>
+                <div class="alert"><div class="alert-dot orange"></div><div><strong>Grade 8 Biology assessment score dropped</strong><span>Class average fell from 76% to 63%. Possible issue: written explanation quality.</span></div></div>
+                <div class="alert"><div class="alert-dot green"></div><div><strong>Grade 7 Physics running well</strong><span>Good pacing, strong worksheet verification, and low number of flagged students.</span></div></div>
+              </div>
+            </article>
+
+            <article class="card">
+              <div class="card-header">
+                <div>
+                  <h3 class="card-title">Academic Calendar Pressure</h3>
+                  <p class="card-subtitle">Upcoming school events that affect mission pacing.</p>
+                </div>
+              </div>
+              <div class="section-body">
+                <div class="calendar-strip">
+                  <div class="cycle-card active"><strong>This week</strong><span>Normal teaching week. Good catch-up window.</span></div>
+                  <div class="cycle-card"><strong>Next week</strong><span>Science fair preparation. 2 class periods affected.</span></div>
+                  <div class="cycle-card"><strong>Week 8</strong><span>Block assessments scheduled.</span></div>
+                  <div class="cycle-card"><strong>Week 9</strong><span>Half-yearly exam preparation begins.</span></div>
+                  <div class="cycle-card"><strong>Week 10</strong><span>Exam week. Missions paused.</span></div>
+                </div>
+              </div>
+            </article>
+          </div>
+
+          <article class="card">
+            <div class="card-header">
+              <div>
+                <h3 class="card-title">Teacher Usage Snapshot</h3>
+                <p class="card-subtitle">Usage is shown as academic operations, not surveillance. Click a teacher to inspect classes and mission evidence.</p>
+              </div>
+              <button class="btn small" onclick="showToast('Opening detailed teacher usage report')">Detailed view</button>
+            </div>
+            <div class="section-body teacher-grid">
+              <div class="teacher-card">
+                <span class="pill green">Strong</span>
+                <h4 style="margin-top:12px;">Ms. Farhana</h4>
+                <p>Grade 5 Combined Science. Uses mission launcher consistently and verifies most worksheet results.</p>
+                <div class="teacher-stat-row"><span>Missions</span><strong>18/19</strong></div>
+                <div class="teacher-stat-row"><span>Verification</span><strong>83%</strong></div>
+              </div>
+              <div class="teacher-card">
+                <span class="pill yellow">Needs support</span>
+                <h4 style="margin-top:12px;">Mr. Rashed</h4>
+                <p>Grade 5 Mathematics. Mission pacing acceptable, but worksheet verification is incomplete.</p>
+                <div class="teacher-stat-row"><span>Missions</span><strong>15/18</strong></div>
+                <div class="teacher-stat-row"><span>Verification</span><strong>61%</strong></div>
+              </div>
+              <div class="teacher-card">
+                <span class="pill red">At risk</span>
+                <h4 style="margin-top:12px;">Ms. Jannat</h4>
+                <p>Grade 6 Combined Science. Multiple missed missions after school event week.</p>
+                <div class="teacher-stat-row"><span>Missions</span><strong>11/17</strong></div>
+                <div class="teacher-stat-row"><span>Verification</span><strong>48%</strong></div>
+              </div>
+              <div class="teacher-card">
+                <span class="pill green">Strong</span>
+                <h4 style="margin-top:12px;">Mr. Nayeem</h4>
+                <p>Grade 7 Physics. Strong completion and consistent student evidence collection.</p>
+                <div class="teacher-stat-row"><span>Missions</span><strong>16/16</strong></div>
+                <div class="teacher-stat-row"><span>Verification</span><strong>78%</strong></div>
+              </div>
+            </div>
+          </article>
+        </div>
+
+        <aside class="stack">
+          <article class="card pad">
+            <div style="display:flex; justify-content:space-between; gap:12px; align-items:flex-start;">
+              <div>
+                <h3 class="card-title">Flagged Students</h3>
+                <p class="card-subtitle">Only priority students shown first. Principal can open the full list.</p>
+              </div>
+              <button class="btn small" onclick="showToast('Opening full flagged student registry')">View all</button>
+            </div>
+            <div class="student-list" style="margin-top: 16px;">
+              <div class="student-row" onclick="openStudentModal('Sarah Zaheen')">
+                <div class="avatar">S</div>
+                <div><h4>Sarah Zaheen</h4><p>Grade 5 Science · repeated weakness in speed, direction, and force vocabulary.</p></div>
+                <div class="risk-badge high">High</div>
+              </div>
+              <div class="student-row" onclick="openStudentModal('Rafi Chowdhury')">
+                <div class="avatar">R</div>
+                <div><h4>Rafi Chowdhury</h4><p>Grade 5 Science · missed 2 worksheet evidence uploads.</p></div>
+                <div class="risk-badge mid">Medium</div>
+              </div>
+              <div class="student-row" onclick="openStudentModal('Tahiya Khan')">
+                <div class="avatar">T</div>
+                <div><h4>Tahiya Khan</h4><p>Grade 6 Science · low score in two consecutive mission worksheets.</p></div>
+                <div class="risk-badge high">High</div>
+              </div>
+              <div class="student-row" onclick="openStudentModal('Zarin Tasnim')">
+                <div class="avatar">Z</div>
+                <div><h4>Zarin Tasnim</h4><p>Grade 8 Biology · good MCQs but weak written explanation.</p></div>
+                <div class="risk-badge mid">Medium</div>
+              </div>
+            </div>
+          </article>
+
+          <article class="card pad">
+            <h3 class="card-title">Principal Action Center</h3>
+            <p class="card-subtitle">Create notes, request teacher follow-up, or call a meeting without leaving the dashboard.</p>
+            <div class="field" style="margin-top:16px;">
+              <label>Focus area</label>
+              <select id="focusArea">
+                <option>Grade 6 Combined Science</option>
+                <option>Grade 5 Mathematics</option>
+                <option>Sarah Zaheen · Grade 5 Science</option>
+                <option>Grade 8 Biology Written Responses</option>
+              </select>
+            </div>
+            <div class="field" style="margin-top:12px;">
+              <label>Instruction / note for teacher</label>
+              <textarea id="principalNote">Please review the students flagged for foundation weaknesses and submit a short remediation plan by Thursday.</textarea>
+            </div>
+            <div class="actions" style="margin-top:12px;">
+              <button class="btn primary" onclick="savePrincipalNote()">Send Note</button>
+              <button class="btn warning" onclick="showToast('Meeting request prepared')">Call Meeting</button>
+            </div>
+          </article>
+
+          <article class="card pad">
+            <h3 class="card-title">Recent Principal Notes</h3>
+            <p class="card-subtitle">Notes are attached to class, teacher, or student records.</p>
+            <div class="note-list" id="noteList" style="margin-top:16px;">
+              <div class="note-item"><strong>Grade 6 Science follow-up</strong><span>Ask teacher to recover missed missions before Week 8 assessment.</span></div>
+              <div class="note-item"><strong>Grade 5 Science student support</strong><span>Sarah needs foundation worksheet on motion vocabulary.</span></div>
+            </div>
+          </article>
+
+          <article class="card pad">
+            <h3 class="card-title">Usage & Renewal Cycle</h3>
+            <p class="card-subtitle">No financial amount shown here. Only cycle status and adoption signal.</p>
+            <div class="alert-list" style="margin-top:16px;">
+              <div class="alert"><div class="alert-dot green"></div><div><strong>Current cycle active</strong><span>All licensed grades and subjects are available.</span></div></div>
+              <div class="alert"><div class="alert-dot yellow"></div><div><strong>Renewal window in 38 days</strong><span>Prepare usage summary before school admin review.</span></div></div>
+              <div class="alert"><div class="alert-dot green"></div><div><strong>Adoption signal positive</strong><span>82% teacher usage across assigned classes this term.</span></div></div>
+            </div>
+          </article>
+        </aside>
+      </section>
+    </main>
+  </div>
+
+  <div class="modal-backdrop" id="actionModal">
+    <div class="modal">
+      <div class="modal-header">
+        <div>
+          <h3 id="modalTitle">Follow-up</h3>
+          <p id="modalSubtitle">Review the issue, assign an instruction, and save it to the class record.</p>
+        </div>
+        <button class="btn small" onclick="closeModal()">Close</button>
+      </div>
+      <div class="form-row">
+        <div class="field">
+          <label>Assign to</label>
+          <select>
+            <option>Relevant teacher</option>
+            <option>Academic coordinator</option>
+            <option>Principal only</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Priority</label>
+          <select>
+            <option>Medium</option>
+            <option>High</option>
+            <option>Low</option>
+          </select>
+        </div>
+      </div>
+      <div class="field" style="margin-top:12px;">
+        <label>Action note</label>
+        <textarea id="modalNote">Please review the pacing gap and update the mission recovery plan before the next assessment block.</textarea>
+      </div>
+      <div class="actions" style="margin-top:14px;">
+        <button class="btn primary" onclick="saveModalAction()">Save Follow-up</button>
+        <button class="btn warning" onclick="showToast('Meeting request added')">Request Meeting</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast">Saved</div>
+
+  <script>
+    function showToast(message) {
+      const toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.classList.add('show');
+      clearTimeout(window.toastTimer);
+      window.toastTimer = setTimeout(() => toast.classList.remove('show'), 2400);
+    }
+
+    function filterView() {
+      const value = document.getElementById('viewFilter').value;
+      showToast(`View changed: ${value}`);
+    }
+
+    function openActionModal(context) {
+      document.getElementById('modalTitle').textContent = `${context} Follow-up`;
+      document.getElementById('modalSubtitle').textContent = 'Review the issue, assign an instruction, and save it to the academic record.';
+      document.getElementById('actionModal').classList.add('show');
+    }
+
+    function openStudentModal(studentName) {
+      document.getElementById('modalTitle').textContent = `${studentName} Student Review`;
+      document.getElementById('modalSubtitle').textContent = 'View flagged weaknesses, teacher comments, assessment evidence, and recommended intervention.';
+      document.getElementById('modalNote').value = `Review ${studentName}'s recent worksheet evidence and ask the teacher to confirm whether a foundation task is needed.`;
+      document.getElementById('actionModal').classList.add('show');
+    }
+
+    function closeModal() {
+      document.getElementById('actionModal').classList.remove('show');
+    }
+
+    function saveModalAction() {
+      closeModal();
+      showToast('Follow-up saved to academic record');
+    }
+
+    function savePrincipalNote() {
+      const focus = document.getElementById('focusArea').value;
+      const note = document.getElementById('principalNote').value.trim();
+      if (!note) {
+        showToast('Write a note before sending');
+        return;
+      }
+      const list = document.getElementById('noteList');
+      const item = document.createElement('div');
+      item.className = 'note-item';
+      item.innerHTML = `<strong>${focus}</strong><span>${note}</span>`;
+      list.prepend(item);
+      localStorage.setItem('principalLastNote', note);
+      showToast('Principal note sent and saved');
+    }
+
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape') closeModal();
+    });
+  </script>
+</body>
+</html>
