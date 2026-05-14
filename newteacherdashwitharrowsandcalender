@@ -1,0 +1,966 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mission Control | Teacher Dashboard</title>
+  <style>
+    :root {
+      --bg: #08111f;
+      --bg-soft: #111c2f;
+      --card: rgba(18, 30, 51, 0.92);
+      --card-2: rgba(22, 38, 64, 0.95);
+      --text: #eef4ff;
+      --muted: #9fb0c8;
+      --border: rgba(255,255,255,0.1);
+      --accent: #60a5fa;
+      --accent-2: #a78bfa;
+      --success: #22c55e;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --purple: #8b5cf6;
+      --shadow: 0 20px 60px rgba(0,0,0,.35);
+      --tooltip-bg: #020617;
+    }
+
+    html[data-theme="light"] {
+      --bg: #f4f7fb;
+      --bg-soft: #e8eef7;
+      --card: rgba(255,255,255,0.96);
+      --card-2: rgba(248,250,252,0.98);
+      --text: #0f172a;
+      --muted: #64748b;
+      --border: rgba(15,23,42,0.12);
+      --accent: #2563eb;
+      --accent-2: #7c3aed;
+      --success: #16a34a;
+      --warning: #d97706;
+      --danger: #dc2626;
+      --purple: #7c3aed;
+      --shadow: 0 20px 45px rgba(15,23,42,.12);
+      --tooltip-bg: #0f172a;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: radial-gradient(circle at top left, rgba(96,165,250,.18), transparent 30%), var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    button, select, input { font-family: inherit; }
+
+    .app {
+      display: grid;
+      grid-template-columns: 260px 1fr;
+      min-height: 100vh;
+    }
+
+    aside {
+      background: linear-gradient(180deg, var(--card), var(--bg-soft));
+      border-right: 1px solid var(--border);
+      padding: 22px;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 26px;
+    }
+
+    .logo {
+      width: 42px;
+      height: 42px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      display: grid;
+      place-items: center;
+      color: white;
+      font-weight: 900;
+      box-shadow: var(--shadow);
+    }
+
+    .brand h1 {
+      font-size: 17px;
+      margin: 0;
+      line-height: 1.1;
+    }
+
+    .brand span {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .context-card {
+      background: var(--card-2);
+      border: 1px solid var(--border);
+      padding: 14px;
+      border-radius: 20px;
+      margin-bottom: 20px;
+    }
+
+    .context-card label {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      margin-bottom: 6px;
+    }
+
+    select {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: var(--bg-soft);
+      color: var(--text);
+      outline: none;
+      margin-bottom: 10px;
+    }
+
+    nav {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .nav-btn {
+      border: 1px solid transparent;
+      background: transparent;
+      color: var(--muted);
+      padding: 12px 14px;
+      text-align: left;
+      border-radius: 14px;
+      cursor: pointer;
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      transition: .2s ease;
+    }
+
+    .nav-btn:hover, .nav-btn.active {
+      background: var(--card-2);
+      color: var(--text);
+      border-color: var(--border);
+    }
+
+    main {
+      padding: 22px;
+      overflow: auto;
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 18px;
+      margin-bottom: 22px;
+    }
+
+    .title h2 {
+      margin: 0 0 5px;
+      font-size: 28px;
+    }
+
+    .title p {
+      margin: 0;
+      color: var(--muted);
+    }
+
+    .top-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .btn {
+      border: 1px solid var(--border);
+      background: var(--card-2);
+      color: var(--text);
+      padding: 10px 14px;
+      border-radius: 13px;
+      cursor: pointer;
+      transition: .18s ease;
+      position: relative;
+    }
+
+    .btn:hover { transform: translateY(-1px); border-color: var(--accent); }
+    .btn.primary { background: linear-gradient(135deg, var(--accent), var(--accent-2)); color: white; border: 0; }
+    .btn.success { background: rgba(34,197,94,.16); border-color: rgba(34,197,94,.35); }
+    .btn.warning { background: rgba(245,158,11,.16); border-color: rgba(245,158,11,.35); }
+    .btn.danger { background: rgba(239,68,68,.16); border-color: rgba(239,68,68,.35); }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1.45fr .8fr;
+      gap: 18px;
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0,1fr));
+      gap: 14px;
+      margin-bottom: 18px;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 18px;
+      box-shadow: var(--shadow);
+    }
+
+    .metric .label { color: var(--muted); font-size: 12px; }
+    .metric .value { font-size: 26px; font-weight: 800; margin-top: 6px; }
+    .metric .hint { color: var(--muted); font-size: 12px; margin-top: 6px; }
+
+    .today-card {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 18px;
+      align-items: center;
+      margin-bottom: 18px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      border: 1px solid var(--border);
+      color: var(--text);
+    }
+
+    .badge.green { background: rgba(34,197,94,.16); }
+    .badge.blue { background: rgba(96,165,250,.16); }
+    .badge.orange { background: rgba(245,158,11,.16); }
+    .badge.gray { background: rgba(148,163,184,.16); }
+    .badge.purple { background: rgba(139,92,246,.16); }
+    .badge.red { background: rgba(239,68,68,.16); }
+
+    .mission-title {
+      font-size: 24px;
+      margin: 10px 0 6px;
+    }
+
+    .timeline {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+    }
+
+    .class-path {
+      display: flex;
+      align-items: stretch;
+      gap: 0;
+      overflow-x: auto;
+      padding: 10px 2px 4px;
+      margin-top: 10px;
+    }
+
+    .class-arrow {
+      min-width: 116px;
+      height: 72px;
+      border: 1px solid var(--border);
+      background: var(--card-2);
+      color: var(--text);
+      cursor: pointer;
+      clip-path: polygon(0 0, calc(100% - 22px) 0, 100% 50%, calc(100% - 22px) 100%, 0 100%, 20px 50%);
+      margin-left: -12px;
+      padding: 10px 26px 10px 28px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      transition: .18s ease;
+    }
+
+    .class-arrow:first-child { margin-left: 0; clip-path: polygon(0 0, calc(100% - 22px) 0, 100% 50%, calc(100% - 22px) 100%, 0 100%); padding-left: 16px; }
+    .class-arrow:hover { transform: translateY(-2px); filter: brightness(1.08); }
+    .class-arrow.done { background: rgba(34,197,94,.18); border-color: rgba(34,197,94,.45); }
+    .class-arrow.current { background: linear-gradient(135deg, rgba(96,165,250,.38), rgba(167,139,250,.32)); border-color: var(--accent); box-shadow: 0 0 0 2px rgba(96,165,250,.14); }
+    .class-arrow.next { background: rgba(96,165,250,.13); }
+    .class-arrow.overdue { background: rgba(245,158,11,.18); border-color: rgba(245,158,11,.48); }
+    .class-arrow.locked { opacity: .55; cursor: not-allowed; }
+    .class-arrow strong { font-size: 20px; line-height: 1; }
+    .class-arrow span { font-size: 11px; color: var(--muted); margin-top: 6px; white-space: nowrap; }
+
+    .node {
+      min-width: 132px;
+      background: var(--card-2);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 12px;
+      cursor: pointer;
+    }
+
+    .node.done { border-color: rgba(34,197,94,.55); }
+    .node.current { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(96,165,250,.15); }
+    .node.overdue { border-color: rgba(245,158,11,.65); }
+    .node.locked { opacity: .55; }
+
+    .node small { color: var(--muted); }
+
+    .section { display: none; }
+    .section.active { display: block; }
+
+    .filters {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(120px, 1fr));
+      gap: 10px;
+      margin: 14px 0;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0 10px;
+    }
+
+    th {
+      text-align: left;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 600;
+      padding: 0 12px;
+    }
+
+    td {
+      background: var(--card-2);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      padding: 13px 12px;
+      vertical-align: middle;
+    }
+
+    td:first-child { border-left: 1px solid var(--border); border-radius: 16px 0 0 16px; }
+    td:last-child { border-right: 1px solid var(--border); border-radius: 0 16px 16px 0; }
+
+    .resource-icons span {
+      display: inline-grid;
+      place-items: center;
+      width: 28px;
+      height: 28px;
+      border-radius: 10px;
+      background: var(--bg-soft);
+      border: 1px solid var(--border);
+      margin-right: 4px;
+      cursor: help;
+    }
+
+    .right-stack { display: grid; gap: 18px; }
+
+    .progress-bar {
+      height: 10px;
+      background: var(--bg-soft);
+      border-radius: 999px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 72%;
+      background: linear-gradient(90deg, var(--accent), var(--success));
+    }
+
+    .list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .list-item {
+      padding: 12px;
+      border-radius: 16px;
+      background: var(--card-2);
+      border: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .mini-calendar {
+      display: grid;
+      grid-template-columns: repeat(7, minmax(0, 1fr));
+      gap: 7px;
+      margin-top: 12px;
+    }
+
+    .cal-head {
+      color: var(--muted);
+      font-size: 11px;
+      text-align: center;
+      padding-bottom: 4px;
+    }
+
+    .cal-day {
+      min-height: 54px;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      background: var(--card-2);
+      padding: 7px;
+      cursor: pointer;
+      transition: .18s ease;
+      position: relative;
+    }
+
+    .cal-day:hover { transform: translateY(-2px); border-color: var(--accent); }
+    .cal-day .date { font-size: 12px; font-weight: 800; }
+    .cal-day .event { font-size: 9.5px; color: var(--muted); margin-top: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .cal-day.today { box-shadow: 0 0 0 2px rgba(96,165,250,.18); border-color: var(--accent); }
+    .cal-day.assessment { background: rgba(139,92,246,.17); border-color: rgba(139,92,246,.48); }
+    .cal-day.chapter { background: rgba(34,197,94,.14); border-color: rgba(34,197,94,.42); }
+    .cal-day.mission { background: rgba(96,165,250,.12); }
+    .cal-day.overdue { background: rgba(245,158,11,.15); border-color: rgba(245,158,11,.45); }
+
+    .term-calendar {
+      display: grid;
+      grid-template-columns: repeat(7, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .term-day {
+      min-height: 96px;
+      border: 1px solid var(--border);
+      background: var(--card-2);
+      border-radius: 18px;
+      padding: 10px;
+    }
+
+    .term-day strong { font-size: 14px; }
+    .term-day p { margin: 7px 0 0; font-size: 12px; color: var(--muted); line-height: 1.3; }
+
+    .page {
+      min-height: 420px;
+    }
+
+    .detail-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .toast {
+      position: fixed;
+      right: 22px;
+      bottom: 22px;
+      background: var(--tooltip-bg);
+      color: white;
+      padding: 14px 18px;
+      border-radius: 16px;
+      box-shadow: var(--shadow);
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(12px);
+      transition: .25s ease;
+      z-index: 20;
+      max-width: 360px;
+    }
+
+    .toast.show { opacity: 1; transform: translateY(0); }
+
+    [data-tip] { position: relative; }
+    [data-tip]:hover::after {
+      content: attr(data-tip);
+      position: absolute;
+      left: 50%;
+      bottom: calc(100% + 9px);
+      transform: translateX(-50%);
+      background: var(--tooltip-bg);
+      color: white;
+      font-size: 12px;
+      line-height: 1.35;
+      padding: 8px 10px;
+      border-radius: 10px;
+      white-space: nowrap;
+      z-index: 30;
+      box-shadow: var(--shadow);
+    }
+
+    .empty-state {
+      padding: 42px;
+      text-align: center;
+      color: var(--muted);
+      border: 1px dashed var(--border);
+      border-radius: 22px;
+      background: var(--card-2);
+    }
+
+    @media (max-width: 1100px) {
+      .app { grid-template-columns: 1fr; }
+      aside { position: relative; height: auto; }
+      .grid, .detail-grid { grid-template-columns: 1fr; }
+      .cards { grid-template-columns: repeat(2, minmax(0,1fr)); }
+      .filters { grid-template-columns: repeat(2, minmax(0,1fr)); }
+    }
+
+    @media (max-width: 640px) {
+      main { padding: 14px; }
+      .topbar, .today-card { flex-direction: column; display: flex; align-items: flex-start; }
+      .cards { grid-template-columns: 1fr; }
+      .filters { grid-template-columns: 1fr; }
+      table { font-size: 13px; }
+      .app { display: block; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside>
+      <div class="brand">
+        <div class="logo">MC</div>
+        <div>
+          <h1>Mission Control</h1>
+          <span>Teacher Dashboard</span>
+        </div>
+      </div>
+
+      <div class="context-card">
+        <label>Class</label>
+        <select id="classSelect" data-tip="Switch between assigned classes.">
+          <option>Year 5A</option>
+          <option>Year 5B</option>
+          <option>Year 6A</option>
+        </select>
+        <label>Subject</label>
+        <select id="subjectSelect" data-tip="Mission list updates by subject in the final system.">
+          <option>Science</option>
+          <option>Mathematics</option>
+          <option>English</option>
+        </select>
+      </div>
+
+      <nav>
+        <button class="nav-btn active" data-page="overview" data-tip="Daily teaching command center.">🏠 Overview</button>
+        <button class="nav-btn" data-page="missions" data-tip="Browse, filter and launch all missions.">🗺️ Mission Grid</button>
+        <button class="nav-btn" data-page="progress" data-tip="See class completion, weak areas and assessment readiness.">📈 Class Progress</button>
+        <button class="nav-btn" data-page="calendar" data-tip="See the next 30 days and the full term plan.">📅 Calendar</button>
+        <button class="nav-btn" data-page="resources" data-tip="Print worksheets, slides and teacher notes.">🖨️ Resources</button>
+        <button class="nav-btn" data-page="students" data-tip="View students needing attention.">👥 Student Alerts</button>
+        <button class="nav-btn" data-page="settings" data-tip="Teacher preferences and display options.">⚙️ Settings</button>
+      </nav>
+    </aside>
+
+    <main>
+      <div class="topbar">
+        <div class="title">
+          <h2 id="pageTitle">Overview</h2>
+          <p id="pageSubtitle">Year 5A Science · Human Body Block · Week 3</p>
+        </div>
+        <div class="top-actions">
+          <button class="btn" id="themeToggle" data-tip="Switch between dark and light mode.">☀️ Light Mode</button>
+          <button class="btn" onclick="goToPage('resources')" data-tip="Open printable lesson materials.">Print Center</button>
+          <button class="btn" onclick="goToPage('students')" data-tip="Take attendance or review absences.">Quick Attendance</button>
+          <button class="btn primary" onclick="openMission('Mission 4: The Heart')" data-tip="Start today’s recommended classroom mission.">Start Today</button>
+        </div>
+      </div>
+
+      <section id="overview" class="section active page">
+        <div class="cards">
+          <div class="card metric" data-tip="Percentage of planned missions completed for this block.">
+            <div class="label">Curriculum Progress</div>
+            <div class="value">72%</div>
+            <div class="hint">18 of 25 missions completed</div>
+          </div>
+          <div class="card metric" data-tip="Missions that should already have been completed.">
+            <div class="label">Overdue Missions</div>
+            <div class="value">2</div>
+            <div class="hint">Needs attention this week</div>
+          </div>
+          <div class="card metric" data-tip="Latest average from quizzes and OMR assessments.">
+            <div class="label">Assessment Average</div>
+            <div class="value">68%</div>
+            <div class="hint">Slightly below target</div>
+          </div>
+          <div class="card metric" data-tip="Students who may need intervention.">
+            <div class="label">Student Alerts</div>
+            <div class="value">4</div>
+            <div class="hint">Below performance threshold</div>
+          </div>
+        </div>
+
+        <div class="card" style="margin-bottom:18px;">
+          <div style="display:flex; justify-content:space-between; gap:14px; align-items:flex-start; flex-wrap:wrap;">
+            <div>
+              <h3 style="margin-bottom:6px;">Class Number Progression</h3>
+              <p style="color:var(--muted); margin-top:0;">Follow the actual teaching sequence, independent of week or date. Click a class number to open its mission.</p>
+            </div>
+            <span class="badge blue">Current: Class 56</span>
+          </div>
+          <div class="class-path" aria-label="Class number progression">
+            <button class="class-arrow done" onclick="openMission('Class 52: Body Systems')"><strong>52</strong><span>Completed</span></button>
+            <button class="class-arrow done" onclick="openMission('Class 53: Skeleton')"><strong>53</strong><span>Completed</span></button>
+            <button class="class-arrow overdue" onclick="openMission('Class 54: Muscles')"><strong>54</strong><span>Overdue</span></button>
+            <button class="class-arrow done" onclick="openMission('Class 55: Blood Vessels')"><strong>55</strong><span>Completed</span></button>
+            <button class="class-arrow current" onclick="openMission('Class 56: The Heart')"><strong>56</strong><span>Today · Heart</span></button>
+            <button class="class-arrow next" onclick="openMission('Class 57: Lungs')"><strong>57</strong><span>Next · Lungs</span></button>
+            <button class="class-arrow next" onclick="openMission('Class 58: Digestion')"><strong>58</strong><span>Upcoming</span></button>
+            <button class="class-arrow locked" onclick="lockedMission()"><strong>59</strong><span>Assessment</span></button>
+          </div>
+        </div>
+
+        <div class="grid">
+          <div>
+            <div class="card today-card">
+              <div>
+                <span class="badge blue">Ready to teach</span>
+                <h3 class="mission-title">Mission 4: The Heart</h3>
+                <p style="color:var(--muted); margin-top:0;">Students explore how the heart pumps blood and why circulation matters.</p>
+                <div class="top-actions" style="justify-content:flex-start; margin-top:14px;">
+                  <button class="btn primary" onclick="openMission('Mission 4: The Heart')" data-tip="Open slides and classroom flow.">Start Mission</button>
+                  <button class="btn" onclick="openTabWithMessage('resources','Teacher notes opened for Mission 4.')" data-tip="View teacher script and lesson guidance.">Teacher Notes</button>
+                  <button class="btn" onclick="openTabWithMessage('resources','Worksheet prepared for printing.')" data-tip="Go to printable worksheet.">Print Worksheet</button>
+                  <button class="btn success" onclick="completeMission()" data-tip="Mark this mission complete after teaching.">Mark Completed</button>
+                </div>
+              </div>
+              <div>
+                <div class="badge purple">40 min</div>
+              </div>
+            </div>
+
+            <div class="card">
+              <h3>Mission Timeline</h3>
+              <p style="color:var(--muted);">Click any mission to preview it.</p>
+              <div class="timeline">
+                <div class="node done" onclick="openMission('Mission 1: Body Systems')"><strong>Body Systems</strong><br><small>Completed</small></div>
+                <div class="node done" onclick="openMission('Mission 2: Skeleton')"><strong>Skeleton</strong><br><small>Completed</small></div>
+                <div class="node overdue" onclick="openMission('Mission 3: Muscles')"><strong>Muscles</strong><br><small>Overdue</small></div>
+                <div class="node current" onclick="openMission('Mission 4: The Heart')"><strong>Heart</strong><br><small>Today</small></div>
+                <div class="node" onclick="openMission('Mission 5: Lungs')"><strong>Lungs</strong><br><small>Upcoming</small></div>
+                <div class="node locked" onclick="lockedMission()"><strong>Assessment</strong><br><small>Locked</small></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="right-stack">
+            <div class="card">
+              <h3>Class Health</h3>
+              <p style="color:var(--muted);">Current block completion</p>
+              <div class="progress-bar"><div class="progress-fill"></div></div>
+              <div class="list" style="margin-top:14px;">
+                <div class="list-item"><span>Weak topic</span><strong>Muscles</strong></div>
+                <div class="list-item"><span>Strong topic</span><strong>Skeleton</strong></div>
+                <div class="list-item"><span>Assessment readiness</span><strong>Medium</strong></div>
+              </div>
+            </div>
+            <div class="card">
+              <div style="display:flex; justify-content:space-between; gap:12px; align-items:center;">
+                <div>
+                  <h3 style="margin-bottom:4px;">Next 30 Days</h3>
+                  <p style="color:var(--muted); margin:0; font-size:13px;">Missions, assessments and chapter starts.</p>
+                </div>
+                <button class="btn" onclick="goToPage('calendar')" data-tip="Open larger term calendar.">Open</button>
+              </div>
+              <div class="mini-calendar">
+                <div class="cal-head">Sun</div><div class="cal-head">Mon</div><div class="cal-head">Tue</div><div class="cal-head">Wed</div><div class="cal-head">Thu</div><div class="cal-head">Fri</div><div class="cal-head">Sat</div>
+                <div class="cal-day mission" onclick="openMission('Class 54: Muscles')"><div class="date">14</div><div class="event">Muscles</div></div>
+                <div class="cal-day today" onclick="openMission('Class 56: The Heart')"><div class="date">15</div><div class="event">Heart</div></div>
+                <div class="cal-day mission" onclick="openMission('Class 57: Lungs')"><div class="date">16</div><div class="event">Lungs</div></div>
+                <div class="cal-day mission" onclick="openMission('Class 58: Digestion')"><div class="date">17</div><div class="event">Digestion</div></div>
+                <div class="cal-day assessment" onclick="lockedMission()"><div class="date">18</div><div class="event">Assessment</div></div>
+                <div class="cal-day"><div class="date">19</div><div class="event">Review</div></div>
+                <div class="cal-day chapter" onclick="toast('New chapter starts: Electricity.')"><div class="date">20</div><div class="event">New chapter</div></div>
+                <div class="cal-day mission" onclick="toast('Class 60 preview opened.')"><div class="date">21</div><div class="event">Circuits</div></div>
+                <div class="cal-day mission" onclick="toast('Class 61 preview opened.')"><div class="date">22</div><div class="event">Cells</div></div>
+                <div class="cal-day"><div class="date">23</div><div class="event">Practice</div></div>
+                <div class="cal-day"><div class="date">24</div><div class="event">Worksheet</div></div>
+                <div class="cal-day assessment" onclick="toast('Short quiz scheduled.')"><div class="date">25</div><div class="event">Quiz</div></div>
+                <div class="cal-day"><div class="date">26</div></div>
+                <div class="cal-day"><div class="date">27</div></div>
+              </div>
+            </div>
+
+            <div class="card">
+              <h3>Upcoming</h3>
+              <div class="list">
+                <div class="list-item"><span>Tomorrow</span><strong>Lungs</strong></div>
+                <div class="list-item"><span>Thursday</span><strong>Digestion</strong></div>
+                <div class="list-item"><span>Next Week</span><strong>Assessment</strong></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="missions" class="section page">
+        <div class="card">
+          <h3>Mission Grid</h3>
+          <p style="color:var(--muted);">Filter, preview, start, print or mark missions as completed.</p>
+          <div class="filters">
+            <select id="filterStatus" onchange="filterMissions()" data-tip="Show missions by completion status.">
+              <option value="all">All Statuses</option>
+              <option value="completed">Completed</option>
+              <option value="today">Today</option>
+              <option value="overdue">Overdue</option>
+              <option value="upcoming">Upcoming</option>
+              <option value="assessment">Assessment</option>
+            </select>
+            <select data-tip="Filter by curriculum chapter.">
+              <option>All Chapters</option>
+              <option>Human Body</option>
+              <option>Electricity</option>
+            </select>
+            <select data-tip="Filter missions by week.">
+              <option>All Weeks</option>
+              <option>Week 1</option>
+              <option>Week 2</option>
+              <option>Week 3</option>
+            </select>
+            <button class="btn" onclick="filterOnlyOverdue()" data-tip="Quickly show delayed missions.">Show Overdue</button>
+            <button class="btn" onclick="resetFilters()" data-tip="Return to full mission list.">Reset</button>
+          </div>
+
+          <table>
+            <thead>
+              <tr>
+                <th>Class No.</th><th>Week</th><th>Day</th><th>Chapter</th><th>Mission</th><th>Status</th><th>Resources</th><th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="missionTable">
+              <tr data-status="completed"><td><span class="badge green">52</span></td><td>Week 3</td><td>Day 1</td><td>Human Body</td><td>Mission 1: Body Systems</td><td><span class="badge green">Completed</span></td><td class="resource-icons"><span title="Slides">S</span><span title="Worksheet">W</span><span title="Notes">N</span></td><td><button class="btn" onclick="openMission('Class 52: Body Systems')">View</button></td></tr>
+              <tr data-status="completed"><td><span class="badge green">53</span></td><td>Week 3</td><td>Day 2</td><td>Human Body</td><td>Mission 2: Skeleton</td><td><span class="badge green">Completed</span></td><td class="resource-icons"><span title="Slides">S</span><span title="Worksheet">W</span><span title="Notes">N</span></td><td><button class="btn" onclick="openMission('Class 53: Skeleton')">View</button></td></tr>
+              <tr data-status="overdue"><td><span class="badge orange">54</span></td><td>Week 3</td><td>Day 3</td><td>Human Body</td><td>Mission 3: Muscles</td><td><span class="badge orange">Overdue</span></td><td class="resource-icons"><span title="Slides">S</span><span title="Worksheet">W</span><span title="Notes">N</span></td><td><button class="btn warning" onclick="openMission('Class 54: Muscles')">Start</button></td></tr>
+              <tr data-status="completed"><td><span class="badge green">55</span></td><td>Week 3</td><td>Day 3B</td><td>Human Body</td><td>Mission 3B: Blood Vessels</td><td><span class="badge green">Completed</span></td><td class="resource-icons"><span title="Slides">S</span><span title="Worksheet">W</span></td><td><button class="btn" onclick="openMission('Class 55: Blood Vessels')">View</button></td></tr>
+              <tr data-status="today"><td><span class="badge blue">56</span></td><td>Week 3</td><td>Day 4</td><td>Human Body</td><td>Mission 4: The Heart</td><td><span class="badge blue">Today</span></td><td class="resource-icons"><span title="Slides">S</span><span title="Worksheet">W</span><span title="Notes">N</span><span title="Quiz">Q</span></td><td><button class="btn primary" onclick="openMission('Class 56: The Heart')">Start</button></td></tr>
+              <tr data-status="upcoming"><td><span class="badge gray">57</span></td><td>Week 3</td><td>Day 5</td><td>Human Body</td><td>Mission 5: Lungs</td><td><span class="badge gray">Upcoming</span></td><td class="resource-icons"><span title="Slides">S</span><span title="Worksheet">W</span></td><td><button class="btn" onclick="openMission('Class 57: Lungs')">Preview</button></td></tr>
+              <tr data-status="upcoming"><td><span class="badge gray">58</span></td><td>Week 4</td><td>Day 1</td><td>Human Body</td><td>Mission 6: Digestion</td><td><span class="badge gray">Upcoming</span></td><td class="resource-icons"><span title="Slides">S</span><span title="Worksheet">W</span></td><td><button class="btn" onclick="openMission('Class 58: Digestion')">Preview</button></td></tr>
+              <tr data-status="assessment"><td><span class="badge purple">59</span></td><td>Week 4</td><td>Day 3</td><td>Human Body</td><td>Block Assessment</td><td><span class="badge purple">Locked</span></td><td class="resource-icons"><span title="OMR">O</span><span title="Mark Scheme">M</span></td><td><button class="btn" onclick="lockedMission()">Locked</button></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="progress" class="section page">
+        <div class="card">
+          <h3>Class Progress</h3>
+          <div class="detail-grid">
+            <div class="list">
+              <div class="list-item"><span>Human Body Block</span><strong>72%</strong></div>
+              <div class="list-item"><span>Missions completed</span><strong>18 / 25</strong></div>
+              <div class="list-item"><span>Behind schedule</span><strong>2 missions</strong></div>
+              <div class="list-item"><span>Suggested action</span><strong>Teach Muscles + Heart this week</strong></div>
+            </div>
+            <div class="empty-state">Progress heatmap placeholder: topic-level mastery boxes will appear here.</div>
+          </div>
+        </div>
+      </section>
+
+      <section id="calendar" class="section page">
+        <div class="card">
+          <div style="display:flex; justify-content:space-between; gap:14px; align-items:flex-start; flex-wrap:wrap;">
+            <div>
+              <h3>Term Calendar</h3>
+              <p style="color:var(--muted); margin-top:0;">Large view of the semester plan: class numbers, missions, assessments, chapter starts and review days.</p>
+            </div>
+            <div class="top-actions">
+              <button class="btn" onclick="toast('Showing next 30 days.')">Next 30 Days</button>
+              <button class="btn" onclick="toast('Showing full term overview.')">Full Term</button>
+              <button class="btn" onclick="goToPage('overview')">Back to Overview</button>
+            </div>
+          </div>
+          <div class="term-calendar">
+            <div class="cal-head">Sun</div><div class="cal-head">Mon</div><div class="cal-head">Tue</div><div class="cal-head">Wed</div><div class="cal-head">Thu</div><div class="cal-head">Fri</div><div class="cal-head">Sat</div>
+            <div class="term-day mission" onclick="openMission('Class 54: Muscles')"><strong>14</strong><p>Class 54<br>Muscles<br><span class="badge orange">Overdue</span></p></div>
+            <div class="term-day today" onclick="openMission('Class 56: The Heart')"><strong>15</strong><p>Class 56<br>The Heart<br><span class="badge blue">Today</span></p></div>
+            <div class="term-day mission" onclick="openMission('Class 57: Lungs')"><strong>16</strong><p>Class 57<br>Lungs</p></div>
+            <div class="term-day mission" onclick="openMission('Class 58: Digestion')"><strong>17</strong><p>Class 58<br>Digestion</p></div>
+            <div class="term-day assessment" onclick="lockedMission()"><strong>18</strong><p>Class 59<br>Human Body Assessment<br><span class="badge purple">Assessment</span></p></div>
+            <div class="term-day"><strong>19</strong><p>Review and correction class</p></div>
+            <div class="term-day chapter" onclick="toast('New chapter starts: Electricity.')"><strong>20</strong><p>Class 60<br>New Chapter: Electricity<br><span class="badge green">Chapter Start</span></p></div>
+            <div class="term-day mission"><strong>21</strong><p>Class 61<br>Simple Circuits</p></div>
+            <div class="term-day mission"><strong>22</strong><p>Class 62<br>Cells and Batteries</p></div>
+            <div class="term-day"><strong>23</strong><p>Guided practice</p></div>
+            <div class="term-day"><strong>24</strong><p>Worksheet and correction</p></div>
+            <div class="term-day assessment"><strong>25</strong><p>Short Quiz<br><span class="badge purple">Quiz</span></p></div>
+            <div class="term-day"><strong>26</strong><p>No scheduled class</p></div>
+            <div class="term-day"><strong>27</strong><p>No scheduled class</p></div>
+            <div class="term-day mission"><strong>28</strong><p>Class 63<br>Conductors and Insulators</p></div>
+            <div class="term-day mission"><strong>29</strong><p>Class 64<br>Switches</p></div>
+            <div class="term-day mission"><strong>30</strong><p>Class 65<br>Series Circuits</p></div>
+            <div class="term-day mission"><strong>31</strong><p>Class 66<br>Parallel Circuits</p></div>
+            <div class="term-day assessment"><strong>1</strong><p>Electricity Checkpoint</p></div>
+            <div class="term-day"><strong>2</strong><p>Review</p></div>
+            <div class="term-day chapter"><strong>3</strong><p>New Chapter: Forces</p></div>
+          </div>
+        </div>
+      </section>
+
+      <section id="resources" class="section page">
+        <div class="card">
+          <h3>Resources & Print Center</h3>
+          <div class="list">
+            <div class="list-item"><span>Mission 4 Slides</span><button class="btn primary" onclick="toast('Slides opened in classroom mode.')">Open Slides</button></div>
+            <div class="list-item"><span>Mission 4 Worksheet</span><button class="btn" onclick="window.print()">Print Worksheet</button></div>
+            <div class="list-item"><span>Teacher Notes</span><button class="btn" onclick="toast('Teacher notes opened.')">Open Notes</button></div>
+            <div class="list-item"><span>Exit Quiz</span><button class="btn" onclick="toast('Exit quiz prepared.')">Open Quiz</button></div>
+          </div>
+        </div>
+      </section>
+
+      <section id="students" class="section page">
+        <div class="card">
+          <h3>Student Alerts</h3>
+          <div class="list">
+            <div class="list-item"><span>Ayaan · weak in Muscles</span><button class="btn" onclick="toast('Revision task assigned to Ayaan.')">Assign Revision</button></div>
+            <div class="list-item"><span>Sarah · absent twice this week</span><button class="btn" onclick="toast('Attendance note added.')">Add Note</button></div>
+            <div class="list-item"><span>Rafi · low quiz score</span><button class="btn" onclick="toast('Parent message drafted.')">Message Parent</button></div>
+            <div class="list-item"><span>Class attendance</span><button class="btn primary" onclick="toast('Attendance mode opened.')">Take Attendance</button></div>
+          </div>
+        </div>
+      </section>
+
+      <section id="settings" class="section page">
+        <div class="card">
+          <h3>Settings</h3>
+          <div class="list">
+            <div class="list-item"><span>Display theme</span><button class="btn" onclick="toggleTheme()">Toggle Light/Dark</button></div>
+            <div class="list-item"><span>Mission progression mode</span><strong>Guided Mode</strong></div>
+            <div class="list-item"><span>Auto-suggest next mission</span><strong>Enabled</strong></div>
+            <div class="list-item"><span>Teacher completion notes</span><strong>Required for skipped missions</strong></div>
+          </div>
+        </div>
+      </section>
+
+      <section id="missionDetail" class="section page">
+        <div class="card">
+          <span class="badge blue">Mission Detail</span>
+          <h3 id="missionDetailTitle" class="mission-title">Mission 4: The Heart</h3>
+          <p style="color:var(--muted);">A complete teaching package for this classroom mission.</p>
+          <div class="detail-grid">
+            <div class="card">
+              <h3>Teaching Flow</h3>
+              <ol>
+                <li>Opening question and curiosity hook</li>
+                <li>Core concept explanation</li>
+                <li>Class activity</li>
+                <li>Worksheet practice</li>
+                <li>Exit quiz</li>
+              </ol>
+            </div>
+            <div class="card">
+              <h3>Mission Actions</h3>
+              <div class="list">
+                <button class="btn primary" onclick="toast('Classroom slides launched.')">Launch Classroom Slides</button>
+                <button class="btn" onclick="goToPage('resources')">Open Resources</button>
+                <button class="btn success" onclick="completeMission()">Mark Completed</button>
+                <button class="btn warning" onclick="toast('Mission marked as delayed. Principal view will show this.')">Mark Delayed</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div id="toast" class="toast"></div>
+
+  <script>
+    const titles = {
+      overview: ['Overview', 'Year 5A Science · Human Body Block · Week 3'],
+      missions: ['Mission Grid', 'Browse all curriculum missions and launch today’s class.'],
+      progress: ['Class Progress', 'Track completion, delays, weak topics and readiness.'],
+      calendar: ['Calendar', 'Next 30 days and full term study overview.'],
+      resources: ['Resources', 'Slides, worksheets, teacher notes and quizzes.'],
+      students: ['Student Alerts', 'Students who need attention or follow-up.'],
+      settings: ['Settings', 'Display, progression and classroom preferences.'],
+      missionDetail: ['Mission Detail', 'Teaching package, actions and completion workflow.']
+    };
+
+    function goToPage(page) {
+      document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+      document.getElementById(page).classList.add('active');
+      document.querySelectorAll('.nav-btn').forEach(b => b.classList.toggle('active', b.dataset.page === page));
+      document.getElementById('pageTitle').textContent = titles[page][0];
+      document.getElementById('pageSubtitle').textContent = titles[page][1];
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    document.querySelectorAll('.nav-btn').forEach(btn => {
+      btn.addEventListener('click', () => goToPage(btn.dataset.page));
+    });
+
+    function openMission(name) {
+      document.getElementById('missionDetailTitle').textContent = name;
+      goToPage('missionDetail');
+      toast(name + ' opened.');
+    }
+
+    function completeMission() {
+      toast('Mission marked as completed. Class progress updated.');
+    }
+
+    function lockedMission() {
+      toast('This assessment unlocks after required missions are completed.');
+    }
+
+    function openTabWithMessage(page, message) {
+      goToPage(page);
+      toast(message);
+    }
+
+    function toast(message) {
+      const el = document.getElementById('toast');
+      el.textContent = message;
+      el.classList.add('show');
+      clearTimeout(window.toastTimer);
+      window.toastTimer = setTimeout(() => el.classList.remove('show'), 2600);
+    }
+
+    function filterMissions() {
+      const value = document.getElementById('filterStatus').value;
+      document.querySelectorAll('#missionTable tr').forEach(row => {
+        row.style.display = value === 'all' || row.dataset.status === value ? '' : 'none';
+      });
+    }
+
+    function filterOnlyOverdue() {
+      document.getElementById('filterStatus').value = 'overdue';
+      filterMissions();
+      toast('Showing overdue missions only.');
+    }
+
+    function resetFilters() {
+      document.getElementById('filterStatus').value = 'all';
+      filterMissions();
+      toast('Mission filters reset.');
+    }
+
+    function toggleTheme() {
+      const html = document.documentElement;
+      const next = html.dataset.theme === 'dark' ? 'light' : 'dark';
+      html.dataset.theme = next;
+      localStorage.setItem('mission-theme', next);
+      document.getElementById('themeToggle').textContent = next === 'dark' ? '☀️ Light Mode' : '🌙 Dark Mode';
+    }
+
+    document.getElementById('themeToggle').addEventListener('click', toggleTheme);
+
+    const savedTheme = localStorage.getItem('mission-theme');
+    if (savedTheme) {
+      document.documentElement.dataset.theme = savedTheme;
+      document.getElementById('themeToggle').textContent = savedTheme === 'dark' ? '☀️ Light Mode' : '🌙 Dark Mode';
+    }
+
+    document.getElementById('classSelect').addEventListener('change', e => {
+      toast('Class switched to ' + e.target.value + '.');
+      document.getElementById('pageSubtitle').textContent = e.target.value + ' Science · Human Body Block · Week 3';
+    });
+
+    document.getElementById('subjectSelect').addEventListener('change', e => {
+      toast('Subject switched to ' + e.target.value + '.');
+    });
+  </script>
+</body>
+</html>
