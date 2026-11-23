@@ -9,6 +9,7 @@ Static, single-file prototypes of a mission-based classroom system. Open `index.
 | `teacher-dash-planner-above-crease.html` | Mission Control teacher dashboard, planner above the fold |
 | `teacher-dash-acolyte.html` | Earlier Acolyte teacher dashboard |
 | `principal-dash.html` | Principal dashboard |
+| `lesson-planner.html` | Adaptive lesson planner mock-up: re-plans a class’s remaining lessons around pace and calendar changes, inside fixed school rules (mock whole-school data) |
 | `missions/heart-v4/` | Schoolynq Stage 6 Heart Mission v4: `index.html` (the lesson), `mission.json`, `teacher-guide.html` |
 | `missions/blood/` | Grade 5 Science “Operation Blood Flow” (mission 2.7.2-blood-lab) built into the Schoolynq player v2.9.2, the same player as schoolynq.com/demo/breathing/; `teacher-guide.pdf` is extracted from the mission |
 

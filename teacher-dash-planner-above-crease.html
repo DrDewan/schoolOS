@@ -547,6 +547,7 @@
         <button class="nav-btn" data-page="missions" data-tip="Browse, filter and launch all missions.">🗺️ Mission Grid</button>
         <button class="nav-btn" data-page="progress" data-tip="See class completion, weak areas and assessment readiness.">📈 Class Progress</button>
         <button class="nav-btn" data-page="calendar" data-tip="See the next 30 days and the full term plan.">📅 Calendar</button>
+        <a class="nav-btn" href="lesson-planner.html" style="text-decoration:none" data-tip="Re-plan the term when you fall behind or the calendar changes.">🗓️ Lesson Planner</a>
         <button class="nav-btn" data-page="resources" data-tip="Print worksheets, slides and teacher notes.">🖨️ Resources</button>
         <button class="nav-btn" data-page="students" data-tip="View students needing attention.">👥 Student Alerts</button>
         <button class="nav-btn" data-page="settings" data-tip="Teacher preferences and display options.">⚙️ Settings</button>
@@ -895,7 +896,7 @@
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    document.querySelectorAll('.nav-btn').forEach(btn => {
+    document.querySelectorAll('.nav-btn[data-page]').forEach(btn => {
       btn.addEventListener('click', () => goToPage(btn.dataset.page));
     });
 
