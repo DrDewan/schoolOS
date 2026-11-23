@@ -395,6 +395,7 @@
       grid-template-columns: repeat(7, minmax(0, 1fr));
       gap: 7px;
       margin-top: 12px;
+      container-type: inline-size;
     }
 
     .cal-head {
@@ -405,19 +406,39 @@
     }
 
     .cal-day {
-      min-height: 54px;
-      border-radius: 14px;
+      min-height: 48px;
+      min-width: 0;
+      border-radius: 12px;
       border: 1px solid var(--border);
       background: var(--card-2);
-      padding: 7px;
+      padding: 6px 2px;
       cursor: pointer;
       transition: .18s ease;
       position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      text-align: center;
     }
 
     .cal-day:hover { transform: translateY(-2px); border-color: var(--accent); }
-    .cal-day .date { font-size: 12px; font-weight: 800; }
-    .cal-day .event { font-size: 9.5px; color: var(--muted); margin-top: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .cal-day .date { font-size: 13px; font-weight: 800; line-height: 1; }
+    /* In a narrow card a day shows its date and a coloured bar for the event type; the event name is in the tooltip.
+       When the card is wide enough, the name shows in the cell instead. */
+    .cal-day .event { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+    .cal-day:has(.event)::before { content: ""; order: 1; width: 18px; height: 4px; border-radius: 2px; background: var(--muted); opacity: .7; }
+    .cal-day.mission::before, .cal-day.today::before { background: var(--accent); opacity: 1; }
+    .cal-day.assessment::before { background: #a78bfa; opacity: 1; }
+    .cal-day.chapter::before { background: #4ade80; opacity: 1; }
+    @container (min-width: 560px) {
+      .cal-day { align-items: flex-start; justify-content: flex-start; padding: 7px 8px; gap: 4px; }
+      .mini-calendar .cal-day::before { display: none; }
+      .cal-day .event { position: static; width: auto; height: auto; max-width: 100%; clip-path: none; font-size: 10.5px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; }
+    }
+    .cal-legend { display: flex; flex-wrap: wrap; gap: 6px 14px; margin-top: 12px; font-size: 12px; color: var(--muted); }
+    .cal-legend i { display: inline-block; width: 16px; height: 4px; border-radius: 2px; background: var(--muted); opacity: .7; vertical-align: middle; margin-right: 6px; }
     .cal-day.today { box-shadow: 0 0 0 2px rgba(96,165,250,.18); border-color: var(--accent); }
     .cal-day.assessment { background: rgba(139,92,246,.17); border-color: rgba(139,92,246,.48); }
     .cal-day.chapter { background: rgba(34,197,94,.14); border-color: rgba(34,197,94,.42); }
@@ -659,7 +680,7 @@
               </div>
             </div>
             <div class="card">
-              <div style="display:flex; justify-content:space-between; gap:12px; align-items:center;">
+              <div style="display:flex; flex-wrap:wrap; justify-content:space-between; gap:12px; align-items:center;">
                 <div>
                   <h3 style="margin-bottom:4px;">Next 30 Days</h3>
                   <p style="color:var(--muted); margin:0; font-size:13px;">Missions, assessments and chapter starts.</p>
@@ -668,21 +689,22 @@
               </div>
               <div class="mini-calendar">
                 <div class="cal-head">Sun</div><div class="cal-head">Mon</div><div class="cal-head">Tue</div><div class="cal-head">Wed</div><div class="cal-head">Thu</div><div class="cal-head">Fri</div><div class="cal-head">Sat</div>
-                <div class="cal-day mission" onclick="openMission('Class 54: Muscles')"><div class="date">14</div><div class="event">Muscles</div></div>
-                <div class="cal-day today" onclick="openMission('Class 56: The Heart')"><div class="date">15</div><div class="event">Heart</div></div>
-                <div class="cal-day mission" onclick="openMission('Class 57: Lungs')"><div class="date">16</div><div class="event">Lungs</div></div>
-                <div class="cal-day mission" onclick="openMission('Class 58: Digestion')"><div class="date">17</div><div class="event">Digestion</div></div>
-                <div class="cal-day assessment" onclick="lockedMission()"><div class="date">18</div><div class="event">Assessment</div></div>
-                <div class="cal-day"><div class="date">19</div><div class="event">Review</div></div>
-                <div class="cal-day chapter" onclick="toast('New chapter starts: Electricity.')"><div class="date">20</div><div class="event">New chapter</div></div>
-                <div class="cal-day mission" onclick="toast('Class 60 preview opened.')"><div class="date">21</div><div class="event">Circuits</div></div>
-                <div class="cal-day mission" onclick="toast('Class 61 preview opened.')"><div class="date">22</div><div class="event">Cells</div></div>
-                <div class="cal-day"><div class="date">23</div><div class="event">Practice</div></div>
-                <div class="cal-day"><div class="date">24</div><div class="event">Worksheet</div></div>
-                <div class="cal-day assessment" onclick="toast('Short quiz scheduled.')"><div class="date">25</div><div class="event">Quiz</div></div>
+                <div class="cal-day mission" onclick="openMission('Class 54: Muscles')" data-tip="14 · Muscles"><div class="date">14</div><div class="event">Muscles</div></div>
+                <div class="cal-day today" onclick="openMission('Class 56: The Heart')" data-tip="15 · Heart"><div class="date">15</div><div class="event">Heart</div></div>
+                <div class="cal-day mission" onclick="openMission('Class 57: Lungs')" data-tip="16 · Lungs"><div class="date">16</div><div class="event">Lungs</div></div>
+                <div class="cal-day mission" onclick="openMission('Class 58: Digestion')" data-tip="17 · Digestion"><div class="date">17</div><div class="event">Digestion</div></div>
+                <div class="cal-day assessment" onclick="lockedMission()" data-tip="18 · Assessment"><div class="date">18</div><div class="event">Assessment</div></div>
+                <div class="cal-day" data-tip="19 · Review"><div class="date">19</div><div class="event">Review</div></div>
+                <div class="cal-day chapter" onclick="toast('New chapter starts: Electricity.')" data-tip="20 · New chapter"><div class="date">20</div><div class="event">New chapter</div></div>
+                <div class="cal-day mission" onclick="toast('Class 60 preview opened.')" data-tip="21 · Circuits"><div class="date">21</div><div class="event">Circuits</div></div>
+                <div class="cal-day mission" onclick="toast('Class 61 preview opened.')" data-tip="22 · Cells"><div class="date">22</div><div class="event">Cells</div></div>
+                <div class="cal-day" data-tip="23 · Practice"><div class="date">23</div><div class="event">Practice</div></div>
+                <div class="cal-day" data-tip="24 · Worksheet"><div class="date">24</div><div class="event">Worksheet</div></div>
+                <div class="cal-day assessment" onclick="toast('Short quiz scheduled.')" data-tip="25 · Quiz"><div class="date">25</div><div class="event">Quiz</div></div>
                 <div class="cal-day"><div class="date">26</div></div>
                 <div class="cal-day"><div class="date">27</div></div>
               </div>
+              <div class="cal-legend" aria-hidden="true"><span><i style="background:var(--accent);opacity:1"></i>Mission</span><span><i style="background:#a78bfa;opacity:1"></i>Assessment</span><span><i style="background:#4ade80;opacity:1"></i>New chapter</span><span><i></i>Other</span></div>
             </div>
 
             <div class="card">
@@ -804,10 +826,15 @@
         <div class="card">
           <h3>Resources & Print Center</h3>
           <div class="list">
-            <div class="list-item"><span>Mission 4 Slides</span><button class="btn primary" onclick="toast('Slides opened in classroom mode.')">Open Slides</button></div>
-            <div class="list-item"><span>Mission 4 Worksheet</span><button class="btn" onclick="window.print()">Print Worksheet</button></div>
-            <div class="list-item"><span>Teacher Notes</span><button class="btn" onclick="toast('Teacher notes opened.')">Open Notes</button></div>
-            <div class="list-item"><span>Exit Quiz</span><button class="btn" onclick="toast('Exit quiz prepared.')">Open Quiz</button></div>
+            <div class="list-item"><span><strong>Mission 4: The Heart</strong> · Class 56</span><button class="btn primary" onclick="launchMission('Mission 4: The Heart')">Launch Mission</button></div>
+            <div class="list-item"><span>Pupil notes · 2 pages</span><a class="btn" style="text-decoration:none" href="missions/heart-v4/printables/pupil-notes.pdf" target="_blank" rel="noopener">Open PDF</a></div>
+            <div class="list-item"><span>Worksheet, exit slips and answer key · 5 pages</span><a class="btn" style="text-decoration:none" href="missions/heart-v4/printables/worksheet.pdf" target="_blank" rel="noopener">Open PDF</a></div>
+            <div class="list-item"><span>Teacher guide · 6 pages</span><a class="btn" style="text-decoration:none" href="missions/heart-v4/printables/teacher-guide.pdf" target="_blank" rel="noopener">Open PDF</a></div>
+            <div class="list-item"><span><strong>Class 55: Blood Vessels</strong></span><button class="btn primary" onclick="launchMission('Class 55: Blood Vessels')">Launch Mission</button></div>
+            <div class="list-item"><span>Pupil notes · 2 pages</span><a class="btn" style="text-decoration:none" href="missions/blood/printables/pupil-notes.pdf" target="_blank" rel="noopener">Open PDF</a></div>
+            <div class="list-item"><span>Worksheet and answer key · 5 pages</span><a class="btn" style="text-decoration:none" href="missions/blood/printables/worksheet.pdf" target="_blank" rel="noopener">Open PDF</a></div>
+            <div class="list-item"><span>Teacher guide · 2 pages</span><a class="btn" style="text-decoration:none" href="missions/blood/printables/teacher-guide.pdf" target="_blank" rel="noopener">Open PDF</a></div>
+            <div class="list-item"><span>Teacher resource list · 1 page</span><a class="btn" style="text-decoration:none" href="missions/blood/printables/resources.pdf" target="_blank" rel="noopener">Open PDF</a></div>
           </div>
         </div>
       </section>

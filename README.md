@@ -14,6 +14,7 @@ Static, single-file prototypes of a mission-based classroom system, presented as
 | `brand/` | Schoolynq logo, mark and Nunito font (from schoolynq.com), and `brand.css`, which every page loads for the brand font, colours and logo tile |
 | `missions/heart-v4/` | Schoolynq Stage 6 Heart Mission v4: `index.html` (the lesson), `mission.json`, `teacher-guide.html` |
 | `missions/blood/` | Grade 5 Science “Operation Blood Flow” (mission 2.7.2-blood-lab) built into the Schoolynq player v2.9.2, the same player as schoolynq.com/demo/breathing/; `teacher-guide.pdf` is extracted from the mission |
+| `missions/*/printables/` | Print-ready A4 PDFs for each mission: pupil notes, worksheet (with square-grid and ruled answer space, a sample QR code and an answer key), teacher guide and resource list. The same PDFs are embedded in each mission's resource list. The Teacher dashboard's Resources page links them |
 
 The dashboard files were previously named without an `.html` extension (`newteacherdashwitharrowsandcalender`, `teacherdashcalenderplannerabovecrease`, `teacher dash`, `principal dash`). They were renamed so browsers and web hosts display them as pages.
 
