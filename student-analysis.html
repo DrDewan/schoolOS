@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mission Control | Student Analysis</title>
+  <style>
+    /* Same tokens as the Mission Control teacher dashboard and the lesson planner. */
+    :root { --bg:#08111f; --card:rgba(18,30,51,.92); --card-2:rgba(22,38,64,.95); --text:#eef4ff; --muted:#9fb0c8; --border:rgba(255,255,255,.1);
+      --accent:#60a5fa; --accent-2:#a78bfa; --success:#22c55e; --warning:#f59e0b; --danger:#ef4444; --shadow:0 18px 50px rgba(0,0,0,.35);
+      --good-bg:rgba(34,197,94,.2); --good:#86efac; --mid-bg:rgba(245,158,11,.2); --mid:#fcd34d; --low-bg:rgba(239,68,68,.24); --low:#fca5a5; }
+    * { box-sizing:border-box; }
+    body { margin:0; min-height:100vh; background:radial-gradient(ellipse at 80% -10%, #16263f, transparent 55%), var(--bg); color:var(--text);
+      font:14px/1.45 Inter, system-ui, -apple-system, "Segoe UI", Arial, sans-serif; }
+    button, select { font:inherit; color:inherit; }
+    .app { display:grid; grid-template-columns:250px minmax(0,1fr); min-height:100vh; }
+    .sidebar { padding:22px 18px; border-right:1px solid var(--border); background:rgba(8,17,31,.6); display:flex; flex-direction:column; gap:16px; }
+    .brand { display:flex; gap:12px; align-items:center; }
+    .brand-mark { width:42px; height:42px; border-radius:12px; display:grid; place-items:center; font-weight:800; background:linear-gradient(135deg,var(--accent),var(--accent-2)); }
+    .brand h1 { margin:0; font-size:17px; } .brand span { color:var(--muted); font-size:12px; }
+    .side-card { padding:12px; border:1px solid var(--border); border-radius:16px; background:var(--card); font-size:13px; color:var(--muted); }
+    .side-card strong { color:var(--text); display:block; font-size:15px; }
+    .side-link { color:var(--muted); text-decoration:none; padding:9px 12px; border-radius:12px; border:1px solid transparent; }
+    .side-link:hover, .side-link.active { color:var(--text); background:var(--card-2); border-color:var(--border); }
+    main { padding:18px 22px; display:flex; flex-direction:column; gap:14px; min-width:0; }
+    .top { display:flex; justify-content:space-between; align-items:flex-end; gap:16px; flex-wrap:wrap; }
+    .top h2 { margin:0; font-size:26px; letter-spacing:-.4px; } .top p { margin:4px 0 0; color:var(--muted); }
+    .seg { display:inline-flex; border:1px solid var(--border); border-radius:12px; overflow:hidden; }
+    .seg button { background:transparent; border:0; padding:9px 14px; cursor:pointer; color:var(--muted); }
+    .seg button.on { background:var(--card-2); color:var(--text); font-weight:700; }
+    .btn { border:1px solid var(--border); background:var(--card-2); padding:8px 13px; border-radius:12px; cursor:pointer; }
+    .btn:hover { border-color:var(--accent); }
+    .btn.primary { background:linear-gradient(135deg,var(--accent),var(--accent-2)); border:0; color:#fff; font-weight:700; }
+    select { background:var(--card-2); border:1px solid var(--border); border-radius:10px; padding:7px 10px; }
+    .actions { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+    .card { background:var(--card); border:1px solid var(--border); border-radius:20px; padding:14px; box-shadow:var(--shadow); min-width:0; }
+    .card h3 { margin:0 0 10px; font-size:15px; }
+    .card-head { display:flex; justify-content:space-between; align-items:center; gap:10px; margin-bottom:10px; flex-wrap:wrap; }
+    .card-head h3 { margin:0; } .card-head label { color:var(--muted); font-size:12.5px; display:flex; gap:6px; align-items:center; }
+    .note { color:var(--muted); font-size:12px; margin:8px 0 0; }
+
+    /* Data sources strip */
+    .sources { display:grid; grid-template-columns:repeat(auto-fit,minmax(138px,1fr)); gap:8px; }
+    .src { padding:9px 11px; border:1px solid var(--border); border-radius:14px; background:var(--card); font-size:12px; color:var(--muted); display:flex; flex-direction:column; gap:1px; }
+    .src b { color:var(--text); font-size:13px; } .src .cov { color:var(--text); }
+    .chip { display:inline-block; font-size:10.5px; padding:1px 7px; border-radius:999px; background:rgba(148,163,184,.16); color:var(--muted); white-space:nowrap; }
+
+    .kpis { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:10px; }
+    .kpi { padding:11px 13px; border:1px solid var(--border); border-radius:16px; background:var(--card); }
+    .kpi span { color:var(--muted); font-size:12px; } .kpi strong { display:block; font-size:20px; margin-top:2px; } .kpi small { color:var(--muted); font-size:11.5px; }
+    .layout { display:grid; grid-template-columns:minmax(0,1fr) 340px; gap:14px; align-items:start; }
+
+    /* Heatmap */
+    .tablewrap { overflow-x:auto; }
+    table { border-collapse:separate; border-spacing:3px; width:100%; }
+    th { font-size:11.5px; color:var(--muted); font-weight:600; text-align:center; padding:2px 3px; }
+    th.name { text-align:left; }
+    td { text-align:center; font-size:12.5px; font-weight:700; border-radius:7px; padding:5px 3px; min-width:46px; }
+    .good { background:var(--good-bg); color:var(--good); } .mid { background:var(--mid-bg); color:var(--mid); } .low { background:var(--low-bg); color:var(--low); }
+    td.thin { outline:1.5px dashed currentColor; outline-offset:-3px; }
+    td.none { background:repeating-linear-gradient(135deg,rgba(148,163,184,.12) 0 6px,transparent 6px 12px); color:var(--muted); font-weight:400; }
+    td.plain { color:var(--muted); font-weight:500; }
+    .who { background:none; border:0; padding:3px 4px; cursor:pointer; text-align:left; white-space:nowrap; font-weight:600; font-size:13px; border-radius:6px; }
+    .who:hover, .who:focus-visible { color:var(--accent); outline:none; text-decoration:underline; }
+    tr.row:hover td, tr.row:hover th { filter:brightness(1.15); }
+    .flags { display:flex; gap:3px; justify-content:center; }
+    .dot { width:9px; height:9px; border-radius:50%; display:inline-block; }
+    .dot.high { background:var(--danger); } .dot.medium { background:var(--warning); } .dot.info { background:var(--success); }
+    .legend { display:flex; gap:12px; flex-wrap:wrap; margin-top:10px; font-size:12px; color:var(--muted); align-items:center; }
+    .legend i { display:inline-block; width:22px; height:14px; border-radius:4px; vertical-align:middle; margin-right:5px; font-style:normal; }
+
+    /* Alerts */
+    .alerts { list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:7px; }
+    .scroll { max-height:620px; overflow:auto; padding-right:3px; }
+    .alerts li { padding:9px 10px; border-radius:12px; background:var(--card-2); border:1px solid var(--border); border-left:4px solid var(--border); font-size:13px; }
+    .alerts li.high { border-left-color:var(--danger); } .alerts li.medium { border-left-color:var(--warning); } .alerts li.info { border-left-color:var(--success); }
+    .alerts li b { display:block; } .alerts li .d { color:var(--muted); font-size:12px; display:block; margin:2px 0 4px; }
+    .alerts .who { padding:0; font-size:13.5px; }
+    .group { color:var(--muted); font-size:12px; margin:6px 0 0; }
+
+    /* Student profile */
+    #studentView:not([hidden]) { display:flex; flex-direction:column; gap:14px; }
+    .bar > span.neutral { background:rgba(96,165,250,.55); }
+    .shead { display:flex; gap:14px; align-items:center; flex-wrap:wrap; }
+    .avatar { width:52px; height:52px; border-radius:16px; display:grid; place-items:center; font-weight:800; font-size:22px; background:linear-gradient(135deg,var(--accent),var(--accent-2)); }
+    .sname h3 { margin:0; font-size:20px; } .sname span { color:var(--muted); font-size:12.5px; }
+    .stats { display:flex; gap:8px; flex-wrap:wrap; flex:1; }
+    .stat { padding:6px 10px; border-radius:12px; border:1px solid var(--border); background:var(--card-2); font-size:12px; color:var(--muted); }
+    .stat strong { display:block; color:var(--text); font-size:15px; }
+    .ctab td { text-align:left; font-weight:500; background:var(--card-2); padding:7px 8px; }
+    .ctab td.score { text-align:center; font-weight:700; width:64px; }
+    .ctab .lt { font-weight:700; } .ctab .sub { color:var(--muted); font-size:11.5px; display:block; }
+    .ev { display:flex; gap:4px; flex-wrap:wrap; }
+    .ev .chip.ok { background:rgba(34,197,94,.16); color:var(--good); } .ev .chip.no { background:rgba(239,68,68,.18); color:var(--low); }
+    .cards4 { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:14px; }
+    .big { font-size:24px; font-weight:800; }
+    .bar { position:relative; height:12px; border-radius:6px; background:rgba(148,163,184,.15); margin:4px 0 8px; }
+    .bar > span { position:absolute; inset:0 auto 0 0; border-radius:6px; }
+    .bar > i { position:absolute; top:-3px; bottom:-3px; width:2px; background:var(--text); opacity:.7; }
+    .kv { display:flex; justify-content:space-between; font-size:13px; padding:3px 0; border-bottom:1px solid var(--border); }
+    .kv:last-child { border-bottom:0; } .kv span { color:var(--muted); }
+    .notes { list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:6px; font-size:13px; }
+    .notes span { color:var(--muted); font-size:12px; margin-right:6px; }
+
+    .toast { position:fixed; right:22px; bottom:22px; padding:12px 16px; border-radius:14px; background:#0f1d33; border:1px solid var(--accent); box-shadow:var(--shadow); opacity:0; transform:translateY(10px); transition:.2s; pointer-events:none; max-width:420px; }
+    .toast.show { opacity:1; transform:none; }
+    @media (max-width:1400px) { .layout { grid-template-columns:1fr; } .scroll { max-height:none; } }
+    @media (max-width:1200px) { .kpis { grid-template-columns:repeat(3,minmax(0,1fr)); } .cards4 { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+    @media (max-width:860px) { .app { grid-template-columns:1fr; } .sidebar { border-right:0; border-bottom:1px solid var(--border); } }
+  </style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand"><div class="brand-mark">MC</div><div><h1>Mission Control</h1><span>Student Analysis</span></div></div>
+    <div class="side-card"><strong>Year 5A Science</strong>Ms. Farhana · Human Body block · Week 6 Wednesday</div>
+    <a class="side-link" href="teacher-dash-arrows-calendar.html">← Teacher dashboard</a>
+    <a class="side-link" href="lesson-planner.html">🗓️ Lesson Planner</a>
+    <a class="side-link active" href="student-analysis.html">🔎 Student Analysis</a>
+    <a class="side-link" href="index.html">Hub</a>
+    <p class="note">Mock-up. Students, scores and every data source are invented to show how the picture would combine. Nothing is saved or sent.</p>
+  </aside>
+
+  <main>
+    <div class="top">
+      <div><h2 id="title">Student analysis</h2><p id="subtitle"></p></div>
+      <div class="seg" role="group" aria-label="View"><button id="viewClass" class="on">Class overview</button><button id="viewStudent">Student profile</button></div>
+    </div>
+    <section class="sources" id="sources" aria-label="Data sources"></section>
+
+    <div id="classView">
+      <section class="kpis" id="kpis"></section>
+      <div class="layout" style="margin-top:14px">
+        <section class="card">
+          <div class="card-head">
+            <h3>Mastery by lesson · Human Body block</h3>
+            <label>Sort <select id="sort"><option value="attention">Needs attention first</option><option value="name">Name</option><option value="mastery">Lowest mastery first</option></select></label>
+          </div>
+          <div class="tablewrap"><table id="heat"></table></div>
+          <div class="legend">
+            <span><i class="good"></i>Secure 75%+</span><span><i class="mid"></i>Developing 50–74%</span><span><i class="low"></i>Needs support under 50%</span>
+            <span><i style="outline:1.5px dashed var(--muted);outline-offset:-3px"></i>Thin evidence (1–2 pieces)</span><span><i class="none" style="background:repeating-linear-gradient(135deg,rgba(148,163,184,.3) 0 4px,transparent 4px 8px)"></i>No evidence</span>
+          </div>
+          <p class="note">Each lesson score averages every piece of evidence: spotlight answers in the mission (right = 100%, wrong = 0%), the exit ticket and the homework quiz. Spotlight questions reach 1–2 students each, so most students have only a few answers per lesson.</p>
+        </section>
+        <section class="card">
+          <h3 id="alertTitle">Needs attention</h3>
+          <div class="scroll"><ul class="alerts" id="alerts"></ul></div>
+        </section>
+      </div>
+    </div>
+
+    <div id="studentView" hidden></div>
+  </main>
+</div>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+// ---------------------------------------------------------------- mock school data
+const CLASS_AGE = 10.0, TERM_DAYS = 28;   // Year 5 average age; school days so far this term (Weeks 1–6 to Tuesday)
+const CONCEPTS = [
+  { id: 'c50', n: 50, t: 'Food and nutrients', short: 'Nutrients', day: 'Week 5 Tue', ease: .06 },
+  { id: 'c51', n: 51, t: 'Healthy eating', short: 'Eating', day: 'Week 5 Wed', ease: .08 },
+  { id: 'c52', n: 52, t: 'Body systems', short: 'Systems', day: 'Week 6 Sun', ease: 0 },
+  { id: 'c53', n: 53, t: 'Skeleton', short: 'Skeleton', day: 'Week 6 Mon', ease: .02 },
+  { id: 'c54', n: 54, t: 'Muscles', short: 'Muscles', day: null, ease: -.05, note: 'Mission overdue: homework worksheet only' },
+  { id: 'c55', n: 55, t: 'Blood and blood vessels', short: 'Blood', day: 'Week 6 Tue', ease: -.06 }
+];
+const SOURCES = [
+  { id: 'missions', icon: '🚀', name: 'Schoolynq missions', synced: 'Synced today 08:10' },
+  { id: 'exit', icon: '📝', name: 'Exit tickets', synced: 'Marked yesterday' },
+  { id: 'homework', icon: '🏠', name: 'Homework platform', synced: 'Synced today 07:00' },
+  { id: 'assess', icon: '📊', name: 'Block assessments', synced: 'Block 2 marked Week 4' },
+  { id: 'attendance', icon: '🗓️', name: 'Attendance register', synced: 'Synced today 08:05' },
+  { id: 'baseline', icon: '📏', name: 'Baseline test', synced: 'Taken Week 1' },
+  { id: 'notes', icon: '💬', name: 'Teacher notes', synced: 'Updated yesterday' }
+];
+const SRC = Object.fromEntries(SOURCES.map((s) => [s.id, s]));
+const ROSTER = [
+  ['G5-SCI-001', 'Aisha Karim'], ['G5-SCI-002', 'Anika Ferdous'], ['G5-SCI-003', 'Arif Mahmud'], ['G5-SCI-004', 'Farhan Hossain'],
+  ['G5-SCI-005', 'Fahim Uddin'], ['G5-SCI-006', 'Imtiaz Kabir'], ['G5-SCI-007', 'Ishrat Jahan'], ['G5-SCI-008', 'Rafi Chowdhury'],
+  ['G5-SCI-009', 'Junaid Siddique'], ['G5-SCI-010', 'Labiba Haque'], ['G5-SCI-011', 'Maliha Rahman'], ['G5-SCI-012', 'Meera Das'],
+  ['G5-SCI-013', 'Nabila Sultana'], ['G5-SCI-014', 'Ayaan Rahman'], ['G5-SCI-015', 'Nadia Islam'], ['G5-SCI-016', 'Raisa Anwar'],
+  ['G5-SCI-017', 'Rayan Chowdhury'], ['G5-SCI-018', 'Sadia Akter'], ['G5-SCI-019', 'Samir Ahmed'], ['G5-SCI-020', 'Tahmid Hasan'],
+  ['G5-SCI-021', 'Sarah Zaheen'], ['G5-SCI-022', 'Tanvir Alam'], ['G5-SCI-023', 'Zarin Tasnim'], ['G5-SCI-024', 'Zayan Mirza']
+];
+// Students the other Mission Control pages already mention, so the stories match across pages.
+const PERSONAS = {
+  'G5-SCI-014': { a: .8, patch: (s) => { s.hwq.c54 = .3; s.notes.push(['Week 6 Mon', 'Thinks muscles can push as well as pull. Revisit when the Muscles mission runs.']); } },
+  'G5-SCI-021': { a: .62, absent: ['Week 6 Sun', 'Week 6 Mon'], earlier: 2, patch: (s) => { s.b1 = 66; s.b2 = 48; s.notes.push(['Week 4', 'Forces block: foundation gap in speed and direction vocabulary.']); } },
+  'G5-SCI-008': { a: .78, hwRate: .5, patch: (s) => { s.missions.c52 = [1, 1]; s.missions.c55 = [1, 0]; for (const k in s.hwq) s.hwq[k] = Math.min(s.hwq[k], .45); s.b2 = 61; s.notes.push(['Week 5', 'Missed two worksheets. Confident when answering aloud.']); } },
+  'G5-SCI-023': { a: .76, written: .62, readingAge: 8.7, patch: (s) => { s.missions.c52 = [1, 1]; s.missions.c53 = [1]; s.missions.c55 = [1, 1]; s.notes.push(['Week 6 Tue', 'Gets multiple-choice questions right; written explanations are short and incomplete.']); } },
+  'G5-SCI-012': { a: .93, reasoning: 124 },
+  'G5-SCI-020': { a: .56, reasoning: 116 }
+};
+
+/* Seeded random numbers, so every visit shows the same class. */
+let seed = 5056;
+function R() { seed = (seed + 0x6D2B79F5) | 0; let t = Math.imul(seed ^ (seed >>> 15), 1 | seed); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }
+const clamp = (x, lo = 0, hi = 1) => Math.max(lo, Math.min(hi, x));
+const noise = (sd) => (R() + R() + R() - 1.5) * sd * 2;
+const pick = (arr) => arr[Math.floor(R() * arr.length)];
+
+function makeStudent([id, name]) {
+  const o = PERSONAS[id] || {};
+  const a = o.a ?? clamp(.72 + noise(.11), .4, .95), hwRate = o.hwRate ?? clamp(.94 + noise(.05), .6, 1);
+  const absent = o.absent ?? (R() < .12 ? [pick(CONCEPTS.filter((c) => c.day).map((c) => c.day))] : []);
+  const earlier = o.earlier ?? (R() < .6 ? 0 : R() < .75 ? 1 : 2);
+  const s = { id, name, a, absent, missions: {}, exit: {}, hwq: {}, notes: [] };
+  for (const c of CONCEPTS) {
+    const p = clamp(a + c.ease);
+    if (c.day && !absent.includes(c.day)) {
+      s.missions[c.id] = Array.from({ length: pick([0, 1, 1, 2]) }, () => (R() < p ? 1 : 0));
+      s.exit[c.id] = Math.round(clamp(p * (o.written ?? 1) + noise(.1)) * 10);
+    }
+    if (R() < hwRate) s.hwq[c.id] = Math.round(clamp(p + noise(.1)) * 100) / 100;
+  }
+  s.hw = { set: 12, missing: (6 - Object.keys(s.hwq).length) + Math.round((1 - hwRate) * 6) };
+  s.hw.late = s.hw.missing < 12 && R() < .25 ? 1 : 0;
+  s.hw.onTime = s.hw.set - s.hw.missing - s.hw.late;
+  s.b1 = Math.round(100 * clamp(a + noise(.05)));
+  s.b2 = Math.round(100 * clamp(a - .02 + noise(.05)));
+  s.reasoning = o.reasoning ?? Math.round(100 + (a - .7) * 70 + noise(5));
+  s.readingAge = o.readingAge ?? Math.round((CLASS_AGE + .3 + (a - .7) * 5 + noise(.5)) * 10) / 10;
+  s.absences = absent.length + earlier;
+  s.attPct = (TERM_DAYS - s.absences) / TERM_DAYS;
+  if (o.patch) o.patch(s);
+  if (!o.patch && R() < .2) s.notes.push([pick(['Week 5', 'Week 6 Sun', 'Week 6 Tue']), pick(['Good questions during the Blood mission.', 'Worked well in the skeleton group task.', 'Needed prompting to start the exit ticket.', 'Helped a partner with the food groups sort.'])]);
+  return s;
+}
+const STUDENTS = ROSTER.map(makeStudent);
+const byId = (id) => STUDENTS.find((s) => s.id === id);
+
+// ---------------------------------------------------------------- combining the sources
+const mean = (xs) => (xs.length ? xs.reduce((t, x) => t + x, 0) / xs.length : null);
+const pct = (x) => (x == null ? '—' : Math.round(x * 100) + '%');
+const band = (x) => (x == null ? 'none' : x >= .75 ? 'good' : x >= .5 ? 'mid' : 'low');
+
+function evidence(s, c) {
+  const e = (s.missions[c.id] || []).map((v) => ({ src: 'missions', v, label: v ? 'Spotlight ✓' : 'Spotlight ✗' }));
+  if (s.exit[c.id] != null) e.push({ src: 'exit', v: s.exit[c.id] / 10, label: `Exit ticket ${s.exit[c.id]}/10` });
+  if (s.hwq[c.id] != null) e.push({ src: 'homework', v: s.hwq[c.id], label: `Homework quiz ${pct(s.hwq[c.id])}` });
+  return e;
+}
+function mastery(s, c) {
+  const e = evidence(s, c);
+  return { c, e, m: mean(e.map((x) => x.v)), conf: e.length >= 3 ? 'secure' : e.length ? 'thin' : 'none' };
+}
+const overall = (s) => mean(CONCEPTS.map((c) => mastery(s, c).m).filter((m) => m != null));
+const allOf = (s, key) => Object.values(s[key]).flat();
+
+/* Rules that need two or more sources to see. Each alert names the sources it used. */
+function alertsFor(s) {
+  const out = [], add = (level, title, detail, sources) => out.push({ level, title, detail, sources });
+  if (s.attPct < .9) add('high', `Attendance ${pct(s.attPct)}`, `${s.absences} of ${TERM_DAYS} days missed this term${s.absent.length ? ', including ' + s.absent.join(' and ') : ''}.`, ['attendance']);
+  CONCEPTS.filter((c) => c.day && s.absent.includes(c.day)).forEach((c) =>
+    add('medium', `Missed #${c.n} ${c.t}`, `Absent ${c.day}, so there is no class evidence for this lesson. Give the catch-up pack before the block assessment.`, ['attendance', 'missions']));
+  const weak = CONCEPTS.map((c) => mastery(s, c)).filter((x) => x.m != null && x.m < .5);
+  if (weak.length === 1) {
+    const x = weak[0];
+    add('medium', `Weak in ${x.c.t}`, `${x.e.map((e) => e.label).join(', ')}${x.conf === 'thin' ? '. Thin evidence: check before acting' : ''}.`, [...new Set(x.e.map((e) => e.src))]);
+  } else if (weak.length > 1) {
+    add('high', `Weak in ${weak.length} lessons`, weak.map((x) => `${x.c.t} ${pct(x.m)}`).join(', ') + '.', ['missions', 'exit', 'homework']);
+  }
+  const spoken = allOf(s, 'missions'), written = Object.values(s.exit).map((v) => v / 10), inClass = mean(spoken.concat(written));
+  const hwAvg = mean(Object.values(s.hwq));
+  if (inClass >= .7 && s.hw.missing >= 3) add('medium', 'Strong in class, homework missing', `Class answers ${pct(inClass)}, but ${s.hw.missing} of ${s.hw.set} homework tasks missing and the homework quiz average is ${pct(hwAvg)}.`, ['missions', 'exit', 'homework']);
+  if (spoken.length >= 3 && mean(spoken) >= .75 && mean(written) < .55) {
+    const reading = s.readingAge < CLASS_AGE - 1;
+    add('medium', 'Answers well aloud, weaker in writing', `Spotlight answers ${pct(mean(spoken))} right, exit tickets ${pct(mean(written))}.${reading ? ` Reading age ${s.readingAge}: check whether reading the question is the barrier.` : ''}`, reading ? ['missions', 'exit', 'baseline'] : ['missions', 'exit']);
+  }
+  if (s.b2 - s.b1 <= -15) add('medium', 'Assessment score fell', `Block 1 ${s.b1}% → Block 2 ${s.b2}%.`, ['assess']);
+  const ov = overall(s);
+  if (s.reasoning >= 110 && ov != null && ov < .7) add('medium', 'Below what the baseline suggests', `Reasoning score ${s.reasoning} at the start of the year, but ${pct(ov)} mastery this block.`, ['baseline', 'missions', 'exit', 'homework']);
+  if (s.reasoning >= 115 && ov >= .85) add('info', 'Ready for extension', `${pct(ov)} mastery this block and a reasoning score of ${s.reasoning}.`, ['baseline', 'missions', 'exit']);
+  return out;
+}
+const RANK = { high: 3, medium: 2, info: 0 };
+const concern = (s) => alertsFor(s).reduce((t, a) => t + RANK[a.level], 0);
+const needsAttention = (s) => alertsFor(s).some((a) => a.level !== 'info');
+
+// ---------------------------------------------------------------- views
+const $ = (id) => document.getElementById(id);
+const esc = (x) => String(x).replace(/[&<>"]/g, (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[ch]));
+const st = { view: 'class', student: STUDENTS[0].id, sort: 'attention' };
+const srcChips = (ids) => ids.map((id) => `<span class="chip">${SRC[id].icon} ${esc(SRC[id].name)}</span>`).join(' ');
+const alertLi = (a, s) => `<li class="${a.level}">${s ? `<button class="who" data-open="${s.id}">${esc(s.name)}</button>` : ''}<b>${esc(a.title)}</b><span class="d">${esc(a.detail)}</span>${srcChips(a.sources)}</li>`;
+const firstName = (s) => s.name.split(' ')[0];
+
+function coverage(id) {
+  const has = (f) => STUDENTS.filter(f).length, n = STUDENTS.length;
+  return {
+    missions: `${STUDENTS.reduce((t, s) => t + allOf(s, 'missions').length, 0)} spotlight answers · ${has((s) => allOf(s, 'missions').length)}/${n} students`,
+    exit: `${STUDENTS.reduce((t, s) => t + Object.keys(s.exit).length, 0)} marked · ${has((s) => Object.keys(s.exit).length)}/${n} students`,
+    homework: `${STUDENTS.reduce((t, s) => t + Object.keys(s.hwq).length, 0)} quizzes · ${has((s) => Object.keys(s.hwq).length)}/${n} students`,
+    assess: `2 blocks · ${n}/${n} students`,
+    attendance: `${TERM_DAYS} days · ${n}/${n} students`,
+    baseline: `Reading, reasoning · ${n}/${n}`,
+    notes: `${STUDENTS.reduce((t, s) => t + s.notes.length, 0)} notes · ${has((s) => s.notes.length)}/${n} students`
+  }[id];
+}
+
+function renderClass() {
+  const n = STUDENTS.length, flagged = STUDENTS.filter(needsAttention), avg = (f) => mean(STUDENTS.map(f));
+  const gaps = STUDENTS.reduce((t, s) => t + CONCEPTS.filter((c) => !evidence(s, c).length).length, 0);
+  $('kpis').innerHTML = [
+    ['Mastery this block', pct(avg(overall)), 'all evidence combined'],
+    ['Attendance', pct(avg((s) => s.attPct)), 'term to date'],
+    ['Homework handed in', pct(avg((s) => 1 - s.hw.missing / s.hw.set)), 'of tasks set'],
+    ['Needs attention', `${flagged.length} of ${n}`, 'students with a flag'],
+    ['Evidence gaps', String(gaps), 'student-lessons with no evidence']
+  ].map(([k, v, sub]) => `<div class="kpi"><span>${k}</span><strong>${v}</strong><small>${sub}</small></div>`).join('');
+
+  const order = [...STUDENTS].sort(st.sort === 'name' ? (a, b) => a.name.localeCompare(b.name)
+    : st.sort === 'mastery' ? (a, b) => overall(a) - overall(b) : (a, b) => concern(b) - concern(a) || a.name.localeCompare(b.name));
+  $('heat').innerHTML = `<thead><tr><th class="name">Student</th>${CONCEPTS.map((c) => `<th title="#${c.n} ${esc(c.t)}${c.note ? ' · ' + esc(c.note) : ''}">#${c.n}<br>${esc(c.short)}${c.note ? '*' : ''}</th>`).join('')}<th>Attend.</th><th>Home­work</th><th>Block 2</th><th>Flags</th></tr></thead><tbody>`
+    + order.map((s) => {
+      const cells = CONCEPTS.map((c) => {
+        const x = mastery(s, c);
+        if (x.m == null) return `<td class="none" title="No evidence${c.day && s.absent.includes(c.day) ? ' · absent ' + c.day : ''}">—</td>`;
+        return `<td class="${band(x.m)} ${x.conf}" title="${esc(x.e.map((e) => e.label).join(' · '))}">${pct(x.m)}</td>`;
+      }).join('');
+      const hwDone = (s.hw.set - s.hw.missing) / s.hw.set;
+      return `<tr class="row"><th class="name" scope="row"><button class="who" data-open="${s.id}">${esc(s.name)}</button></th>${cells}`
+        + `<td class="${s.attPct < .9 ? 'low' : s.attPct < .95 ? 'mid' : 'plain'}">${pct(s.attPct)}</td>`
+        + `<td class="${hwDone < .7 ? 'low' : hwDone < .85 ? 'mid' : 'plain'}">${s.hw.set - s.hw.missing}/${s.hw.set}</td>`
+        + `<td class="${band(s.b2 / 100)}">${s.b2}%</td>`
+        + `<td><span class="flags">${alertsFor(s).map((a) => `<span class="dot ${a.level}" title="${esc(a.title)}"></span>`).join('')}</span></td></tr>`;
+    }).join('') + '</tbody>'
+    + `<tfoot><tr><th class="name" scope="row">Class average</th>${CONCEPTS.map((c) => { const m = mean(STUDENTS.map((x) => mastery(x, c).m).filter((v) => v != null)); return `<td class="${band(m)}">${pct(m)}</td>`; }).join('')}`
+    + `<td class="plain">${pct(avg((x) => x.attPct))}</td><td class="plain">${pct(avg((x) => 1 - x.hw.missing / x.hw.set))}</td><td class="${band(avg((x) => x.b2) / 100)}">${Math.round(avg((x) => x.b2))}%</td><td></td></tr></tfoot>`;
+
+  const ranked = [...STUDENTS].sort((a, b) => concern(b) - concern(a));
+  const concerns = ranked.flatMap((s) => alertsFor(s).filter((a) => a.level !== 'info').map((a) => alertLi(a, s)));
+  const ready = ranked.flatMap((s) => alertsFor(s).filter((a) => a.level === 'info').map((a) => alertLi(a, s)));
+  $('alertTitle').textContent = `Needs attention · ${flagged.length} students`;
+  $('alerts').innerHTML = concerns.join('') + (ready.length ? `<li class="group">Ready for more</li>${ready.join('')}` : '');
+}
+
+function renderStudent() {
+  const s = byId(st.student), al = alertsFor(s), ov = overall(s), i = STUDENTS.indexOf(s);
+  const cls = (f) => mean(STUDENTS.map(f));
+  const weakest = CONCEPTS.map((c) => mastery(s, c)).filter((x) => x.m != null).sort((a, b) => a.m - b.m)[0];
+  const meter = (v, avg, max = 100, tone = band(v / max)) => `<div class="bar"><span class="${tone}" style="width:${clamp(v / max) * 100}%"></span><i style="left:${clamp(avg / max) * 100}%" title="Class average"></i></div>`;
+  $('studentView').innerHTML = `
+    <section class="card shead">
+      <div class="avatar" aria-hidden="true">${esc(s.name[0])}</div>
+      <div class="sname"><h3 id="studentName">${esc(s.name)}</h3><span>${s.id} · Year 5A</span></div>
+      <div class="stats">
+        <div class="stat">Mastery this block<strong>${pct(ov)}</strong></div>
+        <div class="stat">Attendance<strong>${pct(s.attPct)}</strong></div>
+        <div class="stat">Homework<strong>${s.hw.set - s.hw.missing}/${s.hw.set}</strong></div>
+        <div class="stat">Block 2<strong>${s.b2}%</strong></div>
+      </div>
+      <div class="actions">
+        <button class="btn" id="prev" aria-label="Previous student">←</button>
+        <select id="studentSel" aria-label="Student">${STUDENTS.map((x) => `<option value="${x.id}" ${x === s ? 'selected' : ''}>${esc(x.name)}</option>`).join('')}</select>
+        <button class="btn" id="next" aria-label="Next student">→</button>
+      </div>
+    </section>
+    <div class="layout">
+      <section class="card">
+        <h3>Human Body block, lesson by lesson</h3>
+        <table class="ctab"><tbody>${CONCEPTS.map((c) => {
+          const x = mastery(s, c), missed = c.day && s.absent.includes(c.day);
+          const chips = x.e.map((e) => `<span class="chip ${e.src === 'missions' ? (e.v ? 'ok' : 'no') : ''}">${SRC[e.src].icon} ${esc(e.label)}</span>`).join('')
+            + (missed ? `<span class="chip no">🗓️ Absent ${esc(c.day)}</span>` : '') + (c.day && !missed && !(s.missions[c.id] || []).length ? '<span class="chip">🚀 No spotlight question</span>' : '');
+          return `<tr><td><span class="lt">#${c.n} ${esc(c.t)}</span><span class="sub">${c.note ? esc(c.note) : 'Taught ' + esc(c.day)} · ${x.conf === 'secure' ? 'enough evidence' : x.conf === 'thin' ? 'thin evidence' : 'no evidence'}</span></td><td><div class="ev">${chips || '<span class="chip">No evidence yet</span>'}</div></td><td class="score ${band(x.m)} ${x.m == null ? 'none' : x.conf}">${pct(x.m)}</td></tr>`;
+        }).join('')}</tbody></table>
+      </section>
+      <section class="card">
+        <h3>What the sources say together</h3>
+        <ul class="alerts">${al.length ? al.map((a) => alertLi(a)).join('') : '<li class="info"><b>No concerns across the seven sources</b><span class="d">Keep an eye on the next exit ticket.</span></li>'}</ul>
+        <div class="actions" style="margin-top:10px">
+          <button class="btn primary" id="assign">Assign revision${weakest ? ': ' + esc(weakest.c.short) : ''}</button>
+          <button class="btn" id="parent">Message parent</button>
+        </div>
+      </section>
+    </div>
+    <div class="cards4">
+      <section class="card"><h3>${SRC.assess.icon} Block assessments</h3>
+        <div class="kv"><span>Block 1 · Living things</span><b>${s.b1}%</b></div>${meter(s.b1, cls((x) => x.b1))}
+        <div class="kv"><span>Block 2 · Forces and motion</span><b>${s.b2}%</b></div>${meter(s.b2, cls((x) => x.b2))}
+        <p class="note">The white tick is the class average. Human Body is assessed in Week 8.</p></section>
+      <section class="card"><h3>${SRC.attendance.icon} Attendance</h3>
+        <div class="big ${s.attPct < .9 ? 'low' : ''}" style="background:none">${pct(s.attPct)}</div>
+        <div class="kv"><span>Days missed this term</span><b>${s.absences} of ${TERM_DAYS}</b></div>
+        <div class="kv"><span>This block</span><b>${s.absent.length ? esc(s.absent.join(', ')) : 'None'}</b></div>
+        <div class="kv"><span>Class average</span><b>${pct(cls((x) => x.attPct))}</b></div></section>
+      <section class="card"><h3>${SRC.homework.icon} Homework</h3>
+        <div class="kv"><span>On time</span><b>${s.hw.onTime}</b></div><div class="kv"><span>Late</span><b>${s.hw.late}</b></div>
+        <div class="kv"><span>Missing</span><b class="${s.hw.missing >= 3 ? 'low' : ''}" style="background:none">${s.hw.missing}</b></div>
+        <div class="kv"><span>Quiz average (this block)</span><b>${pct(mean(Object.values(s.hwq)))}</b></div></section>
+      <section class="card"><h3>${SRC.baseline.icon} Start-of-year baseline</h3>
+        <div class="kv"><span>Reading age</span><b>${s.readingAge}</b></div>${meter(s.readingAge - 7, CLASS_AGE - 7, 6, 'neutral')}
+        <div class="kv"><span>Reasoning score</span><b>${s.reasoning}</b></div>${meter(s.reasoning - 70, 30, 60, 'neutral')}
+        <p class="note">Class average age ${CLASS_AGE}. A reasoning score of 100 is average for the age group.</p></section>
+    </div>
+    <section class="card"><h3>${SRC.notes.icon} Teacher notes</h3>
+      <ul class="notes">${s.notes.length ? s.notes.map(([w, t]) => `<li><span>${esc(w)}</span>${esc(t)}</li>`).join('') : '<li><span>—</span>No notes yet.</li>'}</ul></section>`;
+  $('studentSel').onchange = (e) => openStudent(e.target.value);
+  $('prev').onclick = () => openStudent(STUDENTS[(i + STUDENTS.length - 1) % STUDENTS.length].id);
+  $('next').onclick = () => openStudent(STUDENTS[(i + 1) % STUDENTS.length].id);
+  $('assign').onclick = () => toast(weakest ? `Revision on ${weakest.c.t} assigned to ${firstName(s)}.` : `Revision assigned to ${firstName(s)}.`);
+  $('parent').onclick = () => toast(`Message to ${firstName(s)}’s parent drafted. Not sent.`);
+}
+
+function render() {
+  $('subtitle').textContent = `Ms. Farhana · Human Body block · Week 6 · ${STUDENTS.length} students · ${SOURCES.length} data sources`;
+  $('sources').innerHTML = SOURCES.map((x) => `<div class="src"><b>${x.icon} ${esc(x.name)}</b><span class="cov">${coverage(x.id)}</span><span>${esc(x.synced)}</span></div>`).join('');
+  $('viewClass').classList.toggle('on', st.view === 'class');
+  $('viewStudent').classList.toggle('on', st.view === 'student');
+  $('classView').hidden = st.view !== 'class';
+  $('studentView').hidden = st.view !== 'student';
+  $('title').textContent = st.view === 'class' ? 'Year 5A Science · Student analysis' : 'Student profile';
+  st.view === 'class' ? renderClass() : renderStudent();
+}
+function openStudent(id) {
+  if (!byId(id)) return;
+  st.student = id; st.view = 'student';
+  history.replaceState(null, '', '#' + id);
+  render(); scrollTo(0, 0);
+}
+function toast(msg) { const t = $('toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(toast.t); toast.t = setTimeout(() => t.classList.remove('show'), 3200); }
+
+document.addEventListener('click', (e) => { const b = e.target.closest('[data-open]'); if (b) openStudent(b.dataset.open); });
+$('viewClass').onclick = () => { st.view = 'class'; history.replaceState(null, '', location.pathname); render(); };
+$('viewStudent').onclick = () => openStudent(st.student);
+$('sort').onchange = (e) => { st.sort = e.target.value; render(); };
+if (byId(location.hash.slice(1))) { st.student = location.hash.slice(1); st.view = 'student'; }
+render();
+window.ANALYSIS = { STUDENTS, CONCEPTS, evidence, mastery, overall, alertsFor };
+</script>
+</body>
+</html>
