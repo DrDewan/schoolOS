@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SchoolOS</title>
+  <style>
+    :root { --bg:#08111f; --card:#121e33; --card-2:#16263f; --text:#eef4ff; --muted:#9fb0c8; --border:rgba(255,255,255,.1); --accent:#60a5fa; --heart:#f87171; }
+    * { box-sizing:border-box; }
+    body { margin:0; min-height:100vh; background:radial-gradient(ellipse at 80% 0, #16263f, transparent 60%), var(--bg); color:var(--text); font:16px/1.5 Inter, system-ui, -apple-system, "Segoe UI", Arial, sans-serif; }
+    main { max-width:980px; margin:0 auto; padding:48px 20px 64px; display:flex; flex-direction:column; gap:28px; }
+    header p { margin:6px 0 0; color:var(--muted); }
+    h1 { margin:0; font-size:clamp(30px,5vw,42px); letter-spacing:-.5px; }
+    h2 { margin:0 0 12px; font-size:13px; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); }
+    .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:14px; }
+    a.card { display:flex; flex-direction:column; gap:6px; padding:18px 20px; border-radius:16px; background:var(--card); border:1px solid var(--border); color:var(--text); text-decoration:none; }
+    a.card:hover, a.card:focus-visible { border-color:var(--accent); background:var(--card-2); outline:none; }
+    a.card strong { font-size:18px; }
+    a.card span { color:var(--muted); font-size:14px; }
+    a.card.main { border-color:rgba(96,165,250,.5); }
+    a.card.heart { border-color:rgba(248,113,113,.5); }
+    .tag { align-self:flex-start; font-size:12px; font-weight:700; padding:2px 9px; border-radius:999px; background:rgba(96,165,250,.15); color:var(--accent); }
+    .heart .tag { background:rgba(248,113,113,.15); color:var(--heart); }
+    footer { color:var(--muted); font-size:13px; }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <h1>SchoolOS</h1>
+      <p>Mission-based classroom prototypes. Teachers launch missions from the Mission Control dashboard.</p>
+    </header>
+
+    <section>
+      <h2>Dashboards</h2>
+      <div class="grid">
+        <a class="card main" href="teacher-dash-arrows-calendar.html"><span class="tag">Teacher</span><strong>Mission Control</strong><span>Class progression, today’s mission, calendar and resources. Start the Heart mission from here.</span></a>
+        <a class="card" href="principal-dash.html"><span class="tag">Principal</span><strong>Principal dashboard</strong><span>Curriculum progress, attention list, calendar pressure and teacher usage.</span></a>
+        <a class="card" href="teacher-dash-planner-above-crease.html"><span class="tag">Teacher</span><strong>Mission Control · planner variant</strong><span>Same dashboard with the upcoming planner above the fold.</span></a>
+        <a class="card" href="teacher-dash-acolyte.html"><span class="tag">Teacher</span><strong>Acolyte teacher dashboard</strong><span>Earlier dashboard design (Grade 5 Science).</span></a>
+      </div>
+    </section>
+
+    <section>
+      <h2>Missions</h2>
+      <div class="grid">
+        <a class="card heart" href="missions/heart-v4/index.html" target="_blank" rel="noopener"><span class="tag">Stage 6 Science · 40 min</span><strong>Why return to the heart?</strong><span>Four-chamber heart simulations, student spotlight, scoreboard and a dual-screen teacher view.</span></a>
+        <a class="card" href="missions/heart-v4/teacher-guide.html" target="_blank" rel="noopener"><span class="tag">Teacher guide</span><strong>Heart mission guide</strong><span>Timings, talking points, answers, misconceptions and the 3-minute demo.</span></a>
+      </div>
+    </section>
+
+    <footer>Everything here is static and runs offline. Student names and scores stay in the teacher’s browser.</footer>
+  </main>
+</body>
+</html>
