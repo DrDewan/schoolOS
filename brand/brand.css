@@ -1,0 +1,12 @@
+/* Schoolynq brand for the Schoolynq School demo pages: font, colours and logo tile.
+   Each page links this after its own styles, so these rules win. */
+@font-face {
+  font-family: "Nunito";
+  src: url("nunito-latin.woff2") format("woff2");
+  font-weight: 200 1000;
+  font-display: swap;
+}
+body, button, input, select, textarea { font-family: "Nunito", system-ui, -apple-system, "Segoe UI", Arial, sans-serif !important; }
+:root { --accent: #3d8bff; --accent-2: #14bdb8; }
+.logo, .brand-mark { background: #071e50 !important; box-shadow: none !important; padding: 7px; }
+.logo img, .brand-mark img { width: 100%; height: auto; display: block; }
