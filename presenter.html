@@ -10,40 +10,62 @@
     * { box-sizing:border-box; }
     html, body { margin:0; height:100%; }
     body { background:var(--bg); color:var(--text); font:15px/1.45 Inter, system-ui, -apple-system, "Segoe UI", Arial, sans-serif; }
-    button, input, select { font:inherit; color:inherit; }
+    button, input, select, textarea { font:inherit; color:inherit; }
     [hidden] { display:none !important; }
     .btn { border:1px solid var(--border); background:var(--card-2); color:var(--text); padding:9px 14px; border-radius:12px; cursor:pointer; text-decoration:none; display:inline-flex; align-items:center; gap:8px; justify-content:center; }
     .btn:hover { border-color:var(--accent); }
+    .btn:disabled { opacity:.45; cursor:default; }
     .btn.primary { background:linear-gradient(135deg,var(--accent),var(--accent-2)); border:0; color:#fff; font-weight:800; }
     .btn.big { padding:14px 18px; font-size:16px; width:100%; }
+    .btn.small { padding:6px 10px; font-size:13px; }
+    .btn.danger:hover { border-color:#ef4444; color:#fca5a5; }
     .muted { color:var(--muted); }
     .brand { display:flex; gap:12px; align-items:center; }
     .brand-mark { width:42px; height:42px; border-radius:12px; display:grid; place-items:center; flex:none; }
     .brand h1 { margin:0; font-size:17px; } .brand span { color:var(--muted); font-size:12px; }
+    .field { background:#0d1a2e; border:1px solid var(--border); border-radius:10px; padding:8px 10px; width:100%; }
 
     /* ---------------- setup */
-    #setup { max-width:1240px; margin:0 auto; padding:22px 22px 40px; display:flex; flex-direction:column; gap:18px; }
+    #setup { max-width:1280px; margin:0 auto; padding:22px 22px 40px; display:flex; flex-direction:column; gap:18px; }
     .topbar { display:flex; justify-content:space-between; align-items:center; gap:14px; flex-wrap:wrap; }
+    .decks { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+    .decks select { min-width:280px; }
     .setup-grid { display:grid; grid-template-columns:minmax(0,1fr) 360px; gap:18px; align-items:start; }
     .card { background:var(--card); border:1px solid var(--border); border-radius:20px; padding:16px; box-shadow:var(--shadow); }
     .card h2 { margin:0 0 4px; font-size:18px; } .card h3 { margin:0 0 8px; font-size:15px; }
+    .card-head { display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap; }
     .rows { list-style:none; margin:12px 0 0; padding:0; display:flex; flex-direction:column; gap:8px; }
     .row { display:grid; grid-template-columns:34px 26px 128px minmax(0,1fr) 128px; gap:12px; align-items:center; padding:8px 10px; border-radius:14px; background:var(--card-2); border:1px solid var(--border); }
-    .row.off { opacity:.45; }
+    .row.custom { grid-template-columns:34px 26px 128px minmax(0,1fr) 128px 40px; align-items:start; }
+    .row.off { opacity:.5; }
     .row.drag-over { border-color:var(--accent); }
     .row .move { display:flex; flex-direction:column; gap:2px; }
     .row .move button { background:none; border:1px solid var(--border); border-radius:6px; padding:0; height:18px; width:30px; cursor:pointer; font-size:11px; line-height:1; color:var(--muted); }
     .row .move button:hover:not(:disabled) { color:var(--text); border-color:var(--accent); }
     .row .move button:disabled { opacity:.3; cursor:default; }
-    .row input[type=checkbox] { width:20px; height:20px; accent-color:var(--accent); }
-    .row img { width:128px; height:72px; border-radius:8px; display:block; object-fit:cover; border:1px solid var(--border); cursor:grab; }
+    .row input[type=checkbox] { width:20px; height:20px; accent-color:var(--accent); margin-top:4px; }
+    .row img { width:128px; height:72px; border-radius:8px; display:block; object-fit:contain; background:#000; border:1px solid var(--border); cursor:grab; }
     .row .t b { display:block; font-size:15px; } .row .t small { color:var(--muted); }
+    .row details { margin-top:6px; }
+    .row summary { cursor:pointer; color:var(--muted); font-size:13px; }
+    .row details[open] summary { color:var(--text); margin-bottom:8px; }
+    .edit { display:flex; flex-direction:column; gap:8px; }
+    .edit label { font-size:12.5px; color:var(--muted); display:flex; flex-direction:column; gap:4px; }
+    .edit textarea { min-height:84px; resize:vertical; }
+    .linkrow { display:grid; grid-template-columns:150px minmax(0,1fr) 34px; gap:6px; }
+    .linkrow .bad { border-color:#ef4444; }
     .secs { display:flex; align-items:center; gap:6px; justify-content:flex-end; color:var(--muted); font-size:13px; }
     .secs input { width:64px; padding:6px 8px; border-radius:9px; border:1px solid var(--border); background:#0d1a2e; text-align:right; }
+    .del { background:none; border:1px solid var(--border); border-radius:9px; height:34px; cursor:pointer; color:var(--muted); }
+    .del:hover { border-color:#ef4444; color:#fca5a5; }
+    .drop { margin-top:12px; border:2px dashed rgba(61,139,255,.5); border-radius:16px; padding:22px; text-align:center; color:var(--muted); }
+    .drop.over { background:rgba(61,139,255,.12); color:var(--text); }
+    .drop b { color:var(--text); }
+    .status { font-size:13px; color:var(--muted); min-height:18px; }
+    .status.err { color:#fca5a5; }
     .opt { display:flex; flex-direction:column; gap:12px; }
     .opt label.sw { display:flex; justify-content:space-between; align-items:center; gap:10px; padding:10px 12px; border-radius:12px; background:var(--card-2); border:1px solid var(--border); cursor:pointer; }
     .opt label.sw input { width:20px; height:20px; accent-color:var(--accent); }
-    .opt select, .opt .allsecs input { background:#0d1a2e; border:1px solid var(--border); border-radius:10px; padding:9px 10px; width:100%; }
     .allsecs { display:grid; grid-template-columns:1fr 90px auto; gap:8px; align-items:center; }
     .total { font-size:14px; padding:10px 12px; border-radius:12px; background:rgba(61,139,255,.12); border:1px solid rgba(61,139,255,.35); }
     .total b { font-size:18px; }
@@ -58,17 +80,21 @@
     .frame { position:relative; width:min(100vw, calc(100vh * 16 / 9)); aspect-ratio:16/9; container-type:inline-size; }
     .frame img.slide { position:absolute; inset:0; width:100%; height:100%; object-fit:contain; opacity:0; transition:opacity .45s ease; }
     .frame img.slide.on { opacity:1; }
-    .links { position:absolute; left:6.25%; top:79.2%; display:flex; gap:1.1cqw; flex-wrap:wrap; max-width:52%; z-index:3; }
+    .links { position:absolute; display:flex; gap:1.1cqw; flex-wrap:wrap; max-width:52%; z-index:3; }
+    .links.zone { left:6.25%; top:79.2%; }
+    .links.bl { left:3%; bottom:4.5%; } .links.br { right:3%; bottom:4.5%; justify-content:flex-end; }
+    .links.tl { left:3%; top:4.5%; } .links.tr { right:3%; top:4.5%; justify-content:flex-end; }
     .links a { font:800 1.12cqw/1 Nunito, Inter, system-ui, sans-serif; padding:.85cqw 1.35cqw; border-radius:999px; text-decoration:none; background:#071e50; color:#fff; box-shadow:0 .4cqw 1.2cqw rgba(7,30,80,.25); display:inline-flex; gap:.6cqw; align-items:center; }
     .links a.second { background:#fff; color:#071e50; border:.12cqw solid #c9d5e3; }
     .links.dark a { background:#fff; color:#071e50; }
     .links.dark a.second { background:transparent; color:#fff; border:.12cqw solid rgba(255,255,255,.6); }
+    .links.custom a { border:.14cqw solid rgba(255,255,255,.85); box-shadow:0 .4cqw 1.4cqw rgba(0,0,0,.45); }
     .links a:hover { outline:.2cqw solid #3d8bff; outline-offset:.2cqw; }
     .hotspot { position:absolute; z-index:2; border-radius:1cqw; cursor:pointer; background:transparent; border:0; padding:0; }
     .hotspot:hover, .hotspot:focus-visible { outline:.25cqw solid rgba(61,139,255,.85); outline-offset:.2cqw; }
     .hotspot span { position:absolute; right:1cqw; bottom:1cqw; font:800 1cqw/1 Nunito, Inter, sans-serif; background:#071e50; color:#fff; padding:.5cqw .9cqw; border-radius:999px; opacity:0; transition:.2s; }
     .hotspot:hover span, .hotspot:focus-visible span { opacity:1; }
-    #bar { position:fixed; left:0; bottom:0; height:3px; width:100%; background:#3d8bff; box-shadow:0 0 6px rgba(61,139,255,.7); transform-origin:left center; transform:scaleX(0); z-index:5; pointer-events:none; }
+    #bar { position:fixed; left:0; bottom:0; height:3px; width:100%; background:#3d8bff; box-shadow:0 0 6px rgba(61,139,255,.7), 0 -1px 0 rgba(0,0,0,.45); transform-origin:left center; transform:scaleX(0); z-index:5; pointer-events:none; }
     .controls { position:fixed; left:50%; bottom:22px; transform:translateX(-50%); display:flex; gap:6px; align-items:center; padding:8px; border-radius:16px; background:rgba(8,17,31,.82); border:1px solid var(--border); backdrop-filter:blur(8px); transition:opacity .25s; z-index:6; }
     .controls.idle { opacity:0; pointer-events:none; }
     .controls button { background:transparent; border:0; border-radius:10px; padding:8px 11px; cursor:pointer; font-size:15px; }
@@ -96,11 +122,11 @@
     .remain { height:4px; border-radius:2px; background:rgba(148,163,184,.2); overflow:hidden; }
     .remain i { display:block; height:100%; width:0; background:#3d8bff; }
     .strip { display:flex; gap:8px; overflow-x:auto; padding:10px 18px 14px; border-top:1px solid var(--border); background:rgba(8,17,31,.9); }
-    .strip button { flex:none; padding:0; border:2px solid transparent; border-radius:9px; background:none; cursor:pointer; position:relative; }
+    .strip button { flex:none; padding:0; border:2px solid transparent; border-radius:9px; background:#000; cursor:pointer; position:relative; }
     .strip button.now { border-color:var(--accent); }
-    .strip img { width:128px; height:72px; display:block; border-radius:7px; }
+    .strip img { width:128px; height:72px; display:block; border-radius:7px; object-fit:contain; }
     .strip b { position:absolute; left:5px; top:4px; font-size:11px; background:rgba(8,17,31,.85); border-radius:6px; padding:0 5px; }
-    @media (max-width:980px) { .setup-grid, .nmain { grid-template-columns:1fr; } .row { grid-template-columns:34px 26px 96px minmax(0,1fr); } .row img { width:96px; height:54px; } .secs { grid-column:3 / -1; justify-content:flex-start; } }
+    @media (max-width:980px) { .setup-grid, .nmain { grid-template-columns:1fr; } .row, .row.custom { grid-template-columns:34px 26px 96px minmax(0,1fr); } .row img { width:96px; height:54px; } .secs { grid-column:3 / -1; justify-content:flex-start; } }
   </style>
   <link rel="stylesheet" href="brand/brand.css">
 </head>
@@ -109,21 +135,51 @@
 <!-- ======================= setup ======================= -->
 <main id="setup" hidden>
   <div class="topbar">
-    <div class="brand"><div class="brand-mark"><img src="brand/schoolynq-mark-white.svg" alt="Schoolynq"></div><div><h1>Schoolynq product tour</h1><span>Presenter · 12 slides about the whole product</span></div></div>
-    <a class="btn" href="index.html">← Back to the demo hub</a>
+    <div class="brand"><div class="brand-mark"><img src="brand/schoolynq-mark-white.svg" alt="Schoolynq"></div><div><h1>Presenter</h1><span>The Schoolynq product tour, or your own presentations</span></div></div>
+    <div class="decks">
+      <select class="field" id="deckSel" aria-label="Presentation"></select>
+      <button class="btn" id="newDeck">＋ New presentation</button>
+      <button class="btn" id="importBtn">Import…</button>
+      <input type="file" id="importFile" accept=".json,application/json" hidden>
+      <a class="btn" href="index.html">← Demo hub</a>
+    </div>
   </div>
   <div class="setup-grid">
     <section class="card">
-      <h2>Slides</h2>
-      <p class="note">Tick the slides to show, set the seconds for each and change the order with the arrows or by dragging a picture. Changes are remembered on this computer.</p>
+      <div class="card-head">
+        <div id="deckHead"></div>
+        <div class="decks" id="customTools" hidden>
+          <button class="btn small" id="addSlides">＋ Add slide images</button>
+          <input type="file" id="slideFiles" accept="image/png,image/jpeg,image/webp,image/gif" multiple hidden>
+          <button class="btn small" id="exportDeck">Export</button>
+          <button class="btn small danger" id="deleteDeck">Delete</button>
+        </div>
+      </div>
+      <p class="note" id="listNote"></p>
+      <div class="status" id="status" role="status"></div>
       <ol class="rows" id="rows"></ol>
+      <div class="drop" id="drop" hidden><b>Drop slide images here</b> or use “Add slide images”. PNG, JPEG, WebP or GIF; 16:9 looks best. Big images are scaled to 1920 × 1080.</div>
+      <datalist id="targets">
+        <option value="index.html">Demo hub</option>
+        <option value="teacher-dash-arrows-calendar.html">Mission Control (teacher)</option>
+        <option value="principal-dash.html">Principal dashboard</option>
+        <option value="lesson-planner.html">Lesson planner</option>
+        <option value="student-analysis.html">Student analysis</option>
+        <option value="student-analysis.html#school">Student analysis · school view</option>
+        <option value="missions/heart-v4/index.html">Heart mission</option>
+        <option value="missions/blood/index.html">Blood mission</option>
+        <option value="missions/heart-v4/printables/worksheet.pdf">Heart worksheet (PDF)</option>
+        <option value="missions/blood/printables/worksheet.pdf">Blood worksheet (PDF)</option>
+        <option value="https://schoolynq.com/lab/">Simulation Lab</option>
+        <option value="https://schoolynq.com/">schoolynq.com</option>
+      </datalist>
     </section>
     <aside class="card opt">
-      <div><h3>Sequence</h3>
-        <select id="preset" aria-label="Sequence"><option value="">Choose a ready-made sequence…</option></select></div>
+      <div id="presetBox"><h3>Sequence</h3>
+        <select class="field" id="preset" aria-label="Sequence"><option value="">Choose a ready-made sequence…</option></select></div>
       <label class="sw"><span><b>Autoplay</b><br><small class="muted">Moves on by itself; a thin blue bar shows when.</small></span><input type="checkbox" id="autoplay"></label>
       <label class="sw"><span><b>Loop at the end</b><br><small class="muted">For a stand or open day.</small></span><input type="checkbox" id="loop"></label>
-      <div><h3>Same time for every slide</h3><div class="allsecs"><span class="muted">Seconds</span><input type="number" id="allSecs" min="3" max="300" value="20" aria-label="Seconds for every slide"><button class="btn" id="applyAll">Apply</button></div></div>
+      <div><h3>Same time for every slide</h3><div class="allsecs"><span class="muted">Seconds</span><input class="field" type="number" id="allSecs" min="3" max="300" value="20" aria-label="Seconds for every slide"><button class="btn" id="applyAll">Apply</button></div></div>
       <div class="total" id="total"></div>
       <button class="btn primary big" id="present">▶ Present on this screen</button>
       <button class="btn big" id="presentDual">🖥️ Present with laptop screen</button>
@@ -131,6 +187,7 @@
       <p class="warn" id="popupWarn" hidden>The laptop window was blocked. Allow pop-ups for this page, then try again.</p>
       <div><h3>Keys while presenting</h3><ul class="keys"><li><kbd>→</kbd> <kbd>Page Down</kbd> next · <kbd>←</kbd> <kbd>Page Up</kbd> back</li><li><kbd>Space</kbd> pause or resume autoplay</li><li><kbd>F</kbd> full screen · <kbd>Esc</kbd> back to this panel</li></ul></div>
       <button class="btn" id="reset">Reset to the full tour</button>
+      <p class="note" id="storeNote" hidden>Your presentations are saved in this browser on this computer. Use <b>Export</b> to keep a copy or move one to another computer, and <b>Import</b> to open it there.</p>
     </aside>
   </div>
 </main>
@@ -187,7 +244,7 @@
 </div>
 
 <script>
-// ---------------------------------------------------------------- the deck: slide images, links into the software, talking points
+// ================================================================ the built-in deck: the Schoolynq product tour
 const SLIDES = [
   { id: 1, title: 'Ready lessons for teachers. Clear progress for school leaders.', secs: 12, dark: true,
     links: [['Open the demo school', 'index.html']],
@@ -261,98 +318,340 @@ const PRESETS = [
   ['leaders', 'For school leaders · 8 slides', [1, 2, 3, 10, 9, 8, 7, 12]],
   ['quick', 'Two-minute overview · 6 slides of 20 s', [1, 3, 4, 9, 10, 12], 20]
 ];
+const TOUR = 'tour';
 
-// ---------------------------------------------------------------- settings (remembered on this computer)
-const KEY = 'sq-presenter-v1';
-const defaults = () => ({ order: SLIDES.map((s) => s.id), on: Object.fromEntries(SLIDES.map((s) => [s.id, true])), secs: Object.fromEntries(SLIDES.map((s) => [s.id, s.secs])), autoplay: true, loop: false });
-function load() {
-  try {
-    const v = JSON.parse(localStorage.getItem(KEY));
-    if (v && Array.isArray(v.order) && v.order.length === SLIDES.length && v.order.every((id) => BY[id])) return { ...defaults(), ...v };
-  } catch (e) { /* storage unavailable: use defaults */ }
-  return defaults();
-}
-let cfg = load();
-const save = () => { try { localStorage.setItem(KEY, JSON.stringify(cfg)); } catch (e) { /* ignore */ } };
-const seq = () => cfg.order.filter((id) => cfg.on[id]);
-const clampSecs = (v) => Math.max(3, Math.min(300, Math.round(Number(v) || 20)));
-const fmt = (s) => `${Math.floor(s / 60)}:${String(Math.round(s % 60)).padStart(2, '0')}`;
+// ================================================================ small helpers
 const $ = (id) => document.getElementById(id);
 const esc = (x) => String(x).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
-
-// ---------------------------------------------------------------- setup panel
-function renderSetup() {
-  const rows = $('rows');
-  rows.innerHTML = cfg.order.map((id, i) => {
-    const s = BY[id];
-    return `<li class="row ${cfg.on[id] ? '' : 'off'}" data-id="${id}">
-      <div class="move"><button data-up="${id}" ${i ? '' : 'disabled'} aria-label="Move ${esc(s.title)} up">▲</button><button data-down="${id}" ${i < cfg.order.length - 1 ? '' : 'disabled'} aria-label="Move ${esc(s.title)} down">▼</button></div>
-      <input type="checkbox" data-on="${id}" ${cfg.on[id] ? 'checked' : ''} aria-label="Show ${esc(s.title)}">
-      <img src="${THUMB(id)}" alt="" draggable="true" data-drag="${id}">
-      <div class="t"><b>${esc(s.title)}</b><small>Slide ${id}${s.links.length ? ' · ' + s.links.length + ' link' + (s.links.length > 1 ? 's' : '') : ''}</small></div>
-      <label class="secs">seconds <input type="number" min="3" max="300" value="${cfg.secs[id]}" data-secs="${id}" aria-label="Seconds for ${esc(s.title)}"></label></li>`;
-  }).join('');
-  $('autoplay').checked = cfg.autoplay;
-  $('loop').checked = cfg.loop;
-  const list = seq(), total = list.reduce((t, id) => t + cfg.secs[id], 0);
-  $('total').innerHTML = list.length ? `<b>${list.length}</b> slide${list.length > 1 ? 's' : ''} · <b>${fmt(total)}</b> with autoplay` : 'Tick at least one slide.';
-  $('present').disabled = $('presentDual').disabled = !list.length;
+const fmt = (s) => `${Math.floor(s / 60)}:${String(Math.round(s % 60)).padStart(2, '0')}`;
+const clampSecs = (v) => Math.max(3, Math.min(300, Math.round(Number(v) || 20)));
+const uid = (p) => p + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+/* Links may point to a web address or to a page in this demo; anything else (javascript:, data:, ...) is refused. */
+function safeHref(h) {
+  h = String(h || '').trim();
+  if (!h || h.length > 500) return '';
+  if (/^https?:\/\//i.test(h)) return h;
+  if (/^[a-z][a-z0-9+.-]*:/i.test(h) || h.startsWith('//')) return '';
+  return h;
 }
+function status(msg, err = false) { const s = $('status'); s.textContent = msg; s.className = 'status' + (err ? ' err' : ''); }
+
+// ================================================================ storage
+// The tour's settings live in localStorage; custom presentations (with their images) in IndexedDB, in this browser only.
+const KEY = 'sq-presenter-v1', CURRENT = 'sq-presenter-current';
+const tourDefaults = () => ({ order: SLIDES.map((s) => s.id), on: Object.fromEntries(SLIDES.map((s) => [s.id, true])), secs: Object.fromEntries(SLIDES.map((s) => [s.id, s.secs])), autoplay: true, loop: false });
+function loadTour() {
+  try {
+    const v = JSON.parse(localStorage.getItem(KEY));
+    if (v && Array.isArray(v.order) && v.order.length === SLIDES.length && v.order.every((id) => BY[id])) return { ...tourDefaults(), ...v };
+  } catch (e) { /* storage unavailable: use defaults */ }
+  return tourDefaults();
+}
+let cfg = loadTour();
+const saveTour = () => { try { localStorage.setItem(KEY, JSON.stringify(cfg)); } catch (e) { /* ignore */ } };
+const remember = (k, v) => { try { localStorage.setItem(k, v); } catch (e) { /* ignore */ } };
+const recall = (k) => { try { return localStorage.getItem(k); } catch (e) { return null; } };
+
+let dbp = null;
+function db() {
+  return dbp || (dbp = new Promise((res, rej) => {
+    const r = indexedDB.open('sq-presenter', 1);
+    r.onupgradeneeded = () => r.result.createObjectStore('decks', { keyPath: 'id' });
+    r.onsuccess = () => res(r.result);
+    r.onerror = () => { dbp = null; rej(r.error); };
+  }));
+}
+const store = (mode, op) => db().then((d) => new Promise((res, rej) => { const q = op(d.transaction('decks', mode).objectStore('decks')); q.onsuccess = () => res(q.result); q.onerror = () => rej(q.error); }));
+const listDecks = () => store('readonly', (s) => s.getAll());
+const putDeck = (d) => store('readwrite', (s) => s.put(d));
+const removeDeck = (id) => store('readwrite', (s) => s.delete(id));
+
+// ================================================================ the current presentation
+let decks = [];                       // custom presentations
+let current = TOUR;                   // TOUR or a custom deck id
+const urls = new Map();               // Blob -> object URL, for the custom deck on show
+const custom = () => (current === TOUR ? null : decks.find((d) => d.id === current));
+const blobUrl = (b) => { if (!urls.has(b)) urls.set(b, URL.createObjectURL(b)); return urls.get(b); };
+function clearUrls() { urls.forEach((u) => URL.revokeObjectURL(u)); urls.clear(); }
+const settings = () => custom() || cfg;   // .autoplay and .loop
+
+/* Every slide of the current presentation in order, in one shape for the setup list, the TV and the laptop. */
+function slides() {
+  const d = custom();
+  if (!d) return cfg.order.map((id) => { const s = BY[id]; return { id, title: s.title, secs: cfg.secs[id], on: cfg.on[id], notes: s.notes, dark: !!s.dark, shot: !!s.shot, pos: 'zone',
+    links: s.links.map(([label, href]) => ({ label, href })), img: IMG(id), thumb: THUMB(id), rawImg: IMG(id), rawThumb: THUMB(id) }; });
+  return d.slides.map((s) => ({ ...s, notes: String(s.notes || '').split('\n').map((t) => t.trim()).filter(Boolean), links: s.links.filter((l) => l.label && safeHref(l.href)),
+    img: blobUrl(s.img), thumb: blobUrl(s.thumb), rawImg: s.img, rawThumb: s.thumb }));
+}
+const seq = () => slides().filter((s) => s.on);
+let saveTimer = 0;
+function commit(now = false) {
+  const d = custom();
+  if (!d) { saveTour(); return; }
+  d.updated = Date.now();
+  clearTimeout(saveTimer);
+  const go = () => putDeck(d).then(() => status('Saved in this browser.')).catch((e) => status('Could not save: ' + e.message, true));
+  if (now) return go();
+  saveTimer = setTimeout(go, 300);
+}
+const findSlide = (id) => custom().slides.find((s) => s.id === id);
+const key = (v) => (custom() ? v : Number(v));
+function setOrder(ids) {
+  const d = custom();
+  if (!d) cfg.order = ids;
+  else { const m = new Map(d.slides.map((s) => [s.id, s])); d.slides = ids.map((id) => m.get(id)); }
+}
+const ids = () => (custom() ? custom().slides.map((s) => s.id) : cfg.order.slice());
+
+// ================================================================ slide images: upload, scale, thumbnail, export, import
+const IMAGE_TYPES = /^image\/(png|jpeg|webp|gif)$/;
+async function encode(bmp, w, h, letterbox) {
+  const c = document.createElement('canvas'); c.width = w; c.height = h;
+  const g = c.getContext('2d');
+  if (letterbox) {
+    g.fillStyle = '#000'; g.fillRect(0, 0, w, h);
+    const k = Math.min(w / bmp.width, h / bmp.height), dw = bmp.width * k, dh = bmp.height * k;
+    g.drawImage(bmp, (w - dw) / 2, (h - dh) / 2, dw, dh);
+  } else g.drawImage(bmp, 0, 0, w, h);
+  let blob = await new Promise((r) => c.toBlob(r, 'image/webp', 0.9));
+  if (!blob || blob.type !== 'image/webp') blob = await new Promise((r) => c.toBlob(r, 'image/jpeg', 0.9));   // browsers without WebP encoding
+  return blob;
+}
+/* One uploaded image -> a slide: big images are scaled to fit 1920 x 1080; every slide gets a 384 x 216 thumbnail. */
+async function makeSlide(blob, fields = {}) {
+  if (!IMAGE_TYPES.test(blob.type)) throw new Error('not a PNG, JPEG, WebP or GIF image');
+  if (blob.size > 25e6) throw new Error('larger than 25 MB');
+  const bmp = await createImageBitmap(blob).catch(() => { throw new Error('the picture could not be read'); });
+  const k = Math.min(1, 1920 / bmp.width, 1080 / bmp.height);
+  const img = k < 1 ? await encode(bmp, Math.round(bmp.width * k), Math.round(bmp.height * k), false) : blob;
+  const thumb = await encode(bmp, 384, 216, true);
+  bmp.close();
+  return { id: uid('s'), title: 'Slide', secs: 15, on: true, notes: '', links: [], pos: 'br', ...fields, img, thumb };
+}
+const nameOf = (f) => f.name.replace(/\.[^.]+$/, '').replace(/[_-]+/g, ' ').trim().slice(0, 120) || 'Slide';
+async function addFiles(files) {
+  const d = custom(); if (!d) return;
+  const list = [...files], bad = [];
+  status(`Adding ${list.length} image${list.length > 1 ? 's' : ''}…`);
+  for (const f of list) {
+    try { d.slides.push(await makeSlide(f, { title: nameOf(f), secs: d.defaultSecs || 15 })); }
+    catch (e) { bad.push(`${f.name}: ${e.message}`); }
+  }
+  await commit(true);
+  renderSetup();
+  if (bad.length) status('Not added: ' + bad.join('; '), true);
+  else status(`Added ${list.length} slide${list.length > 1 ? 's' : ''}. Saved in this browser.`);
+}
+const blobToDataUrl = (b) => new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(r.result); r.onerror = () => rej(r.error); r.readAsDataURL(b); });
+function dataUrlToBlob(u) {
+  const m = /^data:(image\/(?:png|jpeg|webp|gif));base64,([A-Za-z0-9+/=]+)$/.exec(u);
+  if (!m) throw new Error('a slide image is not a PNG, JPEG, WebP or GIF');
+  const bin = atob(m[2]), bytes = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+  return new Blob([bytes], { type: m[1] });
+}
+async function exportDeck() {
+  const d = custom(); if (!d) return;
+  status('Preparing the file…');
+  const data = { schema: 'schoolynq-presentation-v1', name: d.name, autoplay: d.autoplay, loop: d.loop,
+    slides: await Promise.all(d.slides.map(async (s) => ({ title: s.title, secs: s.secs, on: s.on, notes: s.notes, links: s.links, pos: s.pos, image: await blobToDataUrl(s.img) }))) };
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([JSON.stringify(data)], { type: 'application/json' }));
+  a.download = (d.name.replace(/[^\w\- ]+/g, '').trim() || 'presentation') + '.schoolynq-presentation.json';
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+  status('Exported. Import this file on another computer to present it there.');
+}
+/* Imported files come from outside: check the format, cap sizes, keep only images and safe links. */
+async function importDeck(file) {
+  if (file.size > 150e6) throw new Error('the file is larger than 150 MB');
+  let data;
+  try { data = JSON.parse(await file.text()); } catch (e) { throw new Error('this is not a presentation file'); }
+  if (!data || data.schema !== 'schoolynq-presentation-v1' || !Array.isArray(data.slides) || !data.slides.length) throw new Error('this is not a Schoolynq presentation file');
+  if (data.slides.length > 200) throw new Error('more than 200 slides');
+  const deck = { id: uid('d'), name: String(data.name || 'Imported presentation').slice(0, 80), autoplay: data.autoplay !== false, loop: !!data.loop, created: Date.now(), slides: [] };
+  for (const s of data.slides) {
+    const links = (Array.isArray(s.links) ? s.links : []).slice(0, 6)
+      .map((l) => ({ label: String(l && l.label || '').slice(0, 60), href: safeHref(l && l.href) })).filter((l) => l.label && l.href);
+    deck.slides.push(await makeSlide(dataUrlToBlob(String(s.image || '')), {
+      title: String(s.title || 'Slide').slice(0, 120), secs: clampSecs(s.secs), on: s.on !== false, notes: String(s.notes || '').slice(0, 4000),
+      links, pos: ['bl', 'br', 'tl', 'tr'].includes(s.pos) ? s.pos : 'br' }));
+  }
+  await putDeck(deck);
+  return deck;
+}
+
+// ================================================================ setup panel
+function renderDeckSelect() {
+  $('deckSel').innerHTML = `<option value="${TOUR}">Schoolynq product tour · 12 slides</option>`
+    + (decks.length ? '<optgroup label="Your presentations">' + decks.map((d) => `<option value="${esc(d.id)}">${esc(d.name)} · ${d.slides.length} slide${d.slides.length === 1 ? '' : 's'}</option>`).join('') + '</optgroup>' : '');
+  $('deckSel').value = current;
+}
+function linkRows(s) {
+  return (s.links || []).map((l, k) => `<div class="linkrow"><input class="field" data-linklabel="${esc(s.id)}" data-k="${k}" value="${esc(l.label)}" placeholder="Button text" maxlength="60" aria-label="Button text">`
+    + `<input class="field" data-linkhref="${esc(s.id)}" data-k="${k}" value="${esc(l.href)}" list="targets" placeholder="Pick a part of the demo or type a web address" aria-label="Link"><button class="del" data-linkdel="${esc(s.id)}" data-k="${k}" aria-label="Remove link">✕</button></div>`).join('');
+}
+function renderSetup() {
+  const d = custom(), list = slides();
+  renderDeckSelect();
+  $('customTools').hidden = !d; $('drop').hidden = !d; $('storeNote').hidden = !d;
+  $('presetBox').hidden = !!d; $('reset').hidden = !!d;
+  $('deckHead').innerHTML = d
+    ? `<label class="muted" style="font-size:12.5px">Presentation name<input class="field" id="deckName" value="${esc(d.name)}" maxlength="80" style="margin-top:4px;min-width:300px"></label>`
+    : '<h2>Schoolynq product tour</h2>';
+  $('listNote').textContent = d
+    ? (list.length ? 'Tick the slides to show, set the seconds, drag a picture or use the arrows to reorder. Open “Talking points and links” to add notes for the laptop screen and buttons on the slide.' : '')
+    : 'Tick the slides to show, set the seconds for each and change the order with the arrows or by dragging a picture. Changes are remembered on this computer.';
+  $('rows').innerHTML = list.map((s, i) => {
+    const sid = esc(s.id);
+    const head = `<div class="move"><button data-up="${sid}" ${i ? '' : 'disabled'} aria-label="Move ${esc(s.title)} up">▲</button><button data-down="${sid}" ${i < list.length - 1 ? '' : 'disabled'} aria-label="Move ${esc(s.title)} down">▼</button></div>`
+      + `<input type="checkbox" data-on="${sid}" ${s.on ? 'checked' : ''} aria-label="Show ${esc(s.title)}">`
+      + `<img src="${s.thumb}" alt="" draggable="true" data-drag="${sid}">`;
+    const secs = `<label class="secs">seconds <input type="number" min="3" max="300" value="${s.secs}" data-secs="${sid}" aria-label="Seconds for ${esc(s.title)}"></label>`;
+    if (!d) return `<li class="row ${s.on ? '' : 'off'}" data-id="${sid}">${head}<div class="t"><b>${esc(s.title)}</b><small>Slide ${s.id}${s.links.length ? ' · ' + s.links.length + ' link' + (s.links.length > 1 ? 's' : '') : ''}</small></div>${secs}</li>`;
+    const raw = findSlide(s.id);   // the editor shows every button, including ones still being filled in
+    return `<li class="row custom ${s.on ? '' : 'off'}" data-id="${sid}">${head}<div class="t">`
+      + `<input class="field" data-title="${sid}" value="${esc(s.title)}" maxlength="120" aria-label="Slide title">`
+      + `<details data-details="${sid}"><summary>Talking points and links${s.notes.length || s.links.length ? ` · ${s.notes.length} point${s.notes.length === 1 ? '' : 's'}, ${s.links.length} link${s.links.length === 1 ? '' : 's'}` : ''}</summary><div class="edit">`
+      + `<label>Talking points for the laptop screen, one per line<textarea class="field" data-notes="${sid}">${esc(raw.notes || '')}</textarea></label>`
+      + `<label>Buttons on the slide (open in a new tab)</label>${linkRows(raw)}`
+      + `<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><button class="btn small" data-linkadd="${sid}" ${raw.links.length >= 6 ? 'disabled' : ''}>＋ Add a button</button>`
+      + `<label style="flex-direction:row;align-items:center;gap:6px">Buttons sit <select class="field" data-pos="${sid}" style="width:auto">${[['br', 'bottom right'], ['bl', 'bottom left'], ['tr', 'top right'], ['tl', 'top left']].map(([v, t]) => `<option value="${v}" ${s.pos === v ? 'selected' : ''}>${t}</option>`).join('')}</select></label></div>`
+      + `</div></details></div>${secs}<button class="del" data-delslide="${sid}" aria-label="Delete ${esc(s.title)}">🗑</button></li>`;
+  }).join('');
+  if (openDetails) { const el = document.querySelector(`[data-details="${CSS.escape(openDetails)}"]`); if (el) el.open = true; }
+  $('autoplay').checked = settings().autoplay;
+  $('loop').checked = settings().loop;
+  const on = list.filter((s) => s.on), total = on.reduce((t, s) => t + s.secs, 0);
+  $('total').innerHTML = on.length ? `<b>${on.length}</b> slide${on.length > 1 ? 's' : ''} · <b>${fmt(total)}</b> with autoplay` : (d && !list.length ? 'Add slide images to start.' : 'Tick at least one slide.');
+  $('present').disabled = $('presentDual').disabled = !on.length;
+}
+let openDetails = null;
 function move(id, by) {
-  const i = cfg.order.indexOf(id), j = i + by;
-  if (j < 0 || j >= cfg.order.length) return;
-  [cfg.order[i], cfg.order[j]] = [cfg.order[j], cfg.order[i]];
-  save(); renderSetup();
+  const order = ids(), i = order.indexOf(id), j = i + by;
+  if (j < 0 || j >= order.length) return;
+  [order[i], order[j]] = [order[j], order[i]];
+  setOrder(order); commit(); renderSetup();
+}
+async function selectDeck(id) {
+  clearUrls();
+  current = id === TOUR || decks.some((d) => d.id === id) ? id : TOUR;
+  remember(CURRENT, current);
+  openDetails = null; status('');
+  renderSetup();
+}
+async function refreshDecks() {
+  try { decks = (await listDecks()).sort((a, b) => (a.created || 0) - (b.created || 0)); }
+  catch (e) { decks = []; $('newDeck').disabled = $('importBtn').disabled = true; status('This browser cannot store presentations here (private window?). The product tour still works.', true); }
 }
 function wireSetup() {
   $('preset').innerHTML += PRESETS.map(([k, name]) => `<option value="${k}">${name}</option>`).join('');
   const rows = $('rows');
   rows.addEventListener('click', (e) => {
-    const up = e.target.closest('[data-up]'), down = e.target.closest('[data-down]');
-    if (up) move(Number(up.dataset.up), -1);
-    if (down) move(Number(down.dataset.down), 1);
+    const t = e.target.closest('button'); if (!t) return;
+    const ds = t.dataset;
+    if (ds.up) move(key(ds.up), -1);
+    if (ds.down) move(key(ds.down), 1);
+    if (ds.delslide) {
+      const d = custom(); d.slides = d.slides.filter((s) => s.id !== ds.delslide);
+      commit(true); renderSetup(); status('Slide deleted.');
+    }
+    if (ds.linkadd) { const s = findSlide(ds.linkadd); s.links.push({ label: 'Open', href: '' }); openDetails = ds.linkadd; renderSetup(); }
+    if (ds.linkdel) { const s = findSlide(ds.linkdel); s.links.splice(Number(ds.k), 1); openDetails = ds.linkdel; commit(); renderSetup(); }
   });
   rows.addEventListener('change', (e) => {
-    const t = e.target;
-    if (t.dataset.on) { cfg.on[t.dataset.on] = t.checked; }
-    if (t.dataset.secs) { cfg.secs[t.dataset.secs] = clampSecs(t.value); }
-    save(); renderSetup();
+    const t = e.target, ds = t.dataset, d = custom();
+    if (ds.on !== undefined) { if (d) findSlide(ds.on).on = t.checked; else cfg.on[ds.on] = t.checked; }
+    else if (ds.secs !== undefined) { const v = clampSecs(t.value); if (d) findSlide(ds.secs).secs = v; else cfg.secs[ds.secs] = v; }
+    else if (ds.pos) { findSlide(ds.pos).pos = t.value; openDetails = ds.pos; }
+    else if (ds.linkhref) {
+      const s = findSlide(ds.linkhref), v = safeHref(t.value);
+      openDetails = ds.linkhref;
+      if (t.value.trim() && !v) { t.classList.add('bad'); status('Links must be a web address (https://…) or a page in this demo.', true); return; }
+      s.links[Number(ds.k)].href = v;
+    } else return;
+    commit(); renderSetup();
   });
+  rows.addEventListener('input', (e) => {   // typing in titles, talking points and button text saves without re-drawing the list
+    const t = e.target, ds = t.dataset;
+    if (ds.title) findSlide(ds.title).title = t.value.slice(0, 120);
+    else if (ds.notes) { findSlide(ds.notes).notes = t.value.slice(0, 4000); openDetails = ds.notes; }
+    else if (ds.linklabel) { findSlide(ds.linklabel).links[Number(ds.k)].label = t.value.slice(0, 60); openDetails = ds.linklabel; }
+    else return;
+    commit();
+  });
+  rows.addEventListener('toggle', (e) => { if (e.target.dataset.details) openDetails = e.target.open ? e.target.dataset.details : null; }, true);
   let dragId = null;
-  rows.addEventListener('dragstart', (e) => { dragId = Number(e.target.dataset.drag); e.dataTransfer.effectAllowed = 'move'; });
-  rows.addEventListener('dragover', (e) => { const r = e.target.closest('.row'); if (r && dragId) { e.preventDefault(); r.classList.add('drag-over'); } });
+  rows.addEventListener('dragstart', (e) => { if (e.target.dataset.drag) { dragId = key(e.target.dataset.drag); e.dataTransfer.effectAllowed = 'move'; } });
+  rows.addEventListener('dragover', (e) => { const r = e.target.closest('.row'); if (r && dragId !== null) { e.preventDefault(); r.classList.add('drag-over'); } });
   rows.addEventListener('dragleave', (e) => { e.target.closest('.row')?.classList.remove('drag-over'); });
   rows.addEventListener('drop', (e) => {
-    const r = e.target.closest('.row'); if (!r || !dragId) return;
-    e.preventDefault();
-    const to = Number(r.dataset.id);
-    cfg.order.splice(cfg.order.indexOf(dragId), 1);
-    cfg.order.splice(cfg.order.indexOf(to) + (e.offsetY > r.offsetHeight / 2 ? 1 : 0), 0, dragId);
-    dragId = null; save(); renderSetup();
+    const r = e.target.closest('.row'); if (!r || dragId === null) return;
+    e.preventDefault(); e.stopPropagation();
+    const to = key(r.dataset.id), order = ids().filter((x) => x !== dragId);
+    order.splice(order.indexOf(to) + (e.offsetY > r.offsetHeight / 2 ? 1 : 0), 0, dragId);
+    dragId = null; setOrder(order); commit(); renderSetup();
   });
+  // Image files can be dropped anywhere on the slide list card.
+  const card = $('rows').closest('.card');
+  card.addEventListener('dragover', (e) => { if (custom() && e.dataTransfer.types.includes('Files')) { e.preventDefault(); $('drop').classList.add('over'); } });
+  card.addEventListener('dragleave', () => $('drop').classList.remove('over'));
+  card.addEventListener('drop', (e) => { if (custom() && e.dataTransfer.files.length) { e.preventDefault(); $('drop').classList.remove('over'); addFiles(e.dataTransfer.files); } });
+  $('addSlides').onclick = () => $('slideFiles').click();
+  $('slideFiles').onchange = (e) => { if (e.target.files.length) addFiles(e.target.files); e.target.value = ''; };
+  $('deckSel').onchange = (e) => selectDeck(e.target.value);
+  $('newDeck').onclick = async () => {
+    const deck = { id: uid('d'), name: 'New presentation', autoplay: true, loop: false, created: Date.now(), slides: [] };
+    try { await putDeck(deck); } catch (e) { status('Could not save: ' + e.message, true); return; }
+    if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {});
+    decks.push(deck); await selectDeck(deck.id);
+    $('deckName').select();
+    status('New presentation. Add slide images to start.');
+  };
+  $('deckHead').addEventListener('input', (e) => { if (e.target.id === 'deckName') { custom().name = e.target.value.slice(0, 80) || 'Untitled'; commit(); } });
+  $('deckHead').addEventListener('change', (e) => { if (e.target.id === 'deckName') renderDeckSelect(); });
+  $('exportDeck').onclick = () => exportDeck().catch((e) => status('Export failed: ' + e.message, true));
+  $('deleteDeck').onclick = async () => {
+    const d = custom();
+    if (!confirm(`Delete “${d.name}” and its ${d.slides.length} slide${d.slides.length === 1 ? '' : 's'} from this browser? Export it first if you want a copy.`)) return;
+    await removeDeck(d.id); decks = decks.filter((x) => x.id !== d.id);
+    await selectDeck(TOUR); status(`Deleted “${d.name}”.`);
+  };
+  $('importBtn').onclick = () => $('importFile').click();
+  $('importFile').onchange = async (e) => {
+    const f = e.target.files[0]; e.target.value = ''; if (!f) return;
+    status('Importing…');
+    try { const deck = await importDeck(f); decks.push(deck); await selectDeck(deck.id); status(`Imported “${deck.name}” with ${deck.slides.length} slides.`); }
+    catch (err) { status('Import failed: ' + err.message, true); }
+  };
   $('preset').onchange = (e) => {
     const p = PRESETS.find(([k]) => k === e.target.value); if (!p) return;
-    const [, , ids, secs] = p;
-    cfg.order = [...ids, ...SLIDES.map((s) => s.id).filter((id) => !ids.includes(id))];
-    cfg.on = Object.fromEntries(SLIDES.map((s) => [s.id, ids.includes(s.id)]));
-    if (secs) ids.forEach((id) => { cfg.secs[id] = secs; });
-    e.target.value = ''; save(); renderSetup();
+    const [, , pick, secs] = p;
+    cfg.order = [...pick, ...SLIDES.map((s) => s.id).filter((id) => !pick.includes(id))];
+    cfg.on = Object.fromEntries(SLIDES.map((s) => [s.id, pick.includes(s.id)]));
+    if (secs) pick.forEach((id) => { cfg.secs[id] = secs; });
+    e.target.value = ''; saveTour(); renderSetup();
   };
-  $('autoplay').onchange = (e) => { cfg.autoplay = e.target.checked; save(); renderSetup(); };
-  $('loop').onchange = (e) => { cfg.loop = e.target.checked; save(); };
-  $('applyAll').onclick = () => { const v = clampSecs($('allSecs').value); SLIDES.forEach((s) => { cfg.secs[s.id] = v; }); save(); renderSetup(); };
-  $('reset').onclick = () => { cfg = defaults(); save(); renderSetup(); };
+  $('autoplay').onchange = (e) => { settings().autoplay = e.target.checked; commit(); renderSetup(); };
+  $('loop').onchange = (e) => { settings().loop = e.target.checked; commit(); };
+  $('applyAll').onclick = () => {
+    const v = clampSecs($('allSecs').value), d = custom();
+    if (d) { d.slides.forEach((s) => { s.secs = v; }); d.defaultSecs = v; } else SLIDES.forEach((s) => { cfg.secs[s.id] = v; });
+    commit(); renderSetup();
+  };
+  $('reset').onclick = () => { cfg = tourDefaults(); saveTour(); renderSetup(); };
   $('present').onclick = () => startShow(false);
   $('presentDual').onclick = () => startShow(true);
 }
 
-// ---------------------------------------------------------------- the show (this window is the TV)
+// ================================================================ the show (this window is the TV)
 const run = { list: [], i: 0, auto: false, endsAt: 0, remaining: 0, startedAt: 0 };
 let notesWin = null, showing = false, front = 'imgA', idleTimer = 0;
-const durMs = () => cfg.secs[run.list[run.i]] * 1000;
+const durMs = () => run.list[run.i].secs * 1000;
 
 function startShow(dual) {
-  run.list = seq(); run.i = 0; run.auto = cfg.autoplay; run.startedAt = Date.now();
+  run.list = seq(); run.i = 0; run.auto = settings().autoplay; run.startedAt = Date.now();
+  if (!run.list.length) return;
   $('popupWarn').hidden = true;
   if (dual) {
     notesWin = window.open('presenter.html#notes', 'schoolynq-presenter-notes', 'popup,width=1200,height=780');
@@ -363,6 +662,7 @@ function startShow(dual) {
   showing = true;
   $('setup').hidden = true; $('stage').hidden = false;
   showHint(dual ? 'Drag this window to the TV, then press F for full screen. Your notes and controls are in the laptop window.' : 'Use the arrow keys or a clicker. Space pauses autoplay. Esc returns to the panel.');
+  sendDeck();
   go(0);
   wake();
 }
@@ -376,7 +676,7 @@ function stopShow() {
 function go(i) {
   if (i < 0) i = 0;
   if (i >= run.list.length) {
-    if (cfg.loop) i = 0;
+    if (settings().loop) i = 0;
     else { i = run.list.length - 1; run.auto = false; }
   }
   run.i = i;
@@ -385,19 +685,19 @@ function go(i) {
   paint();
 }
 function paint() {
-  const id = run.list[run.i], s = BY[id];
-  const back = front === 'imgA' ? 'imgB' : 'imgA', img = $(back), url = new URL(IMG(id), location.href).href;
+  const s = run.list[run.i];
+  const back = front === 'imgA' ? 'imgB' : 'imgA', img = $(back), url = new URL(s.img, location.href).href;
   const swap = () => { $(back).classList.add('on'); $(front).classList.remove('on'); front = back; };
   img.alt = s.title;
   if (img.src === url && img.complete) swap();   // already loaded in the hidden layer: no load event would come
   else { img.onload = swap; img.src = url; }
-  const next = run.list[run.i + 1]; if (next) new Image().src = IMG(next);   // preload
-  $('links').className = 'links' + (s.dark ? ' dark' : '');
-  $('links').innerHTML = s.links.map(([label, href], k) => `<a href="${esc(href)}" target="_blank" rel="noopener" class="${k ? 'second' : ''}">${esc(label)} ↗</a>`).join('');
-  $('hot').innerHTML = s.shot && s.links.length ? `<button class="hotspot" style="left:${SHOT_RECT.left}%;top:${SHOT_RECT.top}%;width:${SHOT_RECT.width}%;height:${SHOT_RECT.height}%" data-href="${esc(s.links[0][1])}" aria-label="${esc(s.links[0][0])}"><span>${esc(s.links[0][0])} ↗</span></button>` : '';
+  const next = run.list[run.i + 1]; if (next) new Image().src = next.img;   // preload
+  $('links').className = 'links ' + (s.pos === 'zone' ? 'zone' + (s.dark ? ' dark' : '') : s.pos + ' custom');
+  $('links').innerHTML = s.links.map((l, k) => `<a href="${esc(l.href)}" target="_blank" rel="noopener" class="${k ? 'second' : ''}">${esc(l.label)} ↗</a>`).join('');
+  $('hot').innerHTML = s.shot && s.links.length ? `<button class="hotspot" style="left:${SHOT_RECT.left}%;top:${SHOT_RECT.top}%;width:${SHOT_RECT.width}%;height:${SHOT_RECT.height}%" data-href="${esc(s.links[0].href)}" aria-label="${esc(s.links[0].label)}"><span>${esc(s.links[0].label)} ↗</span></button>` : '';
   $('cCount').textContent = `${run.i + 1} / ${run.list.length}`;
   $('cPlay').textContent = run.auto ? '⏸' : '▶';
-  $('badge').hidden = run.auto || !cfg.autoplay;
+  $('badge').hidden = run.auto || !settings().autoplay;
   send(state());
 }
 function setAuto(on) {
@@ -411,12 +711,14 @@ function adjust(ms) {
   else run.remaining = Math.max(1000, run.remaining + ms);
   send(state());
 }
-function state() { return { type: 'state', list: run.list, i: run.i, auto: run.auto, endsAt: run.endsAt, remaining: run.remaining, dur: durMs(), startedAt: run.startedAt }; }
+function state() { return { type: 'state', n: run.list.length, i: run.i, auto: run.auto, endsAt: run.endsAt, remaining: run.remaining, dur: durMs(), startedAt: run.startedAt }; }
+/* The laptop window gets the slides once: titles, notes, links and images (paths for the tour, image files for custom decks). */
+function sendDeck() { send({ type: 'deck', slides: run.list.map((s) => ({ title: s.title, notes: s.notes, links: s.links, img: s.rawImg, thumb: s.rawThumb })) }); }
 function tick() {
   if (showing) {
     const d = durMs(), left = run.auto ? run.endsAt - Date.now() : run.remaining;
     $('bar').style.transform = `scaleX(${Math.min(1, Math.max(0, 1 - left / d))})`;
-    $('bar').hidden = !(cfg.autoplay || run.auto);
+    $('bar').hidden = !(settings().autoplay || run.auto);
     if (run.auto && left <= 0) go(run.i + 1);
   }
   requestAnimationFrame(tick);
@@ -428,7 +730,7 @@ function command(cmd, arg) {
   if (cmd === 'goto') go(Number(arg));
   if (cmd === 'toggle') setAuto(!run.auto);
   if (cmd === 'adjust') adjust(Number(arg));
-  if (cmd === 'hello') send(state());
+  if (cmd === 'hello') { sendDeck(); send(state()); }
 }
 function showHint(text) { const h = $('hint'); h.textContent = text; h.hidden = false; clearTimeout(showHint.t); showHint.t = setTimeout(() => { h.hidden = true; }, 7000); }
 function wake() {
@@ -448,7 +750,7 @@ function wireStage() {
   $('links').addEventListener('click', (e) => { if (e.target.closest('a')) setAuto(false); });
   $('hot').addEventListener('click', (e) => { const h = e.target.closest('[data-href]'); if (h) { setAuto(false); window.open(h.dataset.href, '_blank', 'noopener'); } });
   document.addEventListener('keydown', (e) => {
-    if (!showing || e.target.closest('input, select')) return;
+    if (!showing || e.target.closest('input, select, textarea')) return;
     const k = e.key;
     if (['ArrowRight', 'PageDown', 'ArrowDown'].includes(k)) { e.preventDefault(); command('next'); }
     else if (['ArrowLeft', 'PageUp', 'ArrowUp'].includes(k)) { e.preventDefault(); command('prev'); }
@@ -465,22 +767,24 @@ function wireStage() {
   });
 }
 
-// ---------------------------------------------------------------- notes (this window is the laptop)
-let tv = null, last = null;
+// ================================================================ notes (this window is the laptop)
+let last = null, nDeck = [];
+const nUrl = (x) => (typeof x === 'string' ? x : x ? URL.createObjectURL(x) : '');
 function cmd(c, arg) { if (window.opener && !window.opener.closed) window.opener.postMessage({ sq: 'presenter', cmd: c, arg }, '*'); }
 function renderNotes(st) {
   last = st;
-  const id = st.list[st.i], s = BY[id], nextId = st.list[st.i + 1];
-  document.title = `Notes · ${st.i + 1}/${st.list.length} · ${s.title}`;
+  const s = nDeck[st.i], next = nDeck[st.i + 1];
+  if (!s) return;
+  document.title = `Notes · ${st.i + 1}/${st.n} · ${s.title}`;
   $('nTitle').textContent = s.title;
-  $('nCount').textContent = `Slide ${st.i + 1} of ${st.list.length}`;
-  $('nNow').src = IMG(id); $('nNow').alt = s.title;
-  $('nPoints').innerHTML = s.notes.map((n) => `<li>${esc(n)}</li>`).join('');
-  $('nLinks').innerHTML = s.links.map(([label, href]) => `<a class="btn" href="${esc(href)}" target="_blank" rel="noopener">${esc(label)} ↗</a>`).join('') || '<span class="muted">No links on this slide.</span>';
-  $('nNext2').src = nextId ? THUMB(nextId) : ''; $('nNext2').alt = nextId ? BY[nextId].title : '';
-  $('nNextTitle').textContent = nextId ? BY[nextId].title : 'End of the presentation';
+  $('nCount').textContent = `Slide ${st.i + 1} of ${st.n}`;
+  $('nNow').src = s.img; $('nNow').alt = s.title;
+  $('nPoints').innerHTML = s.notes.length ? s.notes.map((n) => `<li>${esc(n)}</li>`).join('') : '<li class="muted">No talking points for this slide.</li>';
+  $('nLinks').innerHTML = s.links.map((l) => `<a class="btn" href="${esc(l.href)}" target="_blank" rel="noopener">${esc(l.label)} ↗</a>`).join('') || '<span class="muted">No links on this slide.</span>';
+  $('nNext2').src = next ? next.thumb : ''; $('nNext2').alt = next ? next.title : '';
+  $('nNextTitle').textContent = next ? next.title : 'End of the presentation';
   $('nPlay').textContent = st.auto ? 'Pause autoplay' : 'Resume autoplay';
-  $('nStrip').innerHTML = st.list.map((sid, k) => `<button data-goto="${k}" class="${k === st.i ? 'now' : ''}" aria-label="Go to slide ${k + 1}: ${esc(BY[sid].title)}"><img src="${THUMB(sid)}" alt=""><b>${k + 1}</b></button>`).join('');
+  $('nStrip').innerHTML = nDeck.map((x, k) => `<button data-goto="${k}" class="${k === st.i ? 'now' : ''}" aria-label="Go to slide ${k + 1}: ${esc(x.title)}"><img src="${x.thumb}" alt=""><b>${k + 1}</b></button>`).join('');
   $('nStrip').querySelector('.now')?.scrollIntoView({ inline: 'center', block: 'nearest' });
 }
 function notesTick() {
@@ -510,6 +814,10 @@ function wireNotes() {
   });
   window.addEventListener('message', (e) => {
     if (e.source !== window.opener || !e.data || e.data.sq !== 'presenter') return;   // only the TV window that opened us
+    if (e.data.type === 'deck') {
+      nDeck.forEach((s) => { if (s.own) { URL.revokeObjectURL(s.img); URL.revokeObjectURL(s.thumb); } });
+      nDeck = e.data.slides.map((s) => ({ title: s.title, notes: s.notes, links: s.links.filter((l) => safeHref(l.href)), img: nUrl(s.img), thumb: nUrl(s.thumb), own: typeof s.img !== 'string' }));
+    }
     if (e.data.type === 'state') renderNotes(e.data);
     if (e.data.type === 'ended') { $('nAuto').textContent = 'Presentation ended'; last = null; }
   });
@@ -517,10 +825,17 @@ function wireNotes() {
   notesTick();
 }
 
-// ---------------------------------------------------------------- start
+// ================================================================ start
+async function init() {
+  $('setup').hidden = false; wireSetup(); wireStage(); tick();
+  await refreshDecks();
+  const want = recall(CURRENT);
+  current = want && decks.some((d) => d.id === want) ? want : TOUR;
+  renderSetup();
+}
 if (location.hash === '#notes') wireNotes();
-else { $('setup').hidden = false; wireSetup(); wireStage(); renderSetup(); tick(); }
-window.PRESENTER = { SLIDES, PRESETS, cfg: () => cfg, run };
+else init();
+window.PRESENTER = { SLIDES, PRESETS, cfg: () => cfg, run, decks: () => decks, current: () => current, safeHref };
 </script>
 </body>
 </html>
