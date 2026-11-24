@@ -314,10 +314,72 @@ const SLIDES = [
             'At week 8 you see the results against the baseline, hear from the teachers and students, and decide: expand, adjust or stop.',
             'The school provides two classes, a screen and the books; we provide everything else. Thank you.'] }
 ];
+// ================================================================ the second built-in deck: the Schoolynq pitch (no pricing)
+const PITCH = [
+  { id: 1, title: 'Ready lessons for teachers. Clear progress for school leaders.', secs: 12,
+    links: [['Open the demo school', 'index.html']],
+    notes: ['Schoolynq gives teachers ready lessons and gives school leaders a clear view of progress.',
+            'Missions cover Grades 1 to 8 on the classroom screen; Polaris covers Grades 9 to 12 on each student’s own device.',
+            'Everything is built on the Cambridge curriculum and on the books and calendar your school already uses.'] },
+  { id: 2, title: 'There’s a lot behind a great 40-minute lesson', secs: 15, links: [],
+    notes: ['A good 40-minute lesson needs a clear explanation, visuals that carry the idea, practice with a purpose and a check that students understood.',
+            'Teachers rebuild all of that every day, for every section, on top of marking and admin.',
+            'Schoolynq does the preparation, so teachers can spend their time teaching.'] },
+  { id: 3, title: 'More from your teachers, resources and classroom technology', secs: 15,
+    links: [['Open a mission', 'missions/heart-v4/index.html']],
+    notes: ['The aim is to get more from what the school already has: its teachers, its books and the screen in the classroom.',
+            'Students explore with simulations, explain their thinking, and apply it in practice and worksheets.'] },
+  { id: 4, title: 'AI may know the topic. Does it know the lesson?', secs: 15, links: [],
+    notes: ['A general AI tool can write about any topic, but it does not know your grade, your syllabus objectives or where this lesson sits in the term.',
+            'Schoolynq lessons are prepared around your curriculum and your teaching plan, at the right depth and in the right order.'] },
+  { id: 5, title: 'Prepared from the materials your school already uses', secs: 18, links: [],
+    notes: ['The school shares what it already uses: the syllabus, the books, the academic calendar and the weekly routine.',
+            'Schoolynq prepares the teaching plan and the lesson resources from those.',
+            'Teachers teach, and the academic team reviews progress as it happens.'] },
+  { id: 6, title: 'A lesson ready to teach', secs: 18,
+    links: [['Open the Heart mission', 'missions/heart-v4/index.html'], ['Open the Blood mission', 'missions/blood/index.html']],
+    notes: ['Every mission follows the same shape: explain, explore, check and practise.',
+            'Here, students explore the heart in a simulation on the classroom screen, then the whole class answers a check-understanding question.',
+            'Teacher guidance, pupil notes and worksheets come with every lesson.'] },
+  { id: 7, title: 'The class sees the lesson. You see the plan.', secs: 18,
+    links: [['Open the Blood mission', 'missions/blood/index.html']],
+    notes: ['With two screens, the classroom screen shows only the lesson and the teacher’s laptop shows the plan.',
+            'Talking points, timings and likely misconceptions sit beside every student’s answer as it comes in.',
+            'To try it, open the Blood mission and choose “Start with teacher screen”. This presenter works the same way.'] },
+  { id: 8, title: 'Notes and worksheets, ready to print', secs: 15,
+    links: [['Heart worksheet (PDF)', 'missions/heart-v4/printables/worksheet.pdf'], ['Blood notes (PDF)', 'missions/blood/printables/pupil-notes.pdf']],
+    notes: ['Every mission comes with pupil notes, a worksheet with an answer key, exit slips and a teacher guide.',
+            'Worksheets have square-grid and ruled space for working.'] },
+  { id: 9, title: 'Shared objectives. Flexible teaching.', secs: 18,
+    links: [['Open the lesson planner', 'lesson-planner.html']],
+    notes: ['The plan is built around the school’s weekly routine, with the same goals across every section.',
+            'When the calendar changes, the plan is re-paced, and each teacher keeps room to respond to their class.',
+            'A typical 40-minute lesson: 20 minutes teaching, 15 minutes practice, 5 minutes review.'] },
+  { id: 10, title: 'A clearer view across your classrooms', secs: 18,
+    links: [['Open the principal dashboard', 'principal-dash.html'], ['Open the school view', 'student-analysis.html#school']],
+    notes: ['Coordinators and leaders see coverage, pacing, teacher usage and student responses in one place.',
+            'It points to where to look first, so leaders can identify gaps, support teachers and follow up.',
+            'The evidence sits alongside teacher judgement; it does not replace it.'] },
+  { id: 11, title: 'Know where students need help', secs: 18,
+    links: [['Open this class', 'student-analysis.html#class-5A-sci'], ['Open Sarah’s profile', 'student-analysis.html#SQ-5A-21']],
+    notes: ['Student responses become teaching decisions: by lesson, by class and by student.',
+            'Each flag names its evidence, for example a missed lesson with no class evidence before the block assessment.'] },
+  { id: 12, title: 'Polaris: understand the concept, apply it independently', secs: 15,
+    links: [['Simulation Lab', 'https://schoolynq.com/lab/'], ['schoolynq.com', 'https://schoolynq.com/']],
+    notes: ['Polaris carries the same approach to Grades 9 to 12, on each student’s own device.',
+            'Students learn topic by topic, revise at their own pace with follow-up on every wrong answer, and practise exam questions.'] },
+  { id: 13, title: 'Start with an 8-week pilot', secs: 25,
+    links: [['Plan your pilot', 'https://schoolynq.com/#contact']],
+    notes: ['Here is how a school starts: an 8-week pilot in two classes, in Maths and Science, with one coordinator.',
+            'Before week 1, you choose the classes and share the syllabus pages and calendar. We prepare the lessons and train the teachers.',
+            'In weeks 1 and 2 our team is in the room for the first lessons, and we take a baseline. In weeks 3 to 6 the missions run in normal lessons, with a review at week 4.',
+            'In weeks 7 and 8 you see the results against the baseline and hear from teachers and students. Then you decide: expand, adjust or stop.',
+            'The first step is small: one lesson with your coordinator and two teachers. Thank you.'] }
+];
+const PITCH_DIR = 'slides/pitch/';   // plain string, like SLIDE_DIR
 const SLIDE_DIR = 'slides/';   // kept as a plain string so the schoolynq.com copy can point it at the right folder
-const IMG = (id) => `${SLIDE_DIR}${String(id).padStart(2, '0')}.webp`;
-const THUMB = (id) => `${SLIDE_DIR}thumbs/${String(id).padStart(2, '0')}.webp`;
-const BY = Object.fromEntries(SLIDES.map((s) => [s.id, s]));
+const IMG = (id, dir = SLIDE_DIR) => `${dir}${String(id).padStart(2, '0')}.webp`;
+const THUMB = (id, dir = SLIDE_DIR) => `${dir}thumbs/${String(id).padStart(2, '0')}.webp`;
 const SHOT_RECT = { left: 43.23, top: 18.15, width: 51.56, height: 54.7 };   // the screenshot frame on slides 4-10, in % of the slide
 const PRESETS = [
   ['full', 'Full tour · 13 slides', [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]],
@@ -325,7 +387,13 @@ const PRESETS = [
   ['leaders', 'For school leaders · 8 slides', [1, 2, 3, 10, 9, 8, 7, 13]],
   ['quick', 'Two-minute overview · 6 slides of 20 s', [1, 3, 4, 9, 10, 13], 20]
 ];
-const TOUR = 'tour';
+const TOUR = 'tour', PITCH_ID = 'pitch';
+/* The built-in presentations: each keeps its own order, timings and on/off settings in this browser. */
+const BUILTIN = {
+  [TOUR]: { name: 'Schoolynq product tour', slides: SLIDES, dir: SLIDE_DIR, key: 'sq-presenter-v1', presets: PRESETS, pos: 'zone' },
+  [PITCH_ID]: { name: 'Schoolynq pitch', slides: PITCH, dir: PITCH_DIR, key: 'sq-presenter-pitch-v1', presets: [], pos: 'bl' }
+};
+for (const b of Object.values(BUILTIN)) b.by = Object.fromEntries(b.slides.map((s) => [s.id, s]));
 
 // ================================================================ small helpers
 const $ = (id) => document.getElementById(id);
@@ -345,20 +413,22 @@ function status(msg, err = false) { const s = $('status'); s.textContent = msg; 
 
 // ================================================================ storage
 // The tour's settings live in localStorage; custom presentations (with their images) in IndexedDB, in this browser only.
-const KEY = 'sq-presenter-v1', CURRENT = 'sq-presenter-current';
-const tourDefaults = () => ({ order: SLIDES.map((s) => s.id), on: Object.fromEntries(SLIDES.map((s) => [s.id, true])), secs: Object.fromEntries(SLIDES.map((s) => [s.id, s.secs])), autoplay: true, loop: false });
-function loadTour() {
+const CURRENT = 'sq-presenter-current';
+const defaults = (b) => ({ order: b.slides.map((s) => s.id), on: Object.fromEntries(b.slides.map((s) => [s.id, true])), secs: Object.fromEntries(b.slides.map((s) => [s.id, s.secs])), autoplay: true, loop: false });
+function loadBuiltin(b) {
   try {
-    const v = JSON.parse(localStorage.getItem(KEY));
-    if (v && Array.isArray(v.order) && v.order.every((id) => BY[id]) && new Set(v.order).size === v.order.length) {
-      const d = tourDefaults(), added = SLIDES.map((s) => s.id).filter((id) => !v.order.includes(id));
+    const v = JSON.parse(localStorage.getItem(b.key));
+    if (v && Array.isArray(v.order) && v.order.every((id) => b.by[id]) && new Set(v.order).size === v.order.length) {
+      const d = defaults(b), added = b.slides.map((s) => s.id).filter((id) => !v.order.includes(id));
       return { ...d, ...v, order: [...v.order, ...added], on: { ...d.on, ...v.on }, secs: { ...d.secs, ...v.secs } };
     }
   } catch (e) { /* storage unavailable: use defaults */ }
-  return tourDefaults();
+  return defaults(b);
 }
-let cfg = loadTour();
-const saveTour = () => { try { localStorage.setItem(KEY, JSON.stringify(cfg)); } catch (e) { /* ignore */ } };
+const cfgs = Object.fromEntries(Object.entries(BUILTIN).map(([k, b]) => [k, loadBuiltin(b)]));
+let cfg = cfgs[TOUR];                 // settings of the built-in presentation on show
+const B = () => BUILTIN[current] || BUILTIN[TOUR];
+const saveTour = () => { try { localStorage.setItem(B().key, JSON.stringify(cfg)); } catch (e) { /* ignore */ } };
 const remember = (k, v) => { try { localStorage.setItem(k, v); } catch (e) { /* ignore */ } };
 const recall = (k) => { try { return localStorage.getItem(k); } catch (e) { return null; } };
 
@@ -378,9 +448,9 @@ const removeDeck = (id) => store('readwrite', (s) => s.delete(id));
 
 // ================================================================ the current presentation
 let decks = [];                       // custom presentations
-let current = TOUR;                   // TOUR or a custom deck id
+let current = TOUR;                   // a BUILTIN key or a custom deck id
 const urls = new Map();               // Blob -> object URL, for the custom deck on show
-const custom = () => (current === TOUR ? null : decks.find((d) => d.id === current));
+const custom = () => (BUILTIN[current] ? null : decks.find((d) => d.id === current));
 const blobUrl = (b) => { if (!urls.has(b)) urls.set(b, URL.createObjectURL(b)); return urls.get(b); };
 function clearUrls() { urls.forEach((u) => URL.revokeObjectURL(u)); urls.clear(); }
 const settings = () => custom() || cfg;   // .autoplay and .loop
@@ -388,8 +458,8 @@ const settings = () => custom() || cfg;   // .autoplay and .loop
 /* Every slide of the current presentation in order, in one shape for the setup list, the TV and the laptop. */
 function slides() {
   const d = custom();
-  if (!d) return cfg.order.map((id) => { const s = BY[id]; return { id, title: s.title, secs: cfg.secs[id], on: cfg.on[id], notes: s.notes, dark: !!s.dark, shot: !!s.shot, pos: 'zone',
-    links: s.links.map(([label, href]) => ({ label, href })), img: IMG(id), thumb: THUMB(id), rawImg: IMG(id), rawThumb: THUMB(id), ...(s.pos ? { pos: s.pos } : {}) }; });
+  if (!d) { const b = B(); return cfg.order.map((id) => { const s = b.by[id]; return { id, title: s.title, secs: cfg.secs[id], on: cfg.on[id], notes: s.notes, dark: !!s.dark, shot: !!s.shot, pos: s.pos || b.pos,
+    links: s.links.map(([label, href]) => ({ label, href })), img: IMG(id, b.dir), thumb: THUMB(id, b.dir), rawImg: IMG(id, b.dir), rawThumb: THUMB(id, b.dir) }; }); }
   return d.slides.map((s) => ({ ...s, notes: String(s.notes || '').split('\n').map((t) => t.trim()).filter(Boolean), links: s.links.filter((l) => l.label && safeHref(l.href)),
     img: blobUrl(s.img), thumb: blobUrl(s.thumb), rawImg: s.img, rawThumb: s.thumb }));
 }
@@ -493,7 +563,7 @@ async function importDeck(file) {
 
 // ================================================================ setup panel
 function renderDeckSelect() {
-  $('deckSel').innerHTML = `<option value="${TOUR}">Schoolynq product tour · ${SLIDES.length} slides</option>`
+  $('deckSel').innerHTML = Object.entries(BUILTIN).map(([k, b]) => `<option value="${k}">${b.name} · ${b.slides.length} slides</option>`).join('')
     + (decks.length ? '<optgroup label="Your presentations">' + decks.map((d) => `<option value="${esc(d.id)}">${esc(d.name)} · ${d.slides.length} slide${d.slides.length === 1 ? '' : 's'}</option>`).join('') + '</optgroup>' : '');
   $('deckSel').value = current;
 }
@@ -505,10 +575,10 @@ function renderSetup() {
   const d = custom(), list = slides();
   renderDeckSelect();
   $('customTools').hidden = !d; $('drop').hidden = !d; $('storeNote').hidden = !d;
-  $('presetBox').hidden = !!d; $('reset').hidden = !!d;
+  $('presetBox').hidden = !!d || !B().presets.length; $('reset').hidden = !!d;
   $('deckHead').innerHTML = d
     ? `<label class="muted" style="font-size:12.5px">Presentation name<input class="field" id="deckName" value="${esc(d.name)}" maxlength="80" style="margin-top:4px;min-width:300px"></label>`
-    : '<h2>Schoolynq product tour</h2>';
+    : `<h2>${B().name}</h2>`;
   $('listNote').textContent = d
     ? (list.length ? 'Tick the slides to show, set the seconds, drag a picture or use the arrows to reorder. Open “Talking points and links” to add notes for the laptop screen and buttons on the slide.' : '')
     : 'Tick the slides to show, set the seconds for each and change the order with the arrows or by dragging a picture. Changes are remembered on this computer.';
@@ -545,7 +615,8 @@ function move(id, by) {
 }
 async function selectDeck(id) {
   clearUrls();
-  current = id === TOUR || decks.some((d) => d.id === id) ? id : TOUR;
+  current = BUILTIN[id] || decks.some((d) => d.id === id) ? id : TOUR;
+  if (BUILTIN[current]) cfg = cfgs[current];
   remember(CURRENT, current);
   openDetails = null; status('');
   renderSetup();
@@ -637,8 +708,8 @@ function wireSetup() {
   $('preset').onchange = (e) => {
     const p = PRESETS.find(([k]) => k === e.target.value); if (!p) return;
     const [, , pick, secs] = p;
-    cfg.order = [...pick, ...SLIDES.map((s) => s.id).filter((id) => !pick.includes(id))];
-    cfg.on = Object.fromEntries(SLIDES.map((s) => [s.id, pick.includes(s.id)]));
+    cfg.order = [...pick, ...B().slides.map((s) => s.id).filter((id) => !pick.includes(id))];
+    cfg.on = Object.fromEntries(B().slides.map((s) => [s.id, pick.includes(s.id)]));
     if (secs) pick.forEach((id) => { cfg.secs[id] = secs; });
     e.target.value = ''; saveTour(); renderSetup();
   };
@@ -646,10 +717,10 @@ function wireSetup() {
   $('loop').onchange = (e) => { settings().loop = e.target.checked; commit(); };
   $('applyAll').onclick = () => {
     const v = clampSecs($('allSecs').value), d = custom();
-    if (d) { d.slides.forEach((s) => { s.secs = v; }); d.defaultSecs = v; } else SLIDES.forEach((s) => { cfg.secs[s.id] = v; });
+    if (d) { d.slides.forEach((s) => { s.secs = v; }); d.defaultSecs = v; } else B().slides.forEach((s) => { cfg.secs[s.id] = v; });
     commit(); renderSetup();
   };
-  $('reset').onclick = () => { cfg = tourDefaults(); saveTour(); renderSetup(); };
+  $('reset').onclick = () => { cfg = cfgs[current] = defaults(B()); saveTour(); renderSetup(); };
   $('present').onclick = () => startShow(false);
   $('presentDual').onclick = () => startShow(true);
 }
@@ -839,13 +910,15 @@ function wireNotes() {
 async function init() {
   $('setup').hidden = false; wireSetup(); wireStage(); tick();
   await refreshDecks();
-  const want = recall(CURRENT);
-  current = want && decks.some((d) => d.id === want) ? want : TOUR;
+  const want = location.hash === '#pitch' ? PITCH_ID : recall(CURRENT);   // presenter.html#pitch opens the pitch
+  current = want && (BUILTIN[want] || decks.some((d) => d.id === want)) ? want : TOUR;
+  if (BUILTIN[current]) cfg = cfgs[current];
   renderSetup();
+  addEventListener('hashchange', () => { if (location.hash === '#pitch') selectDeck(PITCH_ID); });
 }
 if (location.hash === '#notes') wireNotes();
 else init();
-window.PRESENTER = { SLIDES, PRESETS, cfg: () => cfg, run, decks: () => decks, current: () => current, safeHref };
+window.PRESENTER = { SLIDES, PITCH, PRESETS, BUILTIN, cfg: () => cfg, run, decks: () => decks, current: () => current, safeHref };
 </script>
 </body>
 </html>
