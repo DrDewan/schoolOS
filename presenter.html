@@ -248,7 +248,7 @@
 const SLIDES = [
   { id: 1, title: 'Ready lessons for teachers. Clear progress for school leaders.', secs: 12, dark: true,
     links: [['Open the demo school', 'index.html']],
-    notes: ['Schoolynq gives teachers ready lessons and gives school leaders a clear view of progress, from Grade 3 to A-Level.',
+    notes: ['Schoolynq gives teachers ready lessons and gives school leaders a clear view of progress, from Grade 1 to A-Level.',
             'Everything you will see is running in this demo school, Schoolynq School, with invented students and data.',
             'The buttons on each slide open that part of the software if you want to show it live.'] },
   { id: 2, title: 'Three things every school wrestles with', secs: 15, links: [],
@@ -258,7 +258,7 @@ const SLIDES = [
             'Schoolynq connects the lesson, the class and the school so these show up early.'] },
   { id: 3, title: 'Two products, one school journey', secs: 15,
     links: [['Open a mission', 'missions/heart-v4/index.html'], ['Simulation Lab', 'https://schoolynq.com/lab/']],
-    notes: ['Missions, for Grades 3 to 8: one classroom screen, led by the teacher, every student taking part.',
+    notes: ['Missions, for Grades 1 to 8: one classroom screen, led by the teacher, every student taking part.',
             'Polaris, for Grades 9 to 12: every student on their own phone, practising to mastery.',
             'A school can start with either and add the other.'] },
   { id: 4, title: 'A ready 40-minute lesson, built from your books', secs: 20, shot: true,
@@ -301,11 +301,18 @@ const SLIDES = [
     notes: ['Every mission comes with pupil notes, a worksheet with an answer key, exit slips and a teacher guide.',
             'Worksheets have square-grid and ruled space for working, and a self-check at the end.',
             'Teachers print what they need from the mission or from Mission Control.'] },
-  { id: 12, title: 'Polaris, the Simulation Lab and where to start', secs: 15, dark: true,
-    links: [['Simulation Lab', 'https://schoolynq.com/lab/'], ['Book a demo', 'https://schoolynq.com/#contact']],
+  { id: 12, title: 'Polaris and the Simulation Lab', secs: 15, dark: true,
+    links: [['Simulation Lab', 'https://schoolynq.com/lab/'], ['schoolynq.com', 'https://schoolynq.com/']],
     notes: ['Polaris extends the same idea to Grades 9 to 12, on each student’s own phone.',
-            'The Simulation Lab is open to any classroom.',
-            'Most schools start with one grade and one subject, then grow. Thank you.'] }
+            'In a live class, a wrong answer gets targeted follow-up until the idea is fixed.',
+            'The Simulation Lab is open to any classroom.'] },
+  { id: 13, title: 'An 8-week trial in two classes', secs: 25, pos: 'tr',
+    links: [['Plan your trial', 'https://schoolynq.com/#contact']],
+    notes: ['Here is how a school starts: an 8-week trial in two classes, in Maths and Science.',
+            'Before week 1 you choose the classes and share the textbook pages and calendar; we build the missions and train the teachers in an hour.',
+            'In weeks 1 and 2 we are in the room for the first lessons and take a baseline. In weeks 3 to 6 the missions run in normal lessons, with a mid-point review at week 4.',
+            'At week 8 you see the results against the baseline, hear from the teachers and students, and decide: expand, adjust or stop.',
+            'The school provides two classes, a screen and the books; we provide everything else. Thank you.'] }
 ];
 const SLIDE_DIR = 'slides/';   // kept as a plain string so the schoolynq.com copy can point it at the right folder
 const IMG = (id) => `${SLIDE_DIR}${String(id).padStart(2, '0')}.webp`;
@@ -313,10 +320,10 @@ const THUMB = (id) => `${SLIDE_DIR}thumbs/${String(id).padStart(2, '0')}.webp`;
 const BY = Object.fromEntries(SLIDES.map((s) => [s.id, s]));
 const SHOT_RECT = { left: 43.23, top: 18.15, width: 51.56, height: 54.7 };   // the screenshot frame on slides 4-10, in % of the slide
 const PRESETS = [
-  ['full', 'Full tour · 12 slides', [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]],
-  ['teachers', 'For teachers · 8 slides', [1, 4, 5, 6, 7, 8, 11, 12]],
-  ['leaders', 'For school leaders · 8 slides', [1, 2, 3, 10, 9, 8, 7, 12]],
-  ['quick', 'Two-minute overview · 6 slides of 20 s', [1, 3, 4, 9, 10, 12], 20]
+  ['full', 'Full tour · 13 slides', [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]],
+  ['teachers', 'For teachers · 8 slides', [1, 4, 5, 6, 7, 8, 11, 13]],
+  ['leaders', 'For school leaders · 8 slides', [1, 2, 3, 10, 9, 8, 7, 13]],
+  ['quick', 'Two-minute overview · 6 slides of 20 s', [1, 3, 4, 9, 10, 13], 20]
 ];
 const TOUR = 'tour';
 
@@ -343,7 +350,10 @@ const tourDefaults = () => ({ order: SLIDES.map((s) => s.id), on: Object.fromEnt
 function loadTour() {
   try {
     const v = JSON.parse(localStorage.getItem(KEY));
-    if (v && Array.isArray(v.order) && v.order.length === SLIDES.length && v.order.every((id) => BY[id])) return { ...tourDefaults(), ...v };
+    if (v && Array.isArray(v.order) && v.order.every((id) => BY[id]) && new Set(v.order).size === v.order.length) {
+      const d = tourDefaults(), added = SLIDES.map((s) => s.id).filter((id) => !v.order.includes(id));
+      return { ...d, ...v, order: [...v.order, ...added], on: { ...d.on, ...v.on }, secs: { ...d.secs, ...v.secs } };
+    }
   } catch (e) { /* storage unavailable: use defaults */ }
   return tourDefaults();
 }
@@ -379,7 +389,7 @@ const settings = () => custom() || cfg;   // .autoplay and .loop
 function slides() {
   const d = custom();
   if (!d) return cfg.order.map((id) => { const s = BY[id]; return { id, title: s.title, secs: cfg.secs[id], on: cfg.on[id], notes: s.notes, dark: !!s.dark, shot: !!s.shot, pos: 'zone',
-    links: s.links.map(([label, href]) => ({ label, href })), img: IMG(id), thumb: THUMB(id), rawImg: IMG(id), rawThumb: THUMB(id) }; });
+    links: s.links.map(([label, href]) => ({ label, href })), img: IMG(id), thumb: THUMB(id), rawImg: IMG(id), rawThumb: THUMB(id), ...(s.pos ? { pos: s.pos } : {}) }; });
   return d.slides.map((s) => ({ ...s, notes: String(s.notes || '').split('\n').map((t) => t.trim()).filter(Boolean), links: s.links.filter((l) => l.label && safeHref(l.href)),
     img: blobUrl(s.img), thumb: blobUrl(s.thumb), rawImg: s.img, rawThumb: s.thumb }));
 }
@@ -483,7 +493,7 @@ async function importDeck(file) {
 
 // ================================================================ setup panel
 function renderDeckSelect() {
-  $('deckSel').innerHTML = `<option value="${TOUR}">Schoolynq product tour · 12 slides</option>`
+  $('deckSel').innerHTML = `<option value="${TOUR}">Schoolynq product tour · ${SLIDES.length} slides</option>`
     + (decks.length ? '<optgroup label="Your presentations">' + decks.map((d) => `<option value="${esc(d.id)}">${esc(d.name)} · ${d.slides.length} slide${d.slides.length === 1 ? '' : 's'}</option>`).join('') + '</optgroup>' : '');
   $('deckSel').value = current;
 }
