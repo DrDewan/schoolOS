@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Schoolynq School | Lesson Planner</title>
+  <style>
+    /* Same tokens as the Mission Control teacher dashboard. */
+    :root { --bg:#08111f; --card:rgba(18,30,51,.92); --card-2:rgba(22,38,64,.95); --text:#eef4ff; --muted:#9fb0c8; --border:rgba(255,255,255,.1);
+      --accent:#60a5fa; --accent-2:#a78bfa; --success:#22c55e; --warning:#f59e0b; --danger:#ef4444; --shadow:0 18px 50px rgba(0,0,0,.35); }
+    * { box-sizing:border-box; }
+    body { margin:0; min-height:100vh; background:radial-gradient(ellipse at 80% -10%, #16263f, transparent 55%), var(--bg); color:var(--text);
+      font:14px/1.45 Inter, system-ui, -apple-system, "Segoe UI", Arial, sans-serif; }
+    button, select { font:inherit; color:inherit; }
+    .app { display:grid; grid-template-columns:250px minmax(0,1fr); min-height:100vh; }
+    .sidebar { padding:22px 18px; border-right:1px solid var(--border); background:rgba(8,17,31,.6); display:flex; flex-direction:column; gap:16px; }
+    .brand { display:flex; gap:12px; align-items:center; }
+    .brand-mark { width:42px; height:42px; border-radius:12px; display:grid; place-items:center; font-weight:800; background:linear-gradient(135deg,var(--accent),var(--accent-2)); }
+    .brand h1 { margin:0; font-size:17px; } .brand span { color:var(--muted); font-size:12px; }
+    .side-card { padding:12px; border:1px solid var(--border); border-radius:16px; background:var(--card); display:flex; flex-direction:column; gap:8px; }
+    .side-card label { font-size:12px; color:var(--muted); }
+    select { width:100%; background:var(--card-2); border:1px solid var(--border); border-radius:10px; padding:8px 10px; }
+    .side-link { color:var(--muted); text-decoration:none; padding:9px 12px; border-radius:12px; border:1px solid transparent; }
+    .side-link:hover, .side-link.active { color:var(--text); background:var(--card-2); border-color:var(--border); }
+    .who { font-size:13px; color:var(--muted); } .who strong { color:var(--text); display:block; font-size:15px; }
+    main { padding:18px 22px; display:flex; flex-direction:column; gap:14px; min-width:0; }
+    .top { display:flex; justify-content:space-between; align-items:flex-end; gap:16px; flex-wrap:wrap; }
+    .top h2 { margin:0; font-size:26px; letter-spacing:-.4px; } .top p { margin:4px 0 0; color:var(--muted); }
+    .seg { display:inline-flex; border:1px solid var(--border); border-radius:12px; overflow:hidden; }
+    .seg button { background:transparent; border:0; padding:9px 14px; cursor:pointer; color:var(--muted); }
+    .seg button.on { background:var(--card-2); color:var(--text); font-weight:700; }
+    .btn { border:1px solid var(--border); background:var(--card-2); padding:9px 14px; border-radius:12px; cursor:pointer; }
+    .btn:hover { border-color:var(--accent); } .btn:disabled { opacity:.45; cursor:default; }
+    .btn.primary { background:linear-gradient(135deg,var(--accent),var(--accent-2)); border:0; color:#fff; font-weight:700; }
+    .btn.small { padding:6px 10px; font-size:13px; }
+    .actions { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+    .kpis { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:12px; }
+    .kpi { padding:12px 14px; border:1px solid var(--border); border-radius:16px; background:var(--card); }
+    .kpi span { color:var(--muted); font-size:12px; } .kpi strong { display:block; font-size:20px; margin-top:2px; } .kpi small { color:var(--muted); }
+    .kpi.bad strong { color:#fca5a5; } .kpi.warn strong { color:#fcd34d; } .kpi.good strong { color:#86efac; }
+    .layout { display:grid; grid-template-columns:minmax(0,1fr) 330px; gap:14px; align-items:start; }
+    .card { background:var(--card); border:1px solid var(--border); border-radius:20px; padding:14px; box-shadow:var(--shadow); }
+    .card h3 { margin:0 0 10px; font-size:15px; }
+    .grid { display:grid; grid-template-columns:72px repeat(5,minmax(0,1fr)); gap:6px; }
+    .gh { font-size:12px; color:var(--muted); text-align:center; padding:2px 0; }
+    .wk { font-size:12px; color:var(--muted); display:flex; flex-direction:column; justify-content:center; }
+    .wk strong { color:var(--text); font-size:13px; }
+    .cell { min-height:66px; border-radius:12px; border:1px solid var(--border); background:rgba(255,255,255,.02); padding:6px 7px; font-size:12px; display:flex; flex-direction:column; gap:3px; }
+    .cell.clickable { cursor:pointer; } .cell.clickable:hover { border-color:var(--accent); }
+    .cell.past { opacity:.55; } .cell.today { border-color:var(--accent); box-shadow:inset 0 0 0 1px var(--accent); }
+    .cell.blocked { background:repeating-linear-gradient(135deg,rgba(148,163,184,.12) 0 8px,transparent 8px 16px); color:var(--muted); }
+    .cell.whatif { background:repeating-linear-gradient(135deg,rgba(239,68,68,.16) 0 8px,transparent 8px 16px); border-color:rgba(239,68,68,.5); }
+    .cell.assess { background:rgba(239,68,68,.12); border-color:rgba(239,68,68,.45); }
+    .cell.flex { border-style:dashed; }
+    .cell.wide { grid-column:span 5; min-height:40px; justify-content:center; }
+    .lt { font-weight:700; color:var(--text); line-height:1.25; }
+    .tag { align-self:flex-start; font-size:10.5px; font-weight:700; padding:1px 7px; border-radius:999px; background:rgba(148,163,184,.16); color:var(--muted); }
+    .tag.core { background:rgba(96,165,250,.16); color:#93c5fd; } .tag.practice { background:rgba(34,197,94,.14); color:#86efac; }
+    .tag.enrich { background:rgba(139,92,246,.18); color:#c4b5fd; } .tag.change { background:rgba(245,158,11,.18); color:#fcd34d; }
+    .tag.risk { background:rgba(239,68,68,.2); color:#fca5a5; }
+    .hw { font-size:11px; color:#86efac; }
+    .extra { margin-top:3px; padding:4px 6px; border-radius:8px; border:1px dashed rgba(239,68,68,.6); color:#fca5a5; font-size:11px; }
+    .tray { margin-top:10px; display:flex; gap:8px; flex-wrap:wrap; align-items:center; font-size:12.5px; }
+    .tray .lbl { color:var(--muted); } .pill { padding:4px 9px; border-radius:999px; border:1px solid var(--border); background:var(--card-2); }
+    .pill.late { border-color:rgba(239,68,68,.55); color:#fca5a5; } .pill.later { border-color:rgba(139,92,246,.5); color:#c4b5fd; }
+    .changes { display:flex; flex-direction:column; gap:8px; margin:0; padding:0; list-style:none; }
+    .changes li { padding:9px 10px; border-radius:12px; background:var(--card-2); border:1px solid var(--border); font-size:13px; }
+    .changes li b { display:block; } .changes li span { color:var(--muted); font-size:12px; }
+    .changes li.need { border-color:rgba(239,68,68,.5); }
+    .rules { margin:0; padding-left:18px; color:var(--muted); font-size:12.5px; display:flex; flex-direction:column; gap:5px; }
+    .rules b { color:var(--text); }
+    .side-stack { display:flex; flex-direction:column; gap:14px; }
+    .note { color:var(--muted); font-size:12px; }
+    .toast { position:fixed; right:22px; bottom:22px; padding:12px 16px; border-radius:14px; background:#0f1d33; border:1px solid var(--accent); box-shadow:var(--shadow); opacity:0; transform:translateY(10px); transition:.2s; pointer-events:none; max-width:420px; }
+    .toast.show { opacity:1; transform:none; }
+    details summary { cursor:pointer; font-weight:700; }
+    @media (max-width:1200px) { .layout { grid-template-columns:1fr; } .kpis { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+    @media (max-width:860px) { .app { grid-template-columns:1fr; } .sidebar { border-right:0; border-bottom:1px solid var(--border); } .grid { overflow-x:auto; } }
+  </style>
+  <link rel="stylesheet" href="brand/brand.css">
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand"><div class="brand-mark"><img src="brand/schoolynq-mark-white.svg" alt="Schoolynq"></div><div><h1>Schoolynq School</h1><span>Lesson Planner</span></div></div>
+    <div class="side-card">
+      <label for="teacherSel">Viewing as (mock whole school)</label>
+      <select id="teacherSel"></select>
+      <div class="who" id="who"></div>
+    </div>
+    <a class="side-link" href="teacher-dash-arrows-calendar.html">← Teacher dashboard</a>
+    <a class="side-link active" href="lesson-planner.html">🗓️ Lesson Planner</a>
+    <a class="side-link" href="student-analysis.html">🔎 Student Analysis</a>
+    <a class="side-link" href="index.html">Hub</a>
+    <p class="note">Mock-up. Data, names and the school calendar are invented to show how re-planning would work. Nothing is saved.</p>
+  </aside>
+
+  <main>
+    <div class="top">
+      <div><h2 id="title">Lesson Planner</h2><p id="subtitle"></p></div>
+      <div class="actions">
+        <div class="seg" role="group" aria-label="Plan view"><button id="viewCurrent" class="on">Current plan</button><button id="viewSuggested">Suggested re-plan</button></div>
+        <button class="btn primary" id="apply">Apply suggested plan</button>
+        <button class="btn" id="undo" disabled>Undo</button>
+      </div>
+    </div>
+
+    <section class="kpis" id="kpis" aria-live="polite"></section>
+
+    <div class="layout">
+      <section class="card">
+        <h3 id="gridTitle">Term plan · Weeks 6–10</h3>
+        <div class="grid" id="grid"></div>
+        <div class="tray" id="tray"></div>
+      </section>
+      <div class="side-stack">
+        <section class="card"><h3>Suggested changes</h3><ul class="changes" id="changes"></ul></section>
+        <section class="card">
+          <h3>What if…</h3>
+          <div class="actions">
+            <button class="btn small" id="wiOver">Today’s lesson ran over</button>
+            <button class="btn small" id="wiEarly">Finished the next lesson early</button>
+            <button class="btn small" id="wiReset">Reset</button>
+          </div>
+          <p class="note">Click any coming day in the plan to mark it unavailable (closure, absence, event). The plan re-flows at once.</p>
+        </section>
+        <section class="card"><details open><summary>School rules for re-planning</summary><ol class="rules" id="rules"></ol></details></section>
+      </div>
+    </div>
+  </main>
+</div>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+// ---------------------------------------------------------------- school calendar and rules (set by the school)
+const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu'];
+const FLEX_DAY = 4;                       // Thursday is a flex period
+const TODAY = { week: 6, day: 3 };         // Wednesday, Week 6 of a 10-week half-year
+const TEACH_WEEKS = [6, 7, 8];
+const ASSESSMENT = { Science: { week: 8, day: 2 }, Maths: { week: 8, day: 3 }, English: { week: 8, day: 1 } };
+const EVENTS = [
+  { week: 7, day: 0, subject: 'Science', label: 'Science fair preparation' },
+  { week: 7, day: 1, subject: 'Science', label: 'Science fair preparation' }
+];
+const RULES = [
+  '<b>Block assessments are fixed</b>: English Week 8 Mon, Science Week 8 Tue, Maths Week 8 Wed.',
+  '<b>Every core lesson is taught in class</b> before the block assessment.',
+  '<b>Thursday is a flex period</b>: catch-up when behind, enrichment when ahead.',
+  '<b>Up to one practice lesson a week</b> may be set as homework instead.',
+  '<b>Enrichment lessons</b> may move to after the exams.',
+  '<b>Week 9 is revision; Week 10 is exams</b>. No new missions.',
+  '<b>Extra periods</b> (after school) need the coordinator’s approval.'
+];
+
+// ---------------------------------------------------------------- mock whole school: one class per teacher
+// k: c = core, p = practice (may become homework), e = enrichment (may move after exams). done = already taught.
+const L = (n, t, k = 'c', done = false) => ({ n, t, k, done });
+const SCHOOL = [
+  // today: the lesson on today's dashboard when it is not simply the next untaught one (Muscles was skipped and is overdue).
+  { id: 'farhana', teacher: 'Ms. Farhana', cls: 'Grade 5A', subject: 'Science', course: 'Combined Science', unit: 'Human Body', planned: 56, today: 56, lessons: [
+    L(50, 'Food and nutrients', 'c', true), L(51, 'Healthy eating', 'c', true), L(52, 'Body systems', 'c', true), L(53, 'Skeleton', 'c', true),
+    L(54, 'Muscles'), L(55, 'Blood and blood vessels', 'c', true), L(56, 'The heart'), L(57, 'Lungs and breathing'), L(58, 'Digestion'),
+    L(59, 'Body systems practice', 'p'), L(60, 'Exercise and the pulse', 'e'), L(61, 'Human body review')] },
+  { id: 'jannat', teacher: 'Ms. Jannat', cls: 'Grade 6A', subject: 'Science', course: 'Combined Science', unit: 'Heart and circulation', planned: 51, lessons: [
+    L(40, 'Body organs', 'c', true), L(41, 'Blood: what it carries', 'c', true), L(42, 'Blood vessels', 'c', true), L(43, 'The heart as a pump'),
+    L(44, 'Two sides, four chambers'), L(45, 'Why return to the heart?'), L(46, 'Route practice', 'p'), L(47, 'Lungs and gas exchange'),
+    L(48, 'Vessels and the oxygen swap'), L(49, 'Circulation practice', 'p'), L(50, 'Pulse investigation', 'e'), L(51, 'A healthy heart', 'e'),
+    L(52, 'Breathing and exercise'), L(53, 'Body systems working together'), L(54, 'Block review')] },
+  { id: 'rashed', teacher: 'Mr. Rashed', cls: 'Grade 5A', subject: 'Maths', course: 'Mathematics', unit: 'Fractions and decimals', planned: 68, lessons: [
+    L(60, 'Fractions of a quantity', 'c', true), L(61, 'Equivalent fractions', 'c', true), L(62, 'Simplifying fractions', 'c', true), L(63, 'Comparing fractions', 'c', true),
+    L(64, 'Adding fractions'), L(65, 'Subtracting fractions'), L(66, 'Fractions practice', 'p'), L(67, 'Mixed numbers'), L(68, 'Improper fractions'),
+    L(69, 'Fractions and decimals'), L(70, 'Decimal place value'), L(71, 'Rounding decimals'), L(72, 'Fraction games', 'e'), L(73, 'Problem solving'), L(74, 'Block review')] },
+  { id: 'imran', teacher: 'Mr. Imran', cls: 'Grade 4B', subject: 'Maths', course: 'Mathematics', unit: 'Measurement', planned: 33, lessons: [
+    L(30, 'Length', 'c', true), L(31, 'Mass', 'c', true), L(32, 'Capacity', 'c', true), L(33, 'Time', 'c', true), L(34, 'Reading timetables', 'c', true),
+    L(35, 'Perimeter'), L(36, 'Area by counting squares'), L(37, 'Area of rectangles'), L(38, 'Measurement practice', 'p'), L(39, 'Measure the playground', 'e'), L(40, 'Block review')] },
+  { id: 'nayeem', teacher: 'Mr. Nayeem', cls: 'Grade 7A', subject: 'Science', course: 'Physics', unit: 'Forces and motion', planned: 26, lessons: [
+    L(21, 'Forces around us', 'c', true), L(22, 'Balanced forces', 'c', true), L(23, 'Friction', 'c', true), L(24, 'Air resistance', 'c', true), L(25, 'Measuring speed', 'c', true),
+    L(26, 'Speed calculations'), L(27, 'Distance–time graphs'), L(28, 'Speed practice', 'p'), L(29, 'Ramp investigation', 'e'), L(30, 'Block review')] },
+  { id: 'samia', teacher: 'Ms. Samia', cls: 'Grade 8A', subject: 'Science', course: 'Biology', unit: 'Cells and organisation', planned: 17, lessons: [
+    L(12, 'Plant and animal cells', 'c', true), L(13, 'Specialised cells', 'c', true), L(14, 'Using a microscope', 'c', true), L(15, 'Diffusion', 'c', true), L(16, 'Tissues and organs', 'c', true),
+    L(17, 'Organ systems'), L(18, 'Unicellular organisms'), L(19, 'Cells practice', 'p'), L(20, 'Onion cell slide', 'e'), L(21, 'Block review')] },
+  { id: 'sajid', teacher: 'Mr. Sajid', cls: 'Grade 8B', subject: 'Maths', course: 'Mathematics', unit: 'Algebra', planned: 45, lessons: [
+    L(40, 'Expressions', 'c', true), L(41, 'Expanding brackets', 'c', true), L(42, 'Factorising', 'c', true), L(43, 'Substitution', 'c', true), L(44, 'Formulae', 'c', true),
+    L(45, 'Linear equations'), L(46, 'Equations with brackets'), L(47, 'Equations practice', 'p'), L(48, 'Forming equations'), L(49, 'Inequalities'),
+    L(50, 'Sequences'), L(51, 'Algebra puzzles', 'e'), L(52, 'Block review')] },
+  { id: 'tania', teacher: 'Ms. Tania', cls: 'Grade 3A', subject: 'English', course: 'English', unit: 'Story writing', planned: 24, lessons: [
+    L(18, 'Story openings', 'c', true), L(19, 'Characters', 'c', true), L(20, 'Settings', 'c', true), L(21, 'Speech marks', 'c', true), L(22, 'Story problems', 'c', true),
+    L(23, 'Plan a story'), L(24, 'Write the middle'), L(25, 'Write the ending'), L(26, 'Editing practice', 'p'), L(27, 'Share our stories', 'e'), L(28, 'Spelling review'), L(29, 'Block review')] },
+  { id: 'ruma', teacher: 'Ms. Ruma', cls: 'Grade 6B', subject: 'English', course: 'English', unit: 'Persuasive writing', planned: 36, lessons: [
+    L(31, 'Fact and opinion', 'c', true), L(32, 'Persuasive language', 'c', true), L(33, 'Reading adverts', 'c', true), L(34, 'Rhetorical questions', 'c', true), L(35, 'Planning an argument', 'c', true),
+    L(36, 'Writing a letter'), L(37, 'Counter-arguments'), L(38, 'Editing practice', 'p'), L(39, 'Class debate', 'e'), L(40, 'Speeches'), L(41, 'Block review')] }
+];
+
+// ---------------------------------------------------------------- planner
+const st = { id: 'jannat', view: 'current', whatif: {}, applied: {}, history: [] };
+const key = (w, d) => w + '-' + d;
+const cmp = (a, b) => a.week - b.week || a.day - b.day;
+const clsNow = () => SCHOOL.find((c) => c.id === st.id);
+function wi() { return st.whatif[st.id] || (st.whatif[st.id] = { blocked: new Set(), over: 0, early: 0 }); }
+
+/* Slots for one class between today and its block assessment, after events and what-if closures. */
+function slots(c) {
+  const a = ASSESSMENT[c.subject], w = wi(), out = [];
+  for (const week of TEACH_WEEKS) for (let day = 0; day < 5; day++) {
+    const s = { week, day };
+    if (cmp(s, TODAY) < 0 || cmp(s, a) >= 0) continue;
+    if (EVENTS.some((e) => e.week === week && e.day === day && e.subject === c.subject)) continue;
+    if (w.blocked.has(key(week, day))) continue;
+    out.push({ ...s, flex: day === FLEX_DAY });
+  }
+  return out;
+}
+/* Lessons still to teach, today's first, with the what-ifs applied. */
+function remaining(c) {
+  const w = wi(), left = c.lessons.filter((l) => !l.done);
+  const today = left.find((l) => l.n === c.today) || left[0];
+  if (!today) return [];
+  const rest = [today, ...left.filter((l) => l !== today)];
+  rest.splice(1, w.early);   // finished early: the lessons after today are done
+  rest.splice(1, 0, ...Array.from({ length: w.over }, (_, i) => ({ n: today.n, t: today.t + ' (continued' + (w.over > 1 ? ' ' + (i + 1) : '') + ')', k: 'c', cont: true })));
+  return rest;
+}
+/* Pace against the school's term plan, in lessons (4 class periods a week). */
+function pace(c) {
+  const w = wi();
+  const behind = c.lessons.filter((l) => !l.done && l.n < c.planned).length + w.over - w.early;
+  const ahead = c.lessons.filter((l) => l.done && l.n >= c.planned).length;
+  return ahead > behind ? -(ahead - behind) : behind;
+}
+
+/* Current plan: lessons go into the normal periods in order; anything left over falls after the assessment. */
+function planCurrent(c) {
+  const list = remaining(c), normal = slots(c).filter((s) => !s.flex);
+  const placed = list.slice(0, normal.length).map((l, i) => ({ lesson: l, slot: normal[i] }));
+  return { placed, late: list.slice(normal.length), homework: [], later: [], extra: [], flexUsed: [], spare: Math.max(0, normal.length - list.length), actions: [] };
+}
+
+/* Suggested plan: apply the school's catch-up rules in order until everything fits. */
+function planSuggested(c) {
+  const all = slots(c), normal = all.filter((s) => !s.flex), flex = all.filter((s) => s.flex);
+  let inClass = remaining(c), actions = [], homework = [], later = [], extra = [], flexUsed = [];
+  let deficit = inClass.length - normal.length;
+  if (deficit > 0) {
+    flexUsed = flex.slice(0, Math.min(deficit, flex.length));
+    deficit -= flexUsed.length;
+    if (flexUsed.length) actions.push({ t: `Use ${flexUsed.length} Thursday flex period${flexUsed.length > 1 ? 's' : ''} for catch-up`, why: 'Rule 3: flex periods absorb lessons that are behind.' });
+  }
+  if (deficit > 0) {
+    const weeks = new Set(normal.concat(flexUsed).map((s) => s.week));
+    const canMove = inClass.filter((l) => l.k === 'p').slice(0, Math.min(deficit, weeks.size));
+    canMove.forEach((l) => { inClass.splice(inClass.indexOf(l), 1); homework.push(l); });
+    deficit -= canMove.length;
+    if (canMove.length) actions.push({ t: `Set ${canMove.map((l) => l.t).join(' and ')} as homework`, why: 'Rule 4: at most one practice lesson a week becomes homework.' });
+  }
+  if (deficit > 0) {
+    const move = inClass.filter((l) => l.k === 'e').slice(0, deficit);
+    move.forEach((l) => { inClass.splice(inClass.indexOf(l), 1); later.push(l); });
+    deficit -= move.length;
+    if (move.length) actions.push({ t: `Move ${move.map((l) => l.t).join(' and ')} to after the exams`, why: 'Rule 5: enrichment can wait; core lessons cannot.' });
+  }
+  const teach = normal.concat(flexUsed).sort(cmp);
+  const placed = inClass.slice(0, teach.length).map((l, i) => ({ lesson: l, slot: teach[i] }));
+  extra = inClass.slice(teach.length);
+  if (extra.length) actions.push({ need: true, t: `Request ${extra.length} extra period${extra.length > 1 ? 's' : ''} before the assessment`, why: 'Rule 7: needs the coordinator’s approval. Without it these core lessons fall after the assessment.' });
+  const spare = Math.max(0, teach.length - inClass.length);
+  if (spare > 0) actions.push({ t: `${spare} period${spare > 1 ? 's' : ''} free before the assessment`, why: 'You are ahead: use them for an extension task or start revision early. Thursday stays an enrichment period.' });
+  if (!actions.length) actions.push({ t: 'No changes needed', why: 'Every lesson fits before the block assessment.' });
+  // Set each homework on the first lesson after the content it practises, in a week with no homework yet (rule 4).
+  const hwWeeks = new Set();
+  homework.forEach((h) => {
+    const from = Math.max(0, placed.filter((p) => p.lesson.n < h.n).length - 1);
+    const free = placed.filter((p, i) => i >= from && !hwWeeks.has(p.slot.week));
+    const at = free[0] || placed.filter((p) => !hwWeeks.has(p.slot.week)).pop();
+    if (at) { (at.hw = at.hw || []).push(h); hwWeeks.add(at.slot.week); }
+  });
+  return { placed, late: [], homework, later, extra, flexUsed, spare, actions };
+}
+function activePlan(c) { return st.view === 'suggested' ? planSuggested(c) : planCurrent(c); }
+
+// ---------------------------------------------------------------- views
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s).replace(/[&<>"]/g, (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[ch]));
+const kindTag = (l) => `<span class="tag ${l.k === 'p' ? 'practice' : l.k === 'e' ? 'enrich' : 'core'}">${l.cont ? 'Continued' : l.k === 'p' ? 'Practice' : l.k === 'e' ? 'Enrichment' : 'Core'}</span>`;
+
+function render() {
+  const c = clsNow(), p = activePlan(c), cur = planCurrent(c), sug = planSuggested(c), pc = pace(c), a = ASSESSMENT[c.subject], all = slots(c);
+  const applied = !!st.applied[c.id];
+  $('title').textContent = `${c.cls} ${c.course}`;
+  $('subtitle').textContent = `${c.teacher} · ${c.unit} · Week ${TODAY.week} of 10 · block assessment Week ${a.week} ${DAYS[a.day]} (fixed by the school)`;
+  $('who').innerHTML = `<strong>${esc(c.teacher)}</strong>${esc(c.cls)} · ${esc(c.course)}`;
+  $('viewCurrent').classList.toggle('on', st.view === 'current');
+  $('viewSuggested').classList.toggle('on', st.view === 'suggested');
+  $('viewCurrent').textContent = applied ? 'Previous plan' : 'Current plan';
+  $('viewSuggested').textContent = applied ? 'Applied plan' : 'Suggested re-plan';
+  $('apply').disabled = applied || (sug.actions.length === 1 && sug.actions[0].t === 'No changes needed');
+  $('undo').disabled = !applied;
+
+  const left = remaining(c).length, normal = all.filter((s) => !s.flex).length, flex = all.length - normal;
+  const fits = sug.extra.length === 0;
+  const outcome = cur.late.length === 0 ? ['Fits', 'good', 'every lesson before the assessment']
+    : fits ? ['Fits after re-plan', 'warn', `${cur.late.length} lesson${cur.late.length > 1 ? 's' : ''} late in the current plan`]
+    : ['At risk', 'bad', `${sug.extra.length} extra period${sug.extra.length > 1 ? 's' : ''} needed even after re-planning`];
+  const paceTxt = pc > 0 ? [`${pc} lesson${pc > 1 ? 's' : ''} behind`, pc >= 4 ? 'bad' : 'warn', pc >= 4 ? `about ${Math.round(pc / 4)} week${Math.round(pc / 4) > 1 ? 's' : ''} of lessons` : 'against the term plan']
+    : pc < 0 ? [`${-pc} lesson${-pc > 1 ? 's' : ''} ahead`, 'good', 'against the term plan'] : ['On track', 'good', 'matches the term plan'];
+  $('kpis').innerHTML = [
+    ['Pace', ...paceTxt], ['Lessons left', String(left), '', 'in this block'],
+    ['Periods before the assessment', String(normal), '', `+ ${flex} Thursday flex period${flex === 1 ? '' : 's'}`], ['Outcome', ...outcome]
+  ].map(([k, v, cls, sub]) => `<div class="kpi ${cls}"><span>${esc(k)}</span><strong>${esc(v)}</strong><small>${esc(sub)}</small></div>`).join('');
+
+  // plan grid
+  const at = new Map(p.placed.map((x) => [key(x.slot.week, x.slot.day), x]));
+  const flexKeys = new Set(p.flexUsed.map((s) => key(s.week, s.day)));
+  const lastTeach = p.placed[p.placed.length - 1];
+  const past = c.lessons.filter((l) => l.done).slice(-TODAY.day);
+  let html = '<div></div>' + DAYS.map((d) => `<div class="gh">${d}</div>`).join('');
+  for (const week of [6, 7, 8]) {
+    html += `<div class="wk"><strong>Week ${week}</strong>${week === TODAY.week ? 'this week' : ''}</div>`;
+    for (let day = 0; day < 5; day++) {
+      const k = key(week, day), s = { week, day }, ev = EVENTS.find((e) => e.week === week && e.day === day && e.subject === c.subject);
+      if (cmp(s, TODAY) < 0) { const l = past[day - (TODAY.day - past.length)]; html += `<div class="cell past">${l ? `<span class="lt">#${l.n} ${esc(l.t)}</span><span class="tag">Done</span>` : '<span>Taught</span>'}</div>`; continue; }
+      if (week === a.week && day === a.day) { html += `<div class="cell assess"><span class="lt">Block assessment</span><span class="tag risk">Fixed by school</span></div>`; continue; }
+      if (cmp(s, a) > 0) { html += `<div class="cell blocked"><span>Revision</span></div>`; continue; }
+      if (ev) { html += `<div class="cell blocked"><span class="lt">${esc(ev.label)}</span><span class="tag">School event</span></div>`; continue; }
+      if (wi().blocked.has(k)) { html += `<div class="cell whatif clickable" data-cell="${k}" title="Click to make this day available again"><span class="lt">Unavailable</span><span class="tag risk">What-if</span></div>`; continue; }
+      const x = at.get(k), today = week === TODAY.week && day === TODAY.day, isFlex = day === FLEX_DAY;
+      const extraHere = lastTeach && p.extra.length && k === key(lastTeach.slot.week, lastTeach.slot.day)
+        ? p.extra.map((l) => `<div class="extra">+ Extra period after school: #${l.n} ${esc(l.t)} · needs approval</div>`).join('') : '';
+      html += `<div class="cell clickable ${today ? 'today' : ''} ${isFlex ? 'flex' : ''}" data-cell="${k}" title="Click to mark this day unavailable">`
+        + (x ? `<span class="lt">#${x.lesson.n} ${esc(x.lesson.t)}</span>${kindTag(x.lesson)}${flexKeys.has(k) ? '<span class="tag change">Catch-up in flex period</span>' : ''}${(x.hw || []).map((h) => `<span class="hw">+ Homework: ${esc(h.t)}</span>`).join('')}`
+          : isFlex ? '<span>Flex period</span><span class="tag">Catch-up or enrichment</span>' : '<span>Free period</span><span class="tag change">Extension or early revision</span>')
+        + (today ? '<span class="tag">Today</span>' : '') + extraHere + '</div>';
+    }
+  }
+  html += `<div class="wk"><strong>Week 9</strong></div><div class="cell blocked wide"><span class="lt">Revision week · exam preparation (school rule)</span></div>`;
+  html += `<div class="wk"><strong>Week 10</strong></div><div class="cell blocked wide"><span class="lt">Half-yearly exams · missions paused</span></div>`;
+  $('grid').innerHTML = html;
+  $('tray').innerHTML = (p.late.length ? `<span class="lbl">Won’t fit before the assessment:</span>${p.late.map((l) => `<span class="pill late">#${l.n} ${esc(l.t)}</span>`).join('')}` : '')
+    + (p.later.length ? `<span class="lbl">After the exams:</span>${p.later.map((l) => `<span class="pill later">#${l.n} ${esc(l.t)}</span>`).join('')}` : '');
+  $('gridTitle').textContent = (st.view === 'suggested' ? (applied ? 'Applied plan' : 'Suggested re-plan') : (applied ? 'Previous plan' : 'Current plan')) + ' · Weeks 6–10';
+  $('changes').innerHTML = sug.actions.map((x) => `<li class="${x.need ? 'need' : ''}"><b>${esc(x.t)}</b><span>${esc(x.why)}</span></li>`).join('');
+  document.querySelectorAll('[data-cell]').forEach((el) => (el.onclick = () => {
+    const b = wi().blocked; b.has(el.dataset.cell) ? b.delete(el.dataset.cell) : b.add(el.dataset.cell); render();
+  }));
+}
+
+function toast(msg) { const t = $('toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(toast.t); toast.t = setTimeout(() => t.classList.remove('show'), 3200); }
+function init() {
+  $('teacherSel').innerHTML = SCHOOL.map((c) => `<option value="${c.id}">${esc(c.teacher)} · ${esc(c.cls)} ${esc(c.course)}</option>`).join('');
+  $('teacherSel').value = st.id;
+  $('teacherSel').onchange = (e) => { st.id = e.target.value; st.view = st.applied[st.id] ? 'suggested' : 'current'; render(); };
+  $('rules').innerHTML = RULES.map((r) => `<li>${r}</li>`).join('');
+  $('viewCurrent').onclick = () => { st.view = 'current'; render(); };
+  $('viewSuggested').onclick = () => { st.view = 'suggested'; render(); };
+  $('apply').onclick = () => {
+    const s = planSuggested(clsNow());
+    st.applied[st.id] = true; st.view = 'suggested'; render();
+    toast(s.extra.length ? 'Plan applied and sent to Mission Control. Extra-period request sent to the coordinator.' : 'Plan applied and sent to Mission Control.');
+  };
+  $('undo').onclick = () => { delete st.applied[st.id]; st.view = 'current'; render(); toast('Back to the previous plan.'); };
+  $('wiOver').onclick = () => { wi().over++; render(); };
+  $('wiEarly').onclick = () => { wi().early++; render(); };
+  $('wiReset').onclick = () => { delete st.whatif[st.id]; render(); };
+  render();
+}
+init();
+window.PLANNER = { SCHOOL, planCurrent, planSuggested, pace, slots, state: st, render };
+</script>
+</body>
+</html>

@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Schoolynq School | Student Analysis</title>
+  <style>
+    /* Same tokens as the Mission Control teacher dashboard and the lesson planner. */
+    :root { --bg:#08111f; --card:rgba(18,30,51,.92); --card-2:rgba(22,38,64,.95); --text:#eef4ff; --muted:#9fb0c8; --border:rgba(255,255,255,.1);
+      --accent:#60a5fa; --accent-2:#a78bfa; --success:#22c55e; --warning:#f59e0b; --danger:#ef4444; --shadow:0 18px 50px rgba(0,0,0,.35);
+      --good-bg:rgba(34,197,94,.2); --good:#86efac; --mid-bg:rgba(245,158,11,.2); --mid:#fcd34d; --low-bg:rgba(239,68,68,.24); --low:#fca5a5; }
+    * { box-sizing:border-box; }
+    body { margin:0; min-height:100vh; background:radial-gradient(ellipse at 80% -10%, #16263f, transparent 55%), var(--bg); color:var(--text);
+      font:14px/1.45 Inter, system-ui, -apple-system, "Segoe UI", Arial, sans-serif; }
+    button, select, input { font:inherit; color:inherit; }
+    .app { display:grid; grid-template-columns:250px minmax(0,1fr); min-height:100vh; }
+    .sidebar { padding:22px 18px; border-right:1px solid var(--border); background:rgba(8,17,31,.6); display:flex; flex-direction:column; gap:16px; }
+    .brand { display:flex; gap:12px; align-items:center; }
+    .brand-mark { width:42px; height:42px; border-radius:12px; display:grid; place-items:center; flex:none; }
+    .brand h1 { margin:0; font-size:17px; } .brand span { color:var(--muted); font-size:12px; }
+    .side-card { padding:12px; border:1px solid var(--border); border-radius:16px; background:var(--card); font-size:13px; color:var(--muted); }
+    .side-card strong { color:var(--text); display:block; font-size:15px; }
+    .side-link { color:var(--muted); text-decoration:none; padding:9px 12px; border-radius:12px; border:1px solid transparent; }
+    .side-link:hover, .side-link.active { color:var(--text); background:var(--card-2); border-color:var(--border); }
+    main { padding:18px 22px; display:flex; flex-direction:column; gap:14px; min-width:0; }
+    .top { display:flex; justify-content:space-between; align-items:flex-end; gap:14px; flex-wrap:wrap; }
+    .top h2 { margin:0; font-size:26px; letter-spacing:-.4px; } .top p { margin:4px 0 0; color:var(--muted); }
+    .seg { display:inline-flex; border:1px solid var(--border); border-radius:12px; overflow:hidden; }
+    .seg button { background:transparent; border:0; padding:9px 14px; cursor:pointer; color:var(--muted); }
+    .seg button.on { background:var(--card-2); color:var(--text); font-weight:700; }
+    .btn { border:1px solid var(--border); background:var(--card-2); padding:8px 13px; border-radius:12px; cursor:pointer; }
+    .btn:hover { border-color:var(--accent); }
+    .btn.primary { background:linear-gradient(135deg,var(--accent),var(--accent-2)); border:0; color:#fff; font-weight:700; }
+    select, input { background:var(--card-2); border:1px solid var(--border); border-radius:10px; padding:8px 10px; }
+    #find { width:230px; }
+    .actions { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+    .card { background:var(--card); border:1px solid var(--border); border-radius:20px; padding:14px; box-shadow:var(--shadow); min-width:0; }
+    .card h3 { margin:0 0 10px; font-size:15px; }
+    .card-head { display:flex; justify-content:space-between; align-items:center; gap:10px; margin-bottom:10px; flex-wrap:wrap; }
+    .card-head h3 { margin:0; } .card-head label { color:var(--muted); font-size:12.5px; display:flex; gap:6px; align-items:center; }
+    .note { color:var(--muted); font-size:12px; margin:8px 0 0; }
+    .view:not([hidden]) { display:flex; flex-direction:column; gap:14px; }
+
+    /* Data sources strip */
+    .sources { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:8px; }
+    .src { padding:8px 11px; border:1px solid var(--border); border-radius:14px; background:var(--card); font-size:11.5px; color:var(--muted); display:flex; flex-direction:column; }
+    .src b { color:var(--text); font-size:12.5px; } .src .cov { color:var(--text); }
+    .chip { display:inline-block; font-size:10.5px; padding:1px 7px; border-radius:999px; background:rgba(148,163,184,.16); color:var(--muted); white-space:nowrap; margin:1px 0; }
+    .chip.scope { background:rgba(61,139,255,.18); color:#a9cbff; }
+
+    .kpis { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:10px; }
+    .kpi { padding:11px 13px; border:1px solid var(--border); border-radius:16px; background:var(--card); }
+    .kpi span { color:var(--muted); font-size:12px; } .kpi strong { display:block; font-size:20px; margin-top:2px; } .kpi small { color:var(--muted); font-size:11.5px; }
+    .layout { display:grid; grid-template-columns:minmax(0,1fr) 340px; gap:14px; align-items:start; }
+    .stack { display:flex; flex-direction:column; gap:14px; min-width:0; }
+
+    /* Tables and heatmap */
+    .tablewrap { overflow-x:auto; }
+    table { border-collapse:separate; border-spacing:3px; width:100%; }
+    th { font-size:11.5px; color:var(--muted); font-weight:600; text-align:center; padding:2px 3px; }
+    th.name { text-align:left; }
+    td { text-align:center; font-size:12.5px; font-weight:700; border-radius:7px; padding:5px 3px; min-width:46px; }
+    .good { background:var(--good-bg); color:var(--good); } .mid { background:var(--mid-bg); color:var(--mid); } .low { background:var(--low-bg); color:var(--low); }
+    td.thin { outline:1.5px dashed currentColor; outline-offset:-3px; }
+    td.none { background:repeating-linear-gradient(135deg,rgba(148,163,184,.12) 0 6px,transparent 6px 12px); color:var(--muted); font-weight:400; }
+    td.plain { color:var(--muted); font-weight:500; }
+    td.txt { text-align:left; color:var(--muted); font-weight:500; }
+    .who { background:none; border:0; padding:3px 4px; cursor:pointer; text-align:left; white-space:nowrap; font-weight:700; font-size:13px; border-radius:6px; }
+    .who:hover, .who:focus-visible { color:var(--accent); outline:none; text-decoration:underline; }
+    tbody tr:hover td, tbody tr:hover th { filter:brightness(1.15); }
+    .flags { display:flex; gap:3px; justify-content:center; flex-wrap:wrap; }
+    .dot { width:9px; height:9px; border-radius:50%; display:inline-block; }
+    .dot.high { background:var(--danger); } .dot.medium { background:var(--warning); } .dot.info { background:var(--success); }
+    .legend { display:flex; gap:12px; flex-wrap:wrap; margin-top:10px; font-size:12px; color:var(--muted); align-items:center; }
+    .legend i { display:inline-block; width:22px; height:14px; border-radius:4px; vertical-align:middle; margin-right:5px; font-style:normal; }
+
+    /* Alerts */
+    .alerts { list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:7px; }
+    .scroll { max-height:640px; overflow:auto; padding-right:3px; }
+    .alerts li { padding:9px 10px; border-radius:12px; background:var(--card-2); border:1px solid var(--border); border-left:4px solid var(--border); font-size:13px; }
+    .alerts li.high { border-left-color:var(--danger); } .alerts li.medium { border-left-color:var(--warning); } .alerts li.info { border-left-color:var(--success); }
+    .alerts li b { display:block; } .alerts li .d { color:var(--muted); font-size:12px; display:block; margin:2px 0 4px; }
+    .alerts .who { padding:0; font-size:13.5px; }
+    .group { color:var(--muted); font-size:12px; margin:6px 0 0; list-style:none; }
+
+    /* Student profile */
+    .shead { display:flex; gap:14px; align-items:center; flex-wrap:wrap; }
+    .avatar { width:52px; height:52px; border-radius:16px; display:grid; place-items:center; font-weight:800; font-size:22px; background:linear-gradient(135deg,var(--accent),var(--accent-2)); flex:none; }
+    .sname h3 { margin:0; font-size:20px; } .sname span { color:var(--muted); font-size:12.5px; }
+    .stats { display:flex; gap:8px; flex-wrap:wrap; flex:1; }
+    .stat { padding:6px 10px; border-radius:12px; border:1px solid var(--border); background:var(--card-2); font-size:12px; color:var(--muted); }
+    .stat strong { display:block; color:var(--text); font-size:15px; }
+    .ctab td { text-align:left; font-weight:500; background:var(--card-2); padding:7px 8px; }
+    .ctab td.score { text-align:center; font-weight:700; width:64px; }
+    .ctab .lt { font-weight:700; } .ctab .sub { color:var(--muted); font-size:11.5px; display:block; }
+    .ev { display:flex; gap:4px; flex-wrap:wrap; }
+    .ev .chip.ok { background:rgba(34,197,94,.16); color:var(--good); } .ev .chip.no { background:rgba(239,68,68,.18); color:var(--low); }
+    .cards3 { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:14px; }
+    .span3 { grid-column:1 / -1; }
+    .big { font-size:24px; font-weight:800; }
+    .bar { position:relative; height:10px; border-radius:6px; background:rgba(148,163,184,.15); margin:3px 0 6px; }
+    .bar > span { position:absolute; inset:0 auto 0 0; border-radius:6px; }
+    .bar > span.neutral { background:rgba(61,139,255,.55); }
+    .bar > i { position:absolute; top:-3px; bottom:-3px; width:2px; background:var(--text); opacity:.7; }
+    .kv { display:flex; justify-content:space-between; gap:10px; font-size:13px; padding:4px 0; border-bottom:1px solid var(--border); }
+    .kv:last-child { border-bottom:0; } .kv span { color:var(--muted); } .kv b { text-align:right; }
+    .stab td { padding:6px 6px; } .stab td.txt b { color:var(--text); display:block; font-size:12.5px; }
+    .wb { display:flex; gap:6px; align-items:flex-end; height:84px; margin:6px 0 4px; }
+    .wb div { flex:1; display:flex; flex-direction:column; align-items:center; gap:3px; font-size:11px; color:var(--muted); }
+    .wb span { width:100%; border-radius:6px 6px 3px 3px; display:grid; place-items:start center; font-weight:800; font-size:11px; padding-top:2px; }
+    .notes { list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:7px; font-size:13px; }
+    .notes span { color:var(--muted); font-size:12px; margin-right:6px; }
+
+    .toast { position:fixed; right:22px; bottom:22px; padding:12px 16px; border-radius:14px; background:#0f1d33; border:1px solid var(--accent); box-shadow:var(--shadow); opacity:0; transform:translateY(10px); transition:.2s; pointer-events:none; max-width:420px; }
+    .toast.show { opacity:1; transform:none; }
+    @media (max-width:1400px) { .layout { grid-template-columns:1fr; } .scroll { max-height:none; } }
+    @media (max-width:1200px) { .kpis { grid-template-columns:repeat(3,minmax(0,1fr)); } .cards3 { grid-template-columns:repeat(2,minmax(0,1fr)); } .sources { grid-template-columns:repeat(3,minmax(0,1fr)); } }
+    @media (max-width:860px) { .app { grid-template-columns:1fr; } .sidebar { border-right:0; border-bottom:1px solid var(--border); } .cards3 { grid-template-columns:1fr; } }
+  </style>
+  <link rel="stylesheet" href="brand/brand.css">
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand"><div class="brand-mark"><img src="brand/schoolynq-mark-white.svg" alt="Schoolynq"></div><div><h1>Schoolynq School</h1><span>Student Analysis</span></div></div>
+    <div class="side-card"><strong>Term 1 · Week 6</strong>Wednesday · Grades 3–8 · 192 students</div>
+    <a class="side-link" href="teacher-dash-arrows-calendar.html">← Teacher dashboard</a>
+    <a class="side-link" href="principal-dash.html">← Principal dashboard</a>
+    <a class="side-link" href="lesson-planner.html">🗓️ Lesson Planner</a>
+    <a class="side-link active" href="student-analysis.html">🔎 Student Analysis</a>
+    <a class="side-link" href="index.html">Hub</a>
+    <p class="note">Mock-up. Every student, guardian, score and data source is invented to show how the picture would combine. Nothing is saved or sent.</p>
+  </aside>
+
+  <main>
+    <div class="top">
+      <div><h2 id="title">Student analysis</h2><p id="subtitle"></p></div>
+      <div class="actions">
+        <input id="find" list="people" placeholder="Find any student…" aria-label="Find a student" autocomplete="off">
+        <datalist id="people"></datalist>
+        <div class="seg" role="group" aria-label="View"><button id="viewSchool">School</button><button id="viewClass">Class</button><button id="viewStudent">Student</button></div>
+      </div>
+    </div>
+    <section class="sources" id="sources" aria-label="Data sources"></section>
+
+    <div id="schoolView" class="view" hidden>
+      <section class="kpis" id="schoolKpis"></section>
+      <div class="layout">
+        <section class="card">
+          <h3>Classes with lesson data this block</h3>
+          <div class="tablewrap"><table id="classTable"></table></div>
+          <p class="note">Attendance, wellbeing and flags are for the whole section; homework and Block 2 are for the class’s subject. Open a class to see every student.</p>
+        </section>
+        <section class="card">
+          <h3 id="schoolAlertTitle">Highest concern across the school</h3>
+          <div class="scroll"><ul class="alerts" id="schoolAlerts"></ul></div>
+        </section>
+      </div>
+    </div>
+
+    <div id="classView" class="view" hidden>
+      <section class="kpis" id="kpis"></section>
+      <div class="layout">
+        <section class="card">
+          <div class="card-head">
+            <h3 id="heatTitle">Mastery by lesson</h3>
+            <div class="actions">
+              <label>Class <select id="classSel"></select></label>
+              <label>Sort <select id="sort"><option value="attention">Needs attention first</option><option value="name">Name</option><option value="mastery">Lowest mastery first</option></select></label>
+            </div>
+          </div>
+          <div class="tablewrap"><table id="heat"></table></div>
+          <div class="legend">
+            <span><i class="good"></i>Secure 75%+</span><span><i class="mid"></i>Developing 50–74%</span><span><i class="low"></i>Needs support under 50%</span>
+            <span><i style="outline:1.5px dashed var(--muted);outline-offset:-3px"></i>Thin evidence (1–2 pieces)</span><span><i style="background:repeating-linear-gradient(135deg,rgba(148,163,184,.3) 0 4px,transparent 4px 8px)"></i>No evidence</span>
+          </div>
+          <p class="note">Each lesson score averages every piece of evidence: spotlight answers in the mission (right = 100%, wrong = 0%), the exit ticket and the homework quiz. Spotlight questions reach 1–2 students each, so most students have only a few answers per lesson.</p>
+        </section>
+        <section class="card">
+          <h3 id="alertTitle">Needs attention</h3>
+          <div class="scroll"><ul class="alerts" id="alerts"></ul></div>
+        </section>
+      </div>
+    </div>
+
+    <div id="studentView" class="view" hidden></div>
+  </main>
+</div>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+// ---------------------------------------------------------------- seeded random numbers, so every visit shows the same school
+let seed = 5056;
+function R() { seed = (seed + 0x6D2B79F5) | 0; let t = Math.imul(seed ^ (seed >>> 15), 1 | seed); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }
+const clamp = (x, lo = 0, hi = 1) => Math.max(lo, Math.min(hi, x));
+const noise = (sd) => (R() + R() + R() - 1.5) * sd * 2;
+const pick = (arr) => arr[Math.floor(R() * arr.length)];
+const mean = (xs) => (xs.length ? xs.reduce((t, x) => t + x, 0) / xs.length : null);
+const pct = (x) => (x == null ? '—' : Math.round(x * 100) + '%');
+const band = (x) => (x == null ? 'none' : x >= .75 ? 'good' : x >= .5 ? 'mid' : 'low');
+
+// ---------------------------------------------------------------- school calendar, sections and classes
+const WD = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu'];
+const TERM = [];   // school days so far: Week 1 Sunday to Week 6 Tuesday
+for (let w = 1; w <= 6; w++) for (let d = 0; d < 5; d++) if (w < 6 || d < 3) TERM.push(`Week ${w} ${WD[d]}`);
+const TERM_DAYS = TERM.length;
+const byTerm = (a, b) => TERM.indexOf(a) - TERM.indexOf(b);
+const LESSON_DAYS = ['Week 6 Tue', 'Week 6 Mon', 'Week 6 Sun', 'Week 5 Wed', 'Week 5 Tue', 'Week 5 Mon', 'Week 5 Sun'];   // newest first; Thursday is the flex period
+const SUBJECTS = ['Science', 'Maths', 'English'];
+const SECTIONS = {
+  '3A': { grade: 3, tutor: 'Ms. Tania', teachers: { Science: 'Mr. Habib', Maths: 'Ms. Shirin', English: 'Ms. Tania' } },
+  '4B': { grade: 4, tutor: 'Mr. Imran', teachers: { Science: 'Ms. Lubna', Maths: 'Mr. Imran', English: 'Ms. Popy' } },
+  '5A': { grade: 5, tutor: 'Ms. Farhana', teachers: { Science: 'Ms. Farhana', Maths: 'Mr. Rashed', English: 'Ms. Nasrin' } },
+  '6A': { grade: 6, tutor: 'Ms. Jannat', teachers: { Science: 'Ms. Jannat', Maths: 'Mr. Faisal', English: 'Ms. Ruma' } },
+  '6B': { grade: 6, tutor: 'Ms. Ruma', teachers: { Science: 'Ms. Jannat', Maths: 'Mr. Faisal', English: 'Ms. Ruma' } },
+  '7A': { grade: 7, tutor: 'Mr. Nayeem', teachers: { Science: 'Mr. Nayeem', Maths: 'Mr. Sajid', English: 'Ms. Nasrin' } },
+  '8A': { grade: 8, tutor: 'Ms. Samia', teachers: { Science: 'Ms. Samia', Maths: 'Mr. Sajid', English: 'Mr. Mahfuz' } },
+  '8B': { grade: 8, tutor: 'Mr. Sajid', teachers: { Science: 'Ms. Samia', Maths: 'Mr. Sajid', English: 'Mr. Mahfuz' } }
+};
+const COURSE = { '5A|Science': 'Combined Science', '6A|Science': 'Combined Science', '6B|Science': 'Combined Science', '7A|Science': 'Physics', '8A|Science': 'Biology', '8B|Science': 'Biology' };
+const courseOf = (sec, sub) => COURSE[sec + '|' + sub] || (sub === 'Maths' ? 'Mathematics' : sub);
+const SUBJECT_OFFSET = { '8A|Science': -.1 };   // the principal dashboard flags Grade 8 Biology for a low assessment score
+
+/* The classes in the lesson planner, with the lessons taught so far this block. A null day = not taught yet. */
+function lessons(list) {
+  const taught = list.filter((x) => x[3] !== null);
+  return list.map(([n, t, short, day]) => ({ n, t, short, ease: ((n * 37) % 13 - 6) / 100,
+    day: day === null ? null : LESSON_DAYS[taught.length - 1 - taught.findIndex((x) => x[0] === n)],
+    note: day === null ? 'Mission overdue: homework worksheet only' : '' }));
+}
+const CLASS = (id, section, subject, teacher, unit, list) => ({ id, section, subject, teacher, unit, course: courseOf(section, subject), lessons: lessons(list) });
+const CLASSES = [
+  CLASS('5A-sci', '5A', 'Science', 'Ms. Farhana', 'Human Body', [[50, 'Food and nutrients', 'Nutrients'], [51, 'Healthy eating', 'Eating'], [52, 'Body systems', 'Systems'], [53, 'Skeleton', 'Skeleton'], [54, 'Muscles', 'Muscles', null], [55, 'Blood and blood vessels', 'Blood']]),
+  CLASS('5A-maths', '5A', 'Maths', 'Mr. Rashed', 'Fractions and decimals', [[60, 'Fractions of a quantity', 'Of amounts'], [61, 'Equivalent fractions', 'Equivalent'], [62, 'Simplifying fractions', 'Simplify'], [63, 'Comparing fractions', 'Compare']]),
+  CLASS('3A-eng', '3A', 'English', 'Ms. Tania', 'Story writing', [[18, 'Story openings', 'Openings'], [19, 'Characters', 'Characters'], [20, 'Settings', 'Settings'], [21, 'Speech marks', 'Speech'], [22, 'Story problems', 'Problems']]),
+  CLASS('4B-maths', '4B', 'Maths', 'Mr. Imran', 'Measurement', [[30, 'Length', 'Length'], [31, 'Mass', 'Mass'], [32, 'Capacity', 'Capacity'], [33, 'Time', 'Time'], [34, 'Reading timetables', 'Timetables']]),
+  CLASS('6A-sci', '6A', 'Science', 'Ms. Jannat', 'Heart and circulation', [[40, 'Body organs', 'Organs'], [41, 'Blood: what it carries', 'Blood'], [42, 'Blood vessels', 'Vessels']]),
+  CLASS('6B-eng', '6B', 'English', 'Ms. Ruma', 'Persuasive writing', [[31, 'Fact and opinion', 'Fact/opinion'], [32, 'Persuasive language', 'Language'], [33, 'Reading adverts', 'Adverts'], [34, 'Rhetorical questions', 'Rhetorical'], [35, 'Planning an argument', 'Planning']]),
+  CLASS('7A-sci', '7A', 'Science', 'Mr. Nayeem', 'Forces and motion', [[21, 'Forces around us', 'Forces'], [22, 'Balanced forces', 'Balanced'], [23, 'Friction', 'Friction'], [24, 'Air resistance', 'Air'], [25, 'Measuring speed', 'Speed']]),
+  CLASS('8A-sci', '8A', 'Science', 'Ms. Samia', 'Cells and organisation', [[12, 'Plant and animal cells', 'Cells'], [13, 'Specialised cells', 'Specialised'], [14, 'Using a microscope', 'Microscope'], [15, 'Diffusion', 'Diffusion'], [16, 'Tissues and organs', 'Tissues']]),
+  CLASS('8B-maths', '8B', 'Maths', 'Mr. Sajid', 'Algebra', [[40, 'Expressions', 'Expressions'], [41, 'Expanding brackets', 'Expanding'], [42, 'Factorising', 'Factorise'], [43, 'Substitution', 'Substitute'], [44, 'Formulae', 'Formulae']])
+];
+const CLASS_BY = Object.fromEntries(CLASSES.map((c) => [c.id, c]));
+const classesOf = (sec) => CLASSES.filter((c) => c.section === sec);
+
+const SOURCES = [
+  { id: 'missions', icon: '🚀', name: 'Schoolynq missions', synced: 'Synced today 08:10' },
+  { id: 'exit', icon: '📝', name: 'Exit tickets', synced: 'Marked yesterday' },
+  { id: 'homework', icon: '🏠', name: 'Homework platform', synced: 'Synced today 07:00' },
+  { id: 'assess', icon: '📊', name: 'Block assessments', synced: 'Block 2 marked Week 4' },
+  { id: 'attendance', icon: '🗓️', name: 'Attendance register', synced: 'Synced today 08:05' },
+  { id: 'baseline', icon: '📏', name: 'Baseline test', synced: 'Taken Week 1' },
+  { id: 'behaviour', icon: '⭐', name: 'Behaviour log', synced: 'Updated yesterday' },
+  { id: 'wellbeing', icon: '💚', name: 'Wellbeing check-in', synced: 'Weekly, last Sunday' },
+  { id: 'sis', icon: '🏫', name: 'School records', synced: 'Synced today 06:00' },
+  { id: 'notes', icon: '💬', name: 'Teacher notes', synced: 'Updated yesterday' }
+];
+const SRC = Object.fromEntries(SOURCES.map((s) => [s.id, s]));
+
+// ---------------------------------------------------------------- students
+const ROSTER_5A = ['Aisha Karim', 'Anika Ferdous', 'Arif Mahmud', 'Farhan Hossain', 'Fahim Uddin', 'Imtiaz Kabir', 'Ishrat Jahan', 'Rafi Chowdhury',
+  'Junaid Siddique', 'Labiba Haque', 'Maliha Rahman', 'Meera Das', 'Nabila Sultana', 'Ayaan Rahman', 'Nadia Islam', 'Raisa Anwar',
+  'Rayan Chowdhury', 'Sadia Akter', 'Samir Ahmed', 'Tahmid Hasan', 'Sarah Zaheen', 'Tanvir Alam', 'Zarin Tasnim', 'Zayan Mirza'];
+const FIRST = ['Adib', 'Afsana', 'Ahnaf', 'Alvi', 'Amaya', 'Anan', 'Arisha', 'Arnob', 'Asif', 'Ayesha', 'Bushra', 'Daiyan', 'Dilruba', 'Eshal', 'Fabiha', 'Faiza', 'Fardin', 'Farzana',
+  'Hasib', 'Humaira', 'Ibrahim', 'Inaya', 'Irfan', 'Jarif', 'Jarin', 'Kashfia', 'Lamia', 'Mahir', 'Maisha', 'Mehrab', 'Mithila', 'Mubin', 'Nafisa', 'Naveed', 'Nehal', 'Nusaiba',
+  'Omar', 'Orpa', 'Parisa', 'Rafsan', 'Rahat', 'Ramisa', 'Rayhan', 'Ruhan', 'Sabiha', 'Sadman', 'Safa', 'Saif', 'Samiha', 'Shayan', 'Sneha', 'Sohan', 'Sumaiya', 'Tahsin',
+  'Tasfia', 'Towhid', 'Umaima', 'Wasif', 'Yasir', 'Zahin', 'Zara', 'Zayed'];
+const LAST = ['Ahmed', 'Akter', 'Alam', 'Anwar', 'Begum', 'Chowdhury', 'Das', 'Haque', 'Hasan', 'Hossain', 'Islam', 'Jahan', 'Kabir', 'Karim', 'Khan', 'Mahmud', 'Mirza',
+  'Rahman', 'Roy', 'Saha', 'Siddique', 'Sultana', 'Talukder', 'Uddin', 'Zaman'];
+const GUARDIANS = [['Rehana', 'Mother'], ['Shahid', 'Father'], ['Nasima', 'Mother'], ['Kamrul', 'Father'], ['Farida', 'Grandmother'], ['Jahangir', 'Father'], ['Salma', 'Mother'],
+  ['Mizanur', 'Uncle'], ['Rokeya', 'Mother'], ['Anisur', 'Father'], ['Shamima', 'Aunt'], ['Delwar', 'Father'], ['Parvin', 'Mother'], ['Habibur', 'Grandfather']];
+const HOUSES = ['Orion', 'Lyra', 'Vega', 'Altair'];
+const CONTACTS = ['Week 2 · welcome meeting', 'Week 3 · progress report sent', 'Week 4 · phone call', 'Week 5 · message on the parent app'];
+const INCIDENTS = ['Late to class twice', 'Missing equipment', 'Talking during a test', 'Unkind words at break', 'Phone out in class', 'Left the room without asking'];
+const TUTOR_NOTES = ['Settled and organised; brings equipment every day.', 'Friendly with the whole class; a good team member.', 'Quiet in discussions; encourage them to share answers.',
+  'Takes pride in neat work.', 'Sometimes rushes work to finish first.', 'Helps others without being asked.', 'Needs reminders to write homework in the planner.'];
+const SUBJECT_NOTES = {
+  Science: ['Asked good questions in the practical.', 'Explains ideas well aloud but rushes written answers.', 'Careful with diagrams and labels.'],
+  Maths: ['Quick with mental methods; show the working more.', 'Confident with the new topic.', 'Needs more practice with word problems.'],
+  English: ['Strong vocabulary in creative writing.', 'Reads widely; suggested the library challenge.', 'Spelling slips in longer pieces.']
+};
+// Students the other Mission Control pages already mention keep their stories; a few more show the cross-source flags.
+const PERSONAS = {
+  'SQ-5A-14': { a: .8, patch: (s) => { s.cls['5A-sci'].hwq[54] = .3; s.notes.push(['Week 6 Mon', 'Ms. Farhana', 'Thinks muscles can push as well as pull. Revisit when the Muscles mission runs.']); } },
+  'SQ-5A-21': { a: .62, absent: ['Week 6 Sun', 'Week 6 Mon'], earlier: 2, patch: (s) => { Object.assign(s.subjects.Science, { b1: 66, b2: 48 }); s.notes.push(['Week 4', 'Ms. Farhana', 'Forces block: foundation gap in speed and direction vocabulary.']); } },
+  'SQ-5A-08': { a: .78, hwRate: .5, patch: (s) => { const r = s.cls['5A-sci']; Object.assign(r.missions, { 50: [1], 51: [1], 52: [1, 1], 53: [1], 55: [1, 0] }); for (const k in r.hwq) r.hwq[k] = Math.min(r.hwq[k], .45); for (const k in r.exit) r.exit[k] = Math.max(r.exit[k], 7); s.subjects.Science.b2 = 61; s.notes.push(['Week 5', 'Ms. Farhana', 'Missed two worksheets. Confident when answering aloud.']); } },
+  'SQ-5A-23': { a: .76, written: .62, readingAge: 8.7, support: 'Reading intervention group', patch: (s) => { const r = s.cls['5A-sci']; r.missions[52] = [1, 1]; r.missions[53] = [1]; r.missions[55] = [1, 1]; s.notes.push(['Week 6 Tue', 'Ms. Farhana', 'Gets multiple-choice questions right; written explanations are short and incomplete.']); } },
+  'SQ-5A-12': { a: .93, reasoning: 124 },
+  'SQ-5A-20': { a: .56, reasoning: 116 },
+  'SQ-8B-07': { a: .64, absent: ['Week 5 Wed', 'Week 6 Sun'], earlier: 1, incidents: 3, wellbeing: [4, 4, 4, 3, 2, 2], patch: (s) => { Object.assign(s.subjects.Maths, { b1: 72, b2: 54 }); s.notes.push(['Week 6 Sun', 'Mr. Sajid', 'Withdrawn this week and did not finish the classwork. Spoke briefly after class.']); } },
+  'SQ-7A-03': { a: .94, reasoning: 127 },
+  'SQ-6A-11': { absent: ['Week 6 Sun', 'Week 6 Mon', 'Week 6 Tue'], earlier: 0, patch: (s) => s.notes.push(['Week 6 Tue', 'Ms. Jannat', 'Off sick since Sunday; catch-up pack ready for their return.']) },
+  'SQ-3A-05': { a: .74, written: .62, support: 'English language support', patch: (s) => { const r = s.cls['3A-eng']; r.missions[19] = [1, 1]; r.missions[21] = [1]; r.missions[22] = [1]; s.notes.push(['Week 5', 'Ms. Tania', 'Tells great stories aloud; writing them down is slower.']); } }
+};
+
+function makeStudent(sec, i, name) {
+  const sd = SECTIONS[sec], grade = sd.grade, id = `SQ-${sec}-${String(i + 1).padStart(2, '0')}`, o = PERSONAS[id] || {};
+  const a = o.a ?? clamp(.74 + noise(.09), .45, .96), hwRate = o.hwRate ?? clamp(.94 + noise(.05), .6, 1);
+  const recent = o.absent ?? (R() < .08 ? [pick(LESSON_DAYS.slice(0, 5))] : []);
+  const earlierN = o.earlier ?? (R() < .6 ? 0 : R() < .75 ? 1 : 2), early = [];
+  while (early.length < earlierN) { const d = pick(TERM.slice(0, 18)); if (!early.includes(d)) early.push(d); }
+  const absent = [...early, ...recent].sort(byTerm);
+  const s = { id, name, sec, grade, a, absent, absences: absent.length, attPct: (TERM_DAYS - absent.length) / TERM_DAYS, lates: R() < .7 ? 0 : R() < .7 ? 1 : 3, subjects: {}, cls: {}, notes: [] };
+  for (const sub of SUBJECTS) {
+    const sa = clamp(a + noise(.05) + (SUBJECT_OFFSET[sec + '|' + sub] || 0), .3, .98);
+    s.subjects[sub] = { a: sa, b1: Math.round(100 * clamp(sa + noise(.03))), b2: Math.round(100 * clamp(sa - .01 + noise(.03))), teacher: sd.teachers[sub], course: courseOf(sec, sub) };
+  }
+  for (const c of classesOf(sec)) {
+    const r = { missions: {}, exit: {}, hwq: {} };
+    for (const l of c.lessons) {
+      const p = clamp(s.subjects[c.subject].a + l.ease);
+      if (l.day && !absent.includes(l.day)) {
+        r.missions[l.n] = Array.from({ length: pick([0, 1, 1, 2]) }, () => (R() < p ? 1 : 0));
+        r.exit[l.n] = Math.round(clamp(p * (o.written ?? 1) + noise(.1)) * 10);
+      }
+      if (R() < hwRate) r.hwq[l.n] = Math.round(clamp(p + noise(.1)) * 100) / 100;
+    }
+    s.cls[c.id] = r;
+  }
+  for (const sub of SUBJECTS) {   // 12 homework tasks per subject this term; a class's lesson quizzes are some of them
+    const c = classesOf(sec).find((x) => x.subject === sub), quizzes = c ? c.lessons.length : 0;
+    const missing = (c ? quizzes - Object.keys(s.cls[c.id].hwq).length : 0) + Math.round((1 - hwRate) * (12 - quizzes));
+    const late = missing < 12 && R() < .2 ? 1 : 0;
+    s.subjects[sub].hw = { set: 12, missing, late, onTime: 12 - missing - late };
+  }
+  s.reasoning = o.reasoning ?? Math.round(100 + (a - .7) * 70 + noise(5));
+  s.age = grade + 5;
+  s.readingAge = o.readingAge ?? Math.round((s.age + .3 + (a - .7) * 5 + noise(.5)) * 10) / 10;
+  const months = Math.floor(R() * 12);
+  s.ageText = `${s.age} years ${months} month${months === 1 ? '' : 's'}`;
+  s.house = pick(HOUSES);
+  s.joined = `Grade ${1 + Math.floor(R() * grade)}`;
+  const [gName, rel] = pick(GUARDIANS);
+  s.guardian = { name: `${gName} ${name.split(' ').slice(-1)[0]}`, rel, phone: `+880 1${pick(['3', '7', '8', '9'])}•• ••• ${100 + Math.floor(R() * 900)}`, lang: pick(['Bangla', 'English', 'Bangla']), last: pick(CONTACTS) };
+  s.support = o.support ?? (R() < .05 ? 'Learning support plan' : R() < .05 ? 'Reading intervention group' : 'None');
+  s.behaviour = { points: Math.round(clamp(14 + a * 28 + noise(5), 4, 60)), incidents: [] };
+  const nInc = o.incidents ?? (R() < .8 ? 0 : R() < .8 ? 1 : 2);
+  for (let k = 0; k < nInc; k++) s.behaviour.incidents.push([pick(TERM.slice(5)), pick(INCIDENTS)]);
+  s.behaviour.incidents.sort((x, y) => byTerm(x[0], y[0]));
+  const base = clamp(Math.round(4.1 + noise(.35)), 3, 5);
+  s.wellbeing = o.wellbeing ?? Array.from({ length: 6 }, () => clamp(Math.round(base + noise(.4)), 1, 5));
+  s.notes.push([pick(['Week 2', 'Week 3', 'Week 4']), sd.tutor + ' (tutor)', pick(TUTOR_NOTES)]);
+  if (R() < .5) { const sub = pick(SUBJECTS); s.notes.push([pick(['Week 5', 'Week 6 Sun', 'Week 6 Tue']), sd.teachers[sub], pick(SUBJECT_NOTES[sub])]); }
+  if (o.patch) o.patch(s);
+  return s;
+}
+
+const usedNames = new Set(ROSTER_5A);
+function rosterFor(sec) {
+  if (sec === '5A') return ROSTER_5A;
+  const out = [];
+  while (out.length < 24) { const n = pick(FIRST) + ' ' + pick(LAST); if (!usedNames.has(n)) { usedNames.add(n); out.push(n); } }
+  return out.sort();
+}
+const STUDENTS = Object.keys(SECTIONS).flatMap((sec) => rosterFor(sec).map((n, i) => makeStudent(sec, i, n)));
+const byId = (id) => STUDENTS.find((s) => s.id === id);
+const inSection = (sec) => STUDENTS.filter((s) => s.sec === sec);
+
+// ---------------------------------------------------------------- combining the sources
+function evidence(s, c, l) {
+  const r = s.cls[c.id], e = (r.missions[l.n] || []).map((v) => ({ src: 'missions', v, label: v ? 'Spotlight ✓' : 'Spotlight ✗' }));
+  if (r.exit[l.n] != null) e.push({ src: 'exit', v: r.exit[l.n] / 10, label: `Exit ticket ${r.exit[l.n]}/10` });
+  if (r.hwq[l.n] != null) e.push({ src: 'homework', v: r.hwq[l.n], label: `Homework quiz ${pct(r.hwq[l.n])}` });
+  return e;
+}
+function mastery(s, c, l) { const e = evidence(s, c, l); return { l, e, m: mean(e.map((x) => x.v)), conf: e.length >= 3 ? 'secure' : e.length ? 'thin' : 'none' }; }
+const classMastery = (s, c) => mean(c.lessons.map((l) => mastery(s, c, l).m).filter((m) => m != null));
+const hwRate = (s, sub) => (sub ? 1 - s.subjects[sub].hw.missing / 12 : mean(SUBJECTS.map((x) => 1 - s.subjects[x].hw.missing / 12)));
+const avgB2 = (s) => mean(SUBJECTS.map((x) => s.subjects[x].b2)) / 100;
+
+/* Rules that need two or more sources to see. Each flag names its sources; scope says which class or subject it belongs to. */
+function alertsFor(s) {
+  const out = [], first = s.name.split(' ')[0];
+  const add = (level, title, detail, sources, scope = 'school') => out.push({ level, title, detail, sources, scope });
+  const w = s.wellbeing, early = mean(w.slice(0, 4)), late2 = mean(w.slice(4));
+  const dip = late2 <= 2.5 || early - late2 >= 1.5;
+  const fell = SUBJECTS.filter((x) => s.subjects[x].b2 - s.subjects[x].b1 <= -15);
+  const signals = [];
+  if (s.attPct < .9) signals.push(['attendance', `attendance ${pct(s.attPct)}`]);
+  if (s.behaviour.incidents.length >= 2) signals.push(['behaviour', `${s.behaviour.incidents.length} behaviour incidents`]);
+  fell.forEach((x) => signals.push(['assess', `${x} score fell`]));
+  if (dip && signals.length) {
+    add('high', 'Several warning signs at once', `Wellbeing check-ins fell from ${early.toFixed(1)} to ${late2.toFixed(1)} out of 5, with ${signals.map((x) => x[1]).join(', ')}. Talk to ${first} and contact the guardian.`, ['wellbeing', ...new Set(signals.map((x) => x[0]))]);
+  } else if (dip) {
+    add('medium', 'Wellbeing dip', `Check-ins fell from ${early.toFixed(1)} to ${late2.toFixed(1)} out of 5. A quiet word with ${first} this week.`, ['wellbeing']);
+  }
+  if (s.attPct < .9) add('high', `Attendance ${pct(s.attPct)}`, `${s.absences} of ${TERM_DAYS} days missed this term: ${s.absent.join(', ')}.`, ['attendance']);
+  if (s.behaviour.incidents.length >= 2) add('medium', `${s.behaviour.incidents.length} behaviour incidents`, s.behaviour.incidents.map((x) => `${x[0]}: ${x[1]}`).join('; ') + '.', ['behaviour']);
+  fell.forEach((x) => add('medium', `${x} score fell`, `Block 1 ${s.subjects[x].b1}% → Block 2 ${s.subjects[x].b2}%.`, ['assess'], x));
+  for (const c of classesOf(s.sec)) {
+    c.lessons.filter((l) => l.day && s.absent.includes(l.day)).forEach((l) =>
+      add('medium', `Missed #${l.n} ${l.t}`, `Absent ${l.day}, so there is no class evidence for this lesson. Give the catch-up pack before the block assessment.`, ['attendance', 'missions'], c.id));
+    const weak = c.lessons.map((l) => mastery(s, c, l)).filter((x) => x.m != null && x.m < .5);
+    if (weak.length === 1) {
+      const x = weak[0];
+      add('medium', `Weak in ${x.l.t}`, `${x.e.map((e) => e.label).join(', ')}${x.conf === 'thin' ? '. Thin evidence: check before acting' : ''}.`, [...new Set(x.e.map((e) => e.src))], c.id);
+    } else if (weak.length > 1) {
+      add('high', `Weak in ${weak.length} ${c.subject} lessons`, weak.map((x) => `${x.l.t} ${pct(x.m)}`).join(', ') + '.', ['missions', 'exit', 'homework'], c.id);
+    }
+    const r = s.cls[c.id], spoken = Object.values(r.missions).flat(), written = Object.values(r.exit).map((v) => v / 10);
+    const inClass = mean(spoken.concat(written)), hw = s.subjects[c.subject].hw;
+    if (inClass >= .7 && hw.missing >= 3) add('medium', 'Strong in class, homework missing', `Class answers ${pct(inClass)}, but ${hw.missing} of ${hw.set} ${c.subject} homework tasks missing and the quiz average is ${pct(mean(Object.values(r.hwq)))}.`, ['missions', 'exit', 'homework'], c.id);
+    if (spoken.length >= 3 && mean(spoken) >= .75 && mean(written) < .55) {
+      const reading = s.readingAge < s.age - 1;
+      add('medium', 'Answers well aloud, weaker in writing', `Spotlight answers ${pct(mean(spoken))} right, exit tickets ${pct(mean(written))}.${reading ? ` Reading age ${s.readingAge} at age ${s.age}: check whether reading the question is the barrier.` : ''}`, reading ? ['missions', 'exit', 'baseline'] : ['missions', 'exit'], c.id);
+    }
+  }
+  if (s.reasoning >= 110 && avgB2(s) < .65) add('medium', 'Below what the baseline suggests', `Reasoning score ${s.reasoning} at the start of the year, but Block 2 averages ${pct(avgB2(s))} across subjects.`, ['baseline', 'assess']);
+  if (s.reasoning >= 115 && avgB2(s) >= .85) add('info', 'Ready for extension', `Block 2 averages ${pct(avgB2(s))} and the reasoning score is ${s.reasoning}.`, ['baseline', 'assess']);
+  return out;
+}
+const RANK = { high: 3, medium: 2, info: 0 };
+STUDENTS.forEach((s) => { s.alerts = alertsFor(s); s.concern = s.alerts.reduce((t, a) => t + RANK[a.level], 0); });
+const inScope = (a, c) => a.scope === 'school' || a.scope === c.subject || a.scope === c.id;
+const classAlerts = (s, c) => s.alerts.filter((a) => inScope(a, c));
+const flagged = (alerts) => alerts.some((a) => a.level !== 'info');
+
+// ---------------------------------------------------------------- views
+const $ = (id) => document.getElementById(id);
+const esc = (x) => String(x).replace(/[&<>"]/g, (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[ch]));
+const st = { view: 'class', cls: '5A-sci', student: 'SQ-5A-21', sort: 'attention' };
+const srcChips = (ids) => ids.map((id) => `<span class="chip">${SRC[id].icon} ${esc(SRC[id].name)}</span>`).join(' ');
+const scopeChip = (a) => (a.scope === 'school' ? '' : `<span class="chip scope">${esc(CLASS_BY[a.scope] ? CLASS_BY[a.scope].course : a.scope)}</span> `);
+const alertLi = (a, s) => `<li class="${a.level}">${s ? `<button class="who" data-open="${s.id}">${esc(s.name)}</button> <span class="chip">${s.sec}</span>` : ''}<b>${esc(a.title)}</b><span class="d">${esc(a.detail)}</span>${scopeChip(a)}${srcChips(a.sources)}</li>`;
+const kpiHtml = (rows) => rows.map(([k, v, sub]) => `<div class="kpi"><span>${k}</span><strong>${v}</strong><small>${sub}</small></div>`).join('');
+const sum = (f) => STUDENTS.reduce((t, s) => t + f(s), 0);
+const has = (f) => STUDENTS.filter(f).length;
+
+function coverage(id) {
+  const n = STUDENTS.length, cl = (s, k) => Object.values(s.cls).reduce((t, r) => t + Object.values(r[k]).flat().length, 0);
+  return {
+    missions: `${sum((s) => cl(s, 'missions'))} spotlight answers · ${has((s) => cl(s, 'missions'))}/${n}`,
+    exit: `${sum((s) => cl(s, 'exit'))} marked · ${has((s) => cl(s, 'exit'))}/${n}`,
+    homework: `${sum((s) => SUBJECTS.reduce((t, x) => t + 12 - s.subjects[x].hw.missing, 0))} handed in · ${n}/${n}`,
+    assess: `2 blocks × 3 subjects · ${n}/${n}`,
+    attendance: `${TERM_DAYS} days · ${n}/${n}`,
+    baseline: `Reading, reasoning · ${n}/${n}`,
+    behaviour: `${sum((s) => s.behaviour.points)} points · ${sum((s) => s.behaviour.incidents.length)} incidents`,
+    wellbeing: `${n * 6} check-ins · ${n}/${n}`,
+    sis: `Guardians, support · ${n}/${n}`,
+    notes: `${sum((s) => s.notes.length)} notes · ${n}/${n}`
+  }[id];
+}
+
+function renderSchool() {
+  const n = STUDENTS.length, avg = (f) => mean(STUDENTS.map(f)), flaggedN = has((s) => flagged(s.alerts));
+  $('schoolKpis').innerHTML = kpiHtml([
+    ['Students', String(n), `${Object.keys(SECTIONS).length} sections, Grades 3–8`],
+    ['Attendance', pct(avg((s) => s.attPct)), 'term to date'],
+    ['Homework handed in', pct(avg((s) => hwRate(s))), 'all subjects'],
+    ['Needs attention', `${flaggedN} of ${n}`, 'students with a flag'],
+    ['Wellbeing', `${avg((s) => s.wellbeing[5]).toFixed(1)} / 5`, 'last weekly check-in']
+  ]);
+  $('classTable').innerHTML = '<thead><tr><th class="name">Class</th><th>Unit</th><th>Mastery</th><th>Attend.</th><th>Home­work</th><th>Block 2</th><th>Well­being</th><th>Flagged</th></tr></thead><tbody>'
+    + CLASSES.map((c) => {
+      const ss = inSection(c.section), m = mean(ss.map((s) => classMastery(s, c)).filter((x) => x != null));
+      const att = mean(ss.map((s) => s.attPct)), hw = mean(ss.map((s) => hwRate(s, c.subject))), b2 = mean(ss.map((s) => s.subjects[c.subject].b2)) / 100;
+      const f = ss.filter((s) => flagged(classAlerts(s, c))).length;
+      return `<tr><th class="name" scope="row"><button class="who" data-class="${c.id}">Grade ${c.section} ${esc(c.course)}</button><span class="chip">${esc(c.teacher)}</span></th>`
+        + `<td class="txt">${esc(c.unit)}</td><td class="${band(m)}">${pct(m)}</td><td class="${att < .93 ? 'mid' : 'plain'}">${pct(att)}</td>`
+        + `<td class="${hw < .85 ? 'mid' : 'plain'}">${pct(hw)}</td><td class="${band(b2)}">${pct(b2)}</td>`
+        + `<td class="plain">${mean(ss.map((s) => s.wellbeing[5])).toFixed(1)}</td><td class="${f >= 8 ? 'mid' : 'plain'}">${f} of ${ss.length}</td></tr>`;
+    }).join('') + '</tbody>';
+  const top = [...STUDENTS].filter((s) => flagged(s.alerts)).sort((a, b) => b.concern - a.concern || a.name.localeCompare(b.name)).slice(0, 15);
+  $('schoolAlertTitle').textContent = `Highest concern across the school · top ${top.length} of ${flaggedN}`;
+  $('schoolAlerts').innerHTML = top.map((s) => { const a = [...s.alerts].sort((x, y) => RANK[y.level] - RANK[x.level])[0]; return alertLi(a, s).replace('</li>', s.alerts.length > 1 ? `<span class="d">+ ${s.alerts.length - 1} more flag${s.alerts.length > 2 ? 's' : ''}</span></li>` : '</li>'); }).join('');
+}
+
+function renderClass() {
+  const c = CLASS_BY[st.cls], ss = inSection(c.section), n = ss.length, avg = (f) => mean(ss.map(f));
+  const fl = ss.filter((s) => flagged(classAlerts(s, c)));
+  const gaps = ss.reduce((t, s) => t + c.lessons.filter((l) => !evidence(s, c, l).length).length, 0);
+  $('classSel').value = c.id;
+  $('heatTitle').textContent = `Mastery by lesson · ${c.unit}`;
+  $('kpis').innerHTML = kpiHtml([
+    ['Mastery this block', pct(avg((s) => classMastery(s, c))), 'all evidence combined'],
+    ['Attendance', pct(avg((s) => s.attPct)), 'term to date'],
+    [`${c.subject} homework`, pct(avg((s) => hwRate(s, c.subject))), 'handed in'],
+    ['Needs attention', `${fl.length} of ${n}`, 'students with a flag'],
+    ['Evidence gaps', String(gaps), 'student-lessons with no evidence']
+  ]);
+  const order = [...ss].sort(st.sort === 'name' ? (a, b) => a.name.localeCompare(b.name)
+    : st.sort === 'mastery' ? (a, b) => classMastery(a, c) - classMastery(b, c)
+    : (a, b) => classAlerts(b, c).reduce((t, x) => t + RANK[x.level], 0) - classAlerts(a, c).reduce((t, x) => t + RANK[x.level], 0) || a.name.localeCompare(b.name));
+  const cell = (m) => `<td class="${band(m)}">${pct(m)}</td>`;
+  $('heat').innerHTML = `<thead><tr><th class="name">Student</th>${c.lessons.map((l) => `<th title="#${l.n} ${esc(l.t)}${l.note ? ' · ' + esc(l.note) : ''}">#${l.n}<br>${esc(l.short)}${l.note ? '*' : ''}</th>`).join('')}<th>Attend.</th><th>Home­work</th><th>Block 2</th><th>Flags</th></tr></thead><tbody>`
+    + order.map((s) => {
+      const cells = c.lessons.map((l) => {
+        const x = mastery(s, c, l);
+        if (x.m == null) return `<td class="none" title="No evidence${l.day && s.absent.includes(l.day) ? ' · absent ' + l.day : ''}">—</td>`;
+        return `<td class="${band(x.m)} ${x.conf}" title="${esc(x.e.map((e) => e.label).join(' · '))}">${pct(x.m)}</td>`;
+      }).join('');
+      const hw = s.subjects[c.subject].hw, done = (hw.set - hw.missing) / hw.set;
+      return `<tr><th class="name" scope="row"><button class="who" data-open="${s.id}">${esc(s.name)}</button></th>${cells}`
+        + `<td class="${s.attPct < .9 ? 'low' : s.attPct < .95 ? 'mid' : 'plain'}">${pct(s.attPct)}</td>`
+        + `<td class="${done < .7 ? 'low' : done < .85 ? 'mid' : 'plain'}">${hw.set - hw.missing}/${hw.set}</td>`
+        + `<td class="${band(s.subjects[c.subject].b2 / 100)}">${s.subjects[c.subject].b2}%</td>`
+        + `<td><span class="flags">${classAlerts(s, c).map((a) => `<span class="dot ${a.level}" title="${esc(a.title)}"></span>`).join('')}</span></td></tr>`;
+    }).join('') + '</tbody>'
+    + `<tfoot><tr><th class="name" scope="row">Class average</th>${c.lessons.map((l) => cell(mean(ss.map((s) => mastery(s, c, l).m).filter((v) => v != null)))).join('')}`
+    + `<td class="plain">${pct(avg((s) => s.attPct))}</td><td class="plain">${pct(avg((s) => hwRate(s, c.subject)))}</td>${cell(avg((s) => s.subjects[c.subject].b2) / 100)}<td></td></tr></tfoot>`;
+  const ranked = [...ss].sort((a, b) => b.concern - a.concern);
+  const concerns = ranked.flatMap((s) => classAlerts(s, c).filter((a) => a.level !== 'info').map((a) => alertLi(a, s)));
+  const ready = ranked.flatMap((s) => classAlerts(s, c).filter((a) => a.level === 'info').map((a) => alertLi(a, s)));
+  $('alertTitle').textContent = `Needs attention · ${fl.length} students`;
+  $('alerts').innerHTML = concerns.join('') + (ready.length ? `<li class="group">Ready for more</li>${ready.join('')}` : '');
+}
+
+function renderStudent() {
+  const s = byId(st.student), mates = inSection(s.sec), i = mates.indexOf(s), first = s.name.split(' ')[0];
+  const secAvg = (f) => mean(mates.map(f));
+  const myClasses = classesOf(s.sec);
+  const weakest = myClasses.flatMap((c) => c.lessons.map((l) => ({ c, ...mastery(s, c, l) }))).filter((x) => x.m != null).sort((a, b) => a.m - b.m)[0];
+  const meter = (v, avg, max = 100, tone = band(v / max)) => `<div class="bar"><span class="${tone}" style="width:${clamp(v / max) * 100}%"></span><i style="left:${clamp(avg / max) * 100}%" title="Class average"></i></div>`;
+  const hwAll = SUBJECTS.reduce((t, x) => ({ onTime: t.onTime + s.subjects[x].hw.onTime, late: t.late + s.subjects[x].hw.late, missing: t.missing + s.subjects[x].hw.missing }), { onTime: 0, late: 0, missing: 0 });
+  const quizAvg = mean(Object.values(s.cls).flatMap((r) => Object.values(r.hwq)));
+  const lessonCard = (c) => `<section class="card"><h3>${esc(c.course)} · ${esc(c.teacher)} · ${esc(c.unit)}, lesson by lesson</h3>
+    <table class="ctab"><tbody>${c.lessons.map((l) => {
+      const x = mastery(s, c, l), missed = l.day && s.absent.includes(l.day), r = s.cls[c.id];
+      const chips = x.e.map((e) => `<span class="chip ${e.src === 'missions' ? (e.v ? 'ok' : 'no') : ''}">${SRC[e.src].icon} ${esc(e.label)}</span>`).join('')
+        + (missed ? `<span class="chip no">🗓️ Absent ${esc(l.day)}</span>` : '') + (l.day && !missed && !(r.missions[l.n] || []).length ? '<span class="chip">🚀 No spotlight question</span>' : '');
+      return `<tr><td><span class="lt">#${l.n} ${esc(l.t)}</span><span class="sub">${l.note ? esc(l.note) : 'Taught ' + esc(l.day)} · ${x.conf === 'secure' ? 'enough evidence' : x.conf === 'thin' ? 'thin evidence' : 'no evidence'}</span></td><td><div class="ev">${chips || '<span class="chip">No evidence yet</span>'}</div></td><td class="score ${band(x.m)} ${x.m == null ? 'none' : x.conf}">${pct(x.m)}</td></tr>`;
+    }).join('')}</tbody></table></section>`;
+  const wbColour = (v) => (v >= 4 ? 'good' : v === 3 ? 'mid' : 'low');
+  $('studentView').innerHTML = `
+    <section class="card shead">
+      <div class="avatar" aria-hidden="true">${esc(s.name[0])}</div>
+      <div class="sname"><h3 id="studentName">${esc(s.name)}</h3><span>${s.id} · Grade ${s.sec} · ${esc(s.house)} house · tutor ${esc(SECTIONS[s.sec].tutor)}</span></div>
+      <div class="stats">
+        <div class="stat">Attendance<strong>${pct(s.attPct)}</strong></div>
+        <div class="stat">Homework<strong>${pct(hwRate(s))}</strong></div>
+        <div class="stat">Block 2 average<strong>${pct(avgB2(s))}</strong></div>
+        <div class="stat">Wellbeing<strong>${s.wellbeing[5]} / 5</strong></div>
+        <div class="stat">House points<strong>${s.behaviour.points}</strong></div>
+      </div>
+      <div class="actions">
+        <button class="btn" id="prev" aria-label="Previous student in ${s.sec}">←</button>
+        <select id="studentSel" aria-label="Student in ${s.sec}">${mates.map((x) => `<option value="${x.id}" ${x === s ? 'selected' : ''}>${esc(x.name)}</option>`).join('')}</select>
+        <button class="btn" id="next" aria-label="Next student in ${s.sec}">→</button>
+      </div>
+    </section>
+    <div class="layout">
+      <div class="stack">${myClasses.map(lessonCard).join('')}
+      <section class="card"><h3>${SRC.assess.icon} Subjects</h3>
+        <table class="stab"><thead><tr><th class="name">Subject</th><th>Block 1</th><th>Block 2</th><th style="width:34%">Block 2 vs class</th><th>Homework</th></tr></thead><tbody>
+        ${SUBJECTS.map((x) => { const sb = s.subjects[x]; return `<tr><td class="txt"><b>${esc(sb.course)}</b>${esc(sb.teacher)}</td><td class="${band(sb.b1 / 100)}">${sb.b1}%</td><td class="${band(sb.b2 / 100)}">${sb.b2}%</td><td>${meter(sb.b2, secAvg((m) => m.subjects[x].b2))}</td><td class="${sb.hw.missing >= 3 ? 'mid' : 'plain'}">${12 - sb.hw.missing}/12</td></tr>`; }).join('')}
+        </tbody></table><p class="note">The white tick is the class average. The block assessments for this unit are in Week 8.</p></section>
+      </div>
+      <section class="card">
+        <h3>What the sources say together</h3>
+        <ul class="alerts">${s.alerts.length ? s.alerts.map((a) => alertLi(a)).join('') : `<li class="info"><b>No concerns across the ${SOURCES.length} sources</b><span class="d">Keep an eye on the next exit ticket.</span></li>`}</ul>
+        <div class="actions" style="margin-top:10px">
+          <button class="btn primary" id="assign">Assign revision${weakest ? ': ' + esc(weakest.l.short) : ''}</button>
+          <button class="btn" id="parent">Message ${esc(s.guardian.rel.toLowerCase())}</button>
+        </div>
+      </section>
+    </div>
+    <div class="cards3">
+      <section class="card"><h3>${SRC.sis.icon} Profile and guardian</h3>
+        <div class="kv"><span>Age</span><b>${s.ageText}</b></div><div class="kv"><span>At the school since</span><b>${s.joined}</b></div>
+        <div class="kv"><span>Support</span><b>${esc(s.support)}</b></div>
+        <div class="kv"><span>Guardian</span><b>${esc(s.guardian.name)} · ${esc(s.guardian.rel)}</b></div>
+        <div class="kv"><span>Phone</span><b>${esc(s.guardian.phone)}</b></div><div class="kv"><span>Prefers</span><b>${esc(s.guardian.lang)}</b></div>
+        <div class="kv"><span>Last contact</span><b>${esc(s.guardian.last)}</b></div></section>
+      <section class="card"><h3>${SRC.attendance.icon} Attendance</h3>
+        <div class="big" style="color:${s.attPct < .9 ? 'var(--low)' : 'inherit'}">${pct(s.attPct)}</div>
+        <div class="kv"><span>Days missed</span><b>${s.absences} of ${TERM_DAYS}</b></div>
+        <div class="kv"><span>Which days</span><b>${s.absent.length ? esc(s.absent.join(', ')) : 'None'}</b></div>
+        <div class="kv"><span>Late arrivals</span><b>${s.lates}</b></div>
+        <div class="kv"><span>Class average</span><b>${pct(secAvg((m) => m.attPct))}</b></div></section>
+      <section class="card"><h3>${SRC.behaviour.icon} Behaviour</h3>
+        <div class="kv"><span>House points (${esc(s.house)})</span><b>${s.behaviour.points}</b></div>
+        <div class="kv"><span>Class average</span><b>${Math.round(secAvg((m) => m.behaviour.points))}</b></div>
+        <div class="kv"><span>Incidents this term</span><b>${s.behaviour.incidents.length}</b></div>
+        ${s.behaviour.incidents.map(([d, t]) => `<div class="kv"><span>${esc(d)}</span><b>${esc(t)}</b></div>`).join('')}</section>
+      <section class="card"><h3>${SRC.wellbeing.icon} Wellbeing check-ins</h3>
+        <div class="wb">${s.wellbeing.map((v, k) => `<div><span class="${wbColour(v)}" style="height:${v * 14}px">${v}</span>Wk ${k + 1}</div>`).join('')}</div>
+        <p class="note">Self-reported each Sunday, from 1 (low) to 5 (great). Class average this week ${secAvg((m) => m.wellbeing[5]).toFixed(1)}.</p></section>
+      <section class="card"><h3>${SRC.baseline.icon} Start-of-year baseline</h3>
+        <div class="kv"><span>Reading age</span><b>${s.readingAge} (age ${s.age})</b></div>${meter(s.readingAge - (s.age - 3), 3, 6, 'neutral')}
+        <div class="kv"><span>Reasoning score</span><b>${s.reasoning}</b></div>${meter(s.reasoning - 70, 30, 60, 'neutral')}
+        <p class="note">The tick marks the age-group average. A reasoning score of 100 is average.</p></section>
+      <section class="card"><h3>${SRC.homework.icon} Homework, all subjects</h3>
+        <div class="kv"><span>On time</span><b>${hwAll.onTime} of 36</b></div><div class="kv"><span>Late</span><b>${hwAll.late}</b></div>
+        <div class="kv"><span>Missing</span><b style="color:${hwAll.missing >= 4 ? 'var(--low)' : 'inherit'}">${hwAll.missing}</b></div>
+        <div class="kv"><span>Lesson quiz average</span><b>${pct(quizAvg)}</b></div></section>
+      <section class="card span3"><h3>${SRC.notes.icon} Teacher notes</h3>
+        <ul class="notes">${s.notes.map(([w, who, t]) => `<li><span>${esc(w)} · ${esc(who)}</span>${esc(t)}</li>`).join('')}</ul></section>
+    </div>`;
+  $('studentSel').onchange = (e) => go(e.target.value);
+  $('prev').onclick = () => go(mates[(i + mates.length - 1) % mates.length].id);
+  $('next').onclick = () => go(mates[(i + 1) % mates.length].id);
+  $('assign').onclick = () => toast(weakest ? `Revision on ${weakest.l.t} (${weakest.c.course}) assigned to ${first}.` : `Revision assigned to ${first}.`);
+  $('parent').onclick = () => toast(`Message to ${s.guardian.name} (${s.guardian.rel.toLowerCase()}) drafted in ${s.guardian.lang}. Not sent.`);
+}
+
+function render() {
+  const c = CLASS_BY[st.cls];
+  $('subtitle').textContent = st.view === 'school' ? `Principal view · ${STUDENTS.length} students · ${SOURCES.length} data sources`
+    : st.view === 'class' ? `${c.teacher} · Grade ${c.section} ${c.course} · ${c.unit} · Week 6` : `${SOURCES.length} data sources combined`;
+  $('title').textContent = st.view === 'school' ? 'Schoolynq School · Student analysis' : st.view === 'class' ? `Grade ${c.section} ${c.course}` : 'Student profile';
+  $('sources').innerHTML = SOURCES.map((x) => `<div class="src"><b>${x.icon} ${esc(x.name)}</b><span class="cov">${coverage(x.id)}</span><span>${esc(x.synced)}</span></div>`).join('');
+  for (const v of ['school', 'class', 'student']) {
+    $('view' + v[0].toUpperCase() + v.slice(1)).classList.toggle('on', st.view === v);
+    $(v + 'View').hidden = st.view !== v;
+  }
+  ({ school: renderSchool, class: renderClass, student: renderStudent })[st.view]();
+}
+/* Views live in the URL hash (#school, #class-5A-sci, #SQ-5A-21), so links and the back button work. */
+function route() {
+  const h = decodeURIComponent(location.hash.slice(1));
+  if (h === 'school') st.view = 'school';
+  else if (h.startsWith('class-') && CLASS_BY[h.slice(6)]) { st.view = 'class'; st.cls = h.slice(6); }
+  else if (byId(h)) {
+    st.view = 'student'; st.student = h;
+    if (CLASS_BY[st.cls].section !== byId(h).sec) st.cls = classesOf(byId(h).sec)[0].id;
+  }
+  render();
+}
+function go(hash) { if (location.hash !== '#' + hash) history.pushState(null, '', '#' + hash); route(); scrollTo(0, 0); }
+function toast(msg) { const t = $('toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(toast.t); toast.t = setTimeout(() => t.classList.remove('show'), 3200); }
+
+$('classSel').innerHTML = CLASSES.map((c) => `<option value="${c.id}">Grade ${c.section} ${esc(c.course)} · ${esc(c.teacher)}</option>`).join('');
+$('people').innerHTML = STUDENTS.map((s) => `<option value="${esc(s.name)} · ${s.sec}"></option>`).join('');
+$('find').onchange = (e) => { const s = STUDENTS.find((x) => `${x.name} · ${x.sec}` === e.target.value.trim()); if (s) { e.target.value = ''; go(s.id); } };
+document.addEventListener('click', (e) => {
+  const b = e.target.closest('[data-open],[data-class]');
+  if (b) go(b.dataset.open || 'class-' + b.dataset.class);
+});
+$('viewSchool').onclick = () => go('school');
+$('viewClass').onclick = () => go('class-' + st.cls);
+$('viewStudent').onclick = () => go(st.student);
+$('classSel').onchange = (e) => go('class-' + e.target.value);
+$('sort').onchange = (e) => { st.sort = e.target.value; render(); };
+window.addEventListener('popstate', route);
+route();
+window.ANALYSIS = { STUDENTS, CLASSES, SECTIONS, SOURCES, evidence, mastery, classMastery, alertsFor };
+</script>
+</body>
+</html>
